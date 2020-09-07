@@ -39,8 +39,8 @@ function MuseTrack(props: { track: Track }) {
       height={d.height + d.marginTop + d.marginBottom}
     >
       {border(d, clazz)}
-      {props.track.bars.map((it) => (
-        <MuseBar bar={it} key={JSON.stringify(it)} />
+      {props.track.bars.map((it,idx) => (
+        <MuseBar bar={it} key={idx} />
       ))}
     </g>
   );

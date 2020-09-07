@@ -27,17 +27,33 @@ function init(data: string): Notation {
       line.dimens.x = page.dimens.marginLeft;
       let lineHeight = 0;
       let trackY = 0;
+      let barUnits: number[] = [];
+      line.tracks.forEach((track) => {
+        track.bars.forEach((bar, barIdx) => {
+          bar.unitNum = bar.notes.length;
+          if (barUnits[barIdx] !== undefined) {
+            barUnits[barIdx] =
+              barUnits[barIdx] > bar.unitNum ? barUnits[barIdx] : bar.unitNum;
+          } else {
+            barUnits.push(bar.unitNum);
+          }
+        });
+      });
+      let barUnitSum = barUnits.reduce((s, it) => s + it);
+
       line.tracks.forEach((track) => {
         let trackHeight = 0;
         track.dimens.y = trackY;
         track.dimens.width = line.dimens.width;
-        let barUnit = track.dimens.width / track.bars.length;
         let maxNoteHeight = 0; //最大note.y
         let maxNoteMarginBottom = 0;
+        let barX = 0;
         track.bars.forEach((bar, barIdx) => {
-          bar.dimens.width = barUnit;
-          bar.dimens.x = barUnit * barIdx;
-          let trackXSpace = barUnit; //横向空余空间，用于确定note.x
+          bar.dimens.width =
+            (barUnits[barIdx] / barUnitSum) * track.dimens.width;
+          bar.dimens.x = barX;
+          barX += bar.dimens.width;
+          let trackXSpace = bar.dimens.width; //横向空余空间，用于确定note.x
           let notesWidth: number[] = [];
           bar.notes.forEach((note) => {
             note.settle();

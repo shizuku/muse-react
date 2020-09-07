@@ -8,6 +8,7 @@ import { border } from "./untils";
 export class Bar implements Codec {
   notes: Note[] = [];
   dimens: Dimens = new Dimens();
+  unitNum: number = 0;
   baselineGroup: {
     y: number;
     s: number;
