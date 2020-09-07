@@ -12,14 +12,30 @@ export class Bar implements Codec {
     y: number;
     s: number;
     e: number;
-  }[] = [
-    { y: 0, s: 1, e: 2 },
-  ];
+  }[] = [];
   constructor(json: string) {
     this.parse(json);
   }
-  generateBaseline(){
-    
+  generateBaseline() {
+    for (let i = 0; ; ++i) {
+      let x = 0;
+      let s = 0;
+      let e = -1;
+      this.notes.forEach((it, idx) => {
+        if (it.l > i) {
+          e = idx;
+          x++;
+        } else {
+          if (s <= e) this.baselineGroup.push({ y: i, s: s, e: e });
+          s = idx + 1;
+          e = idx;
+        }
+      });
+      if (s <= e) this.baselineGroup.push({ y: i, s: s, e: e });
+      if (x === 0) {
+        break;
+      }
+    }
   }
   parse(json: string): void {
     let o = JSON.parse(json);
@@ -27,6 +43,7 @@ export class Bar implements Codec {
       o.notes.forEach((it: any) => {
         this.notes.push(new Note(JSON.stringify(it)));
       });
+      this.generateBaseline();
     }
     if (o.dimens !== undefined) {
       this.dimens = o.dimens;
@@ -54,8 +71,9 @@ function barLine(d: Dimens, clazz: string) {
 function baseLine(bar: Bar, clazz: string) {
   return (
     <g className={clazz + "__base-line"}>
-      {bar.baselineGroup.map((it) => (
+      {bar.baselineGroup.map((it, idx) => (
         <line
+          key={idx}
           x1={bar.notes[it.s].dimens.x}
           y1={bar.notes[it.s].dimens.height + (it.y + 1) * config.pointGap}
           x2={bar.notes[it.e].dimens.x + bar.notes[it.e].dimens.width}

@@ -17,12 +17,13 @@ export class Note implements Codec {
   dx: number = 0;
   notesY: number[] = [];
   pointsY: number[] = [];
+  tailPointsX: number[] = [];
   dimens: Dimens = new Dimens();
   constructor(json: string) {
     this.parse(json);
   }
   settle() {
-    let width = this.dx + config.noteWidth;
+    let width = this.dx + config.noteWidth + this.p * config.pointGap;
     let ny = 0;
     let mb = 0;
     let py = 0;
@@ -64,7 +65,11 @@ export class Note implements Codec {
         }
       }
     });
-    console.log(mb);
+    for (let i = 0; i < this.p; ++i) {
+      this.tailPointsX.push(
+        this.dx + config.noteWidth + ((i + 1) / 2) * config.pointGap
+      );
+    }
     this.dimens.width = width;
     this.dimens.height = ny;
     this.dimens.marginBottom = mb;
@@ -184,6 +189,27 @@ function basePoint(note: Note, clazz: string) {
   );
 }
 
+function tailPoint(note: Note, clazz: string) {
+  return (
+    <g className={clazz + "__tail-point"}>
+      {note.tailPointsX.map((it, idx) => (
+        <circle
+          key={idx}
+          r={config.pointRound}
+          fill="black"
+          transform={
+            "translate(" +
+            it +
+            "," +
+            (note.dimens.height - config.noteHeight / 3) +
+            ")"
+          }
+        />
+      ))}
+    </g>
+  );
+}
+
 function MuseNote(props: { note: Note }) {
   let d = props.note.dimens;
   let clazz = "muse-note";
@@ -199,6 +225,7 @@ function MuseNote(props: { note: Note }) {
       {border(d, clazz)}
       {noteGroup(props.note, clazz)}
       {basePoint(props.note, clazz)}
+      {tailPoint(props.note, clazz)}
     </g>
   );
 }
