@@ -136,7 +136,7 @@ function noteGroup(note: Note, clazz: string) {
       {note.noteGroup.map((it, idx) => {
         return (
           <g
-            className={"__note-one"}
+            className={clazz + "__note-one"}
             key={it.n + idx + it.x}
             width={note.dimens.width}
             height={note.notesY[idx]}
