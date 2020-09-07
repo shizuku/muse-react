@@ -1,9 +1,9 @@
 import React from "react";
 import Dimens from "./Dimens";
- 
-export function border(d: Dimens, clazz: string) {
-  let show = false;
-  if (show) {
+
+export function border(d: Dimens, clazz: string, show: boolean = false) {
+  let ifShow = false;
+  if (show || ifShow) {
     return (
       <rect
         className={clazz + "__border"}

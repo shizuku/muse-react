@@ -4,10 +4,11 @@ export default {
   noteFontSize: 22,
   noteFontFamily: "serif",
 
-  trackGap: 20,
+  trackGap: 10,
 
-  lineGap: 30,
+  lineGap: 20,
 
-  pointGap: 6,
-  pointRound:1.6,
+  pointGap: 5,
+  tailPointGap: 8,
+  pointRound: 1.5,
 };

@@ -23,15 +23,15 @@ export class Note implements Codec {
     this.parse(json);
   }
   settle() {
-    let width = this.dx + config.noteWidth + this.p * config.pointGap;
+    let width = this.dx + config.noteWidth + this.p * config.tailPointGap;
     let ny = 0;
     let mb = 0;
+    mb += this.l * config.pointGap;
     let py = 0;
     this.noteGroup.forEach((it, idx) => {
       if (it.t < 0) {
         if (idx === 0) {
           let i = -it.t;
-          mb += this.l * config.pointGap;
           for (; i > 0; --i) {
             let x = config.pointGap;
             mb += x / 2;
@@ -67,7 +67,7 @@ export class Note implements Codec {
     });
     for (let i = 0; i < this.p; ++i) {
       this.tailPointsX.push(
-        this.dx + config.noteWidth + ((i + 1) / 2) * config.pointGap
+        this.dx + config.noteWidth + (i + 1 / 2) * config.tailPointGap
       );
     }
     this.dimens.width = width;
@@ -132,7 +132,7 @@ function castX(x: string) {
 
 function noteGroup(note: Note, clazz: string) {
   return (
-    <g className={clazz + "__note-group"}>
+    <g className={clazz + "__group-note"}>
       {note.noteGroup.map((it, idx) => {
         return (
           <g
@@ -168,9 +168,9 @@ function noteGroup(note: Note, clazz: string) {
   );
 }
 
-function basePoint(note: Note, clazz: string) {
+function pointGroup(note: Note, clazz: string) {
   return (
-    <g className={clazz + "__base-point"}>
+    <g className={clazz + "__group-point"}>
       {note.pointsY.map((it, idx) => (
         <circle
           key={idx}
@@ -224,7 +224,7 @@ function MuseNote(props: { note: Note }) {
     >
       {border(d, clazz)}
       {noteGroup(props.note, clazz)}
-      {basePoint(props.note, clazz)}
+      {pointGroup(props.note, clazz)}
       {tailPoint(props.note, clazz)}
     </g>
   );
