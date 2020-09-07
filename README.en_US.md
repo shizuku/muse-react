@@ -3,7 +3,7 @@
 🎼A react project to show music score on web page.
 
 ## Example
-![example](example/a.png)
+![example](example/a.jpg)
 
 ## Thanks
 * 团团子

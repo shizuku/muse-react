@@ -3,7 +3,7 @@
 🎼一个显示简谱的react项目。
 
 ## 示例
-![example](example/a.png)
+![example](example/a.jpg)
 
 ## 鸣谢
 * 团团子
