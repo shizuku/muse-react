@@ -16,7 +16,7 @@ class App extends React.Component<
   }
 
   componentDidMount() {
-    fetch("http://localhost:8888/a")
+    fetch("http://localhost:8888/b")
       .then((res) => res.text())
       .then(
         (result) => {
