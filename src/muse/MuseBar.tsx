@@ -8,6 +8,7 @@ export class Bar {
   notes: Note[] = [];
   dimens: Dimens = new Dimens();
   unitNum: number = 0;
+  notesX: number[] = [];
   baselineGroup: {
     y: number;
     s: number;
@@ -20,6 +21,15 @@ export class Bar {
         this.notes.push(new Note(JSON.stringify(it)));
       });
       this.generateBaseline();
+      this.notesX.push(1);
+      this.notes.forEach((note, idx) => {
+        let x = Math.pow(2, -note.l);
+        for (let i = 1; i <= note.p; ++i) {
+          x += Math.pow(2, -i);
+        }
+        this.notesX.push(x);
+        this.unitNum += x;
+      });
     }
     if (o.dimens !== undefined) {
       this.dimens = o.dimens;

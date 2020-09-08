@@ -27,20 +27,18 @@ function init(data: string): Notation {
       line.dimens.x = page.dimens.marginLeft;
       let lineHeight = 0;
       let trackY = 0;
-      let barUnits: number[] = [];
+      let barsW: number[] = [];
       line.tracks.forEach((track) => {
         track.bars.forEach((bar, barIdx) => {
-          bar.unitNum = bar.notes.length;
-          if (barUnits[barIdx] !== undefined) {
-            barUnits[barIdx] =
-              barUnits[barIdx] > bar.unitNum ? barUnits[barIdx] : bar.unitNum;
+          if (barsW[barIdx] !== undefined) {
+            barsW[barIdx] =
+              barsW[barIdx] > bar.unitNum ? barsW[barIdx] : bar.unitNum;
           } else {
-            barUnits.push(bar.unitNum);
+            barsW.push(bar.unitNum);
           }
         });
       });
-      let barUnitSum = barUnits.reduce((s, it) => s + it);
-
+      let barUnitSum = barsW.reduce((s, it) => s + it);
       line.tracks.forEach((track) => {
         let trackHeight = 0;
         track.dimens.y = trackY;
@@ -49,11 +47,10 @@ function init(data: string): Notation {
         let maxNoteMarginBottom = 0;
         let barX = 0;
         track.bars.forEach((bar, barIdx) => {
-          bar.dimens.width =
-            (barUnits[barIdx] / barUnitSum) * track.dimens.width;
+          bar.unitNum = barsW[barIdx];
+          bar.dimens.width = (barsW[barIdx] / barUnitSum) * track.dimens.width;
           bar.dimens.x = barX;
           barX += bar.dimens.width;
-          let trackXSpace = bar.dimens.width; //横向空余空间，用于确定note.x
           let notesWidth: number[] = [];
           bar.notes.forEach((note) => {
             note.settle();
@@ -66,16 +63,12 @@ function init(data: string): Notation {
               maxNoteMarginBottom > noteMarginBootom
                 ? maxNoteMarginBottom
                 : noteMarginBootom;
-            trackXSpace -= noteWidth;
             notesWidth.push(noteWidth);
           });
-          let trackXUnit = trackXSpace / (bar.notes.length + 1);
+          let x = 0;
           bar.notes.forEach((note, idx) => {
-            let px = trackXUnit;
-            for (let i = 0; i < idx; ++i) {
-              px += notesWidth[i] + trackXUnit;
-            }
-            note.dimens.x = px;
+            x += (bar.notesX[idx] / (bar.unitNum + 1)) * bar.dimens.width;
+            note.dimens.x = x - config.noteWidth / 2;
           });
         });
         track.dimens.height = maxNoteHeight + maxNoteMarginBottom;
@@ -90,6 +83,7 @@ function init(data: string): Notation {
         lineHeight += trackHeight + config.trackGap;
         trackY += trackHeight + config.trackGap;
       });
+      console.log(barsW); //fghfhgjfghfgfgfgfgfgfgfgfgfgfgfgf
       lineHeight -= config.trackGap;
       line.dimens.height = lineHeight;
       lineYSpace -= lineHeight;
