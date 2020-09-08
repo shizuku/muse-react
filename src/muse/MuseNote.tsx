@@ -1,11 +1,10 @@
 import React from "react";
-import Codec from "./Codec";
 import Dimens from "./Dimens";
 import { border } from "./untils";
 import "./config";
 import config from "./config";
 
-export class Note implements Codec {
+export class Note {
   n: string = "";
   noteGroup: {
     x: string;
@@ -17,10 +16,24 @@ export class Note implements Codec {
   dx: number = 0;
   notesY: number[] = [];
   pointsY: number[] = [];
-  tailPointsX: number[] = [];
+  tailPointsX: number[] = [];  parse(json: string): void {
+    
+  }
+  stringify(): string {
+    return JSON.stringify(this);
+  }
   dimens: Dimens = new Dimens();
   constructor(json: string) {
-    this.parse(json);
+    let o: any = JSON.parse(json);
+    if (o.n !== undefined) {
+      this.n = o.n;
+      this.generateGroup();
+      this.l = o.l;
+      this.p = o.p;
+    }
+    if (o.dimens !== undefined) {
+      this.dimens = o.dimens;
+    }
   }
   settle() {
     let width = this.dx + config.noteWidth + this.p * config.tailPointGap;
@@ -96,21 +109,6 @@ export class Note implements Codec {
         }
       }
     });
-  }
-  parse(json: string): void {
-    let o: any = JSON.parse(json);
-    if (o.n !== undefined) {
-      this.n = o.n;
-      this.generateGroup();
-      this.l = o.l;
-      this.p = o.p;
-    }
-    if (o.dimens !== undefined) {
-      this.dimens = o.dimens;
-    }
-  }
-  stringify(): string {
-    return JSON.stringify(this);
   }
 }
 

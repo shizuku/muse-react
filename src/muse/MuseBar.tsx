@@ -1,11 +1,10 @@
 import React from "react";
-import Codec from "./Codec";
 import config from "./config";
 import Dimens from "./Dimens";
 import MuseNote, { Note } from "./MuseNote";
 import { border } from "./untils";
 
-export class Bar implements Codec {
+export class Bar {
   notes: Note[] = [];
   dimens: Dimens = new Dimens();
   unitNum: number = 0;
@@ -15,7 +14,16 @@ export class Bar implements Codec {
     e: number;
   }[] = [];
   constructor(json: string) {
-    this.parse(json);
+    let o = JSON.parse(json);
+    if (o.notes !== undefined) {
+      o.notes.forEach((it: any) => {
+        this.notes.push(new Note(JSON.stringify(it)));
+      });
+      this.generateBaseline();
+    }
+    if (o.dimens !== undefined) {
+      this.dimens = o.dimens;
+    }
   }
   generateBaseline() {
     for (let i = 0; ; ++i) {
@@ -37,21 +45,6 @@ export class Bar implements Codec {
         break;
       }
     }
-  }
-  parse(json: string): void {
-    let o = JSON.parse(json);
-    if (o.notes !== undefined) {
-      o.notes.forEach((it: any) => {
-        this.notes.push(new Note(JSON.stringify(it)));
-      });
-      this.generateBaseline();
-    }
-    if (o.dimens !== undefined) {
-      this.dimens = o.dimens;
-    }
-  }
-  stringify(): string {
-    return JSON.stringify(this);
   }
 }
 

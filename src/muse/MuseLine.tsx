@@ -1,16 +1,12 @@
 import React from "react";
-import Codec from "./Codec";
 import Dimens from "./Dimens";
 import MuseTrack, { Track } from "./MuseTrack";
 import { border } from "./untils";
 
-export class Line implements Codec {
+export class Line {
   tracks: Track[] = [];
   dimens: Dimens = new Dimens();
   constructor(json: string) {
-    this.parse(json);
-  }
-  parse(json: string): void {
     let o = JSON.parse(json);
     if (o.tracks !== undefined) {
       o.tracks.forEach((it: any) => {
@@ -20,9 +16,6 @@ export class Line implements Codec {
     if (o.dimens !== undefined) {
       this.dimens = o.dimens;
     }
-  }
-  stringify(): string {
-    return JSON.stringify(this);
   }
 }
 

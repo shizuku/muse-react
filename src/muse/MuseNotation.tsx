@@ -1,16 +1,12 @@
 import React from "react";
-import Codec from "./Codec";
 import Dimens from "./Dimens";
 import MusePage, { Page } from "./MusePage";
 import { border } from "./untils";
 
-export class Notation implements Codec {
+export class Notation {
   pages: Page[] = [];
   dimens: Dimens = new Dimens();
   constructor(json: string) {
-    this.parse(json);
-  }
-  parse(json: string) {
     let o = JSON.parse(json);
     if (o.pages !== undefined) {
       o.pages.forEach((it: any) => {
@@ -20,9 +16,6 @@ export class Notation implements Codec {
     if (o.dimens !== undefined) {
       this.dimens = o.dimens;
     }
-  }
-  stringify(): string {
-    return JSON.stringify(this);
   }
 }
 
