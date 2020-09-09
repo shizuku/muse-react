@@ -16,5 +16,5 @@ export default {
   notaionE: 1.414,
   notationDefaultWidth: 1000,
   notationDefaultMarginHorizontal: 100,
-  notationDefaultMarginVertical: 100,
+  notationDefaultMarginVertical: 110,
 };
