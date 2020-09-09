@@ -16,8 +16,8 @@ class App extends React.Component<
   }
 
   componentDidMount() {
-    fetch("https://cdn.jsdelivr.net/gh/shizuku/muse-react/test/server/b.json")
-    //fetch("http://localhost:8888/b")
+    //fetch("https://cdn.jsdelivr.net/gh/shizuku/muse-react/test/server/b.json")
+    fetch("http://localhost:8888/b")
       .then((res) => res.text())
       .then(
         (result) => {
