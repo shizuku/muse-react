@@ -1,10 +1,19 @@
 (简体中文|[English](README.en_US.md))
+
 # muse-react
-🎼一个显示简谱的react项目。
+
+🎼 一个显示简谱的 react 项目。
 
 ## 示例
+
 ### a
-![example](example/a.jpg)
+
+![example/a](example/a.jpg)
+
+### b
+
+![example/b](example/b.jpg)
 
 ## 鸣谢
-* 团团子
+
+- 团团子
