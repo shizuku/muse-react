@@ -23,10 +23,22 @@ export class Bar {
       this.generateBaseline();
       this.notesX.push(1);
       this.notes.forEach((note, idx) => {
-        let x = Math.pow(2, -note.l);
-        for (let i = 1; i <= note.p; ++i) {
-          x += Math.pow(2, -i);
+        let x = 0;
+        if (this.notes[idx + 1] === undefined) {
+          x += 1;
+        } else if (
+          this.notes[idx + 1] !== undefined &&
+          this.notes[idx + 1].l < note.l
+        ) {
+          x += Math.pow(2, -this.notes[idx + 1].l);
+        } else {
+          x += Math.pow(2, -note.l);
         }
+        let q = 1;
+        for (let i = 1; i <= note.p; ++i) {
+          q += Math.pow(2, -i);
+        }
+        x *= q;
         this.notesX.push(x);
         this.unitNum += x;
       });

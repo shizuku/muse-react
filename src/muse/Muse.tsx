@@ -2,11 +2,11 @@ import React from "react";
 import config from "./config";
 import MuseNotation, { Notation } from "./MuseNotation";
 
-function init(data: string): Notation {
-  let hm = 100;
-  let vm = 100;
-  let w = 800;
-  let h = 1000;
+function init(data: string, notationWidth: number): Notation {
+  let hm = config.notationDefaultMarginHorizontal;
+  let vm = config.notationDefaultMarginVertical;
+  let w = notationWidth - hm * 2;
+  let h = notationWidth * config.notaionE - vm * 2;
   let notation = new Notation(data);
   let notationH = 0;
   notation.pages.forEach((page, pageIdx) => {
@@ -68,7 +68,7 @@ function init(data: string): Notation {
           let x = 0;
           bar.notes.forEach((note, idx) => {
             x += (bar.notesX[idx] / (bar.unitNum + 1)) * bar.dimens.width;
-            note.dimens.x = x - config.noteWidth / 2;
+            note.dimens.x = x - config.noteWidth / 2 - note.dx;
           });
         });
         track.dimens.height = maxNoteHeight + maxNoteMarginBottom;
@@ -83,7 +83,6 @@ function init(data: string): Notation {
         lineHeight += trackHeight + config.trackGap;
         trackY += trackHeight + config.trackGap;
       });
-      console.log(barsW); //fghfhgjfghfgfgfgfgfgfgfgfgfgfgfgf
       lineHeight -= config.trackGap;
       line.dimens.height = lineHeight;
       lineYSpace -= lineHeight;
@@ -104,7 +103,14 @@ function init(data: string): Notation {
 }
 
 function Muse(props: { data: string; width?: number }) {
-  return <MuseNotation notation={init(props.data)} />;
+  return (
+    <MuseNotation
+      notation={init(
+        props.data,
+        props.width ? props.width : config.notationDefaultWidth
+      )}
+    />
+  );
 }
 
 export default Muse;

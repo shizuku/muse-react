@@ -3,6 +3,7 @@ export default {
   noteWidth: 11,
   noteFontSize: 22,
   noteFontFamily: "serif",
+  sigFontSize: 14,
 
   trackGap: 10,
 
@@ -11,4 +12,9 @@ export default {
   pointGap: 5,
   tailPointGap: 8,
   pointRound: 1.5,
+
+  notaionE: 1.414,
+  notationDefaultWidth: 1000,
+  notationDefaultMarginHorizontal: 100,
+  notationDefaultMarginVertical: 100,
 };

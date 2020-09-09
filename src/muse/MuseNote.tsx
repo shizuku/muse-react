@@ -16,9 +16,8 @@ export class Note {
   dx: number = 0;
   notesY: number[] = [];
   pointsY: number[] = [];
-  tailPointsX: number[] = [];  parse(json: string): void {
-    
-  }
+  tailPointsX: number[] = [];
+  parse(json: string): void {}
   stringify(): string {
     return JSON.stringify(this);
   }
@@ -103,7 +102,7 @@ export class Note {
           }
           this.noteGroup.push({ x, n, t });
           if (x !== "") {
-            this.dx = config.noteWidth;
+            this.dx = config.sigFontSize / 2;
           }
           break;
         }
@@ -155,7 +154,14 @@ function noteGroup(note: Note, clazz: string) {
             </text>
             <text
               fontFamily={config.noteFontFamily}
-              fontSize={config.noteFontSize}
+              fontSize={config.sigFontSize}
+              transform={
+                "translate(" +
+                0 +
+                "," +
+                (config.sigFontSize - config.noteHeight) +
+                ")"
+              }
             >
               {castX(it.x)}
             </text>
