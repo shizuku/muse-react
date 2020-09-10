@@ -1,13 +1,13 @@
 import React from "react";
-import config from "./config";
+import MuseConfig from "./MuseConfig";
 import MuseNotation, { Notation } from "./MuseNotation";
 
-function init(data: string, notationWidth: number): Notation {
-  let hm = config.notationDefaultMarginHorizontal;
-  let vm = config.notationDefaultMarginVertical;
-  let w = notationWidth - hm * 2;
-  let h = notationWidth * config.notaionE - vm * 2;
-  let notation = new Notation(data);
+function init(data: string, config: MuseConfig): Notation {
+  let hm = config.pageMarginHorizontal;
+  let vm = config.pageMarginVertical;
+  let w = config.notationWidth - hm * 2;
+  let h = config.notationWidth * config.pageE - vm * 2;
+  let notation = new Notation(data, config);
   let notationH = 0;
   notation.pages.forEach((page, pageIdx) => {
     page.dimens.x = hm;
@@ -18,6 +18,16 @@ function init(data: string, notationWidth: number): Notation {
     page.dimens.height = h;
     page.dimens.marginTop = vm;
     page.dimens.marginBottom = vm;
+    if (pageIdx === 0) {
+      let x = 0;
+      x += config.infoTitleFontSize + config.infoGap;
+      x += config.infoSubtitleFontSize + config.infoGap;
+      x += notation.author.length * (config.infoFontSize + config.infoGap);
+      page.dimens.marginTop += x;
+      page.dimens.height -= x;
+      page.dimens.y += x;
+    }
+    page.index = pageIdx + 1;
     notationH +=
       page.dimens.marginTop + page.dimens.marginBottom + page.dimens.height;
     let linesHeight: number[] = [];
@@ -102,12 +112,12 @@ function init(data: string, notationWidth: number): Notation {
   return notation;
 }
 
-function Muse(props: { data: string; width?: number }) {
+function Muse(props: { data: string; config?: MuseConfig }) {
   return (
     <MuseNotation
       notation={init(
         props.data,
-        props.width ? props.width : config.notationDefaultWidth
+        props.config ? props.config : new MuseConfig()
       )}
     />
   );

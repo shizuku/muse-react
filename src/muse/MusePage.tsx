@@ -1,22 +1,48 @@
 import React from "react";
+import MuseConfig from "./MuseConfig";
 import Dimens from "./Dimens";
 import MuseLine, { Line } from "./MuseLine";
 import { border, outerBorder } from "./untils";
 
 export class Page {
+  config: MuseConfig;
   lines: Line[] = [];
   dimens: Dimens = new Dimens();
-  constructor(json: string) {
+  index: number = 0;
+  constructor(json: string, config: MuseConfig) {
+    this.config = config;
     let o = JSON.parse(json);
     if (o.lines !== undefined) {
       o.lines.forEach((it: any) => {
-        this.lines.push(new Line(JSON.stringify(it)));
+        this.lines.push(new Line(JSON.stringify(it), this.config));
       });
     }
     if (o.dimens !== undefined) {
       this.dimens = o.dimens;
     }
   }
+}
+
+function pageIndex(idx: number, d: Dimens, clazz: string, config: MuseConfig) {
+  return (
+    <g
+      className={clazz + "__page-index"}
+      transform={
+        "translate(" +
+        (d.marginLeft + d.width / 2) +
+        "," +
+        (d.marginTop + d.height + d.marginBottom / 2) +
+        ")"
+      }
+    >
+      <text
+        fontFamily={config.noteFontFamily}
+        fontSize={config.pageIndexFontSize}
+      >
+        {idx.toString()}
+      </text>
+    </g>
+  );
 }
 
 function MusePage(props: { page: Page }) {
@@ -33,8 +59,9 @@ function MusePage(props: { page: Page }) {
     >
       {border(d, clazz)}
       {outerBorder(d, clazz)}
-      {props.page.lines.map((it) => (
-        <MuseLine line={it} key={JSON.stringify(it)} />
+      {pageIndex(props.page.index, d, clazz, props.page.config)}
+      {props.page.lines.map((it, idx) => (
+        <MuseLine line={it} key={idx} />
       ))}
     </g>
   );

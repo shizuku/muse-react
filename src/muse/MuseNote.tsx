@@ -1,10 +1,10 @@
 import React from "react";
 import Dimens from "./Dimens";
 import { border } from "./untils";
-import "./config";
-import config from "./config";
+import MuseConfig from "./MuseConfig";
 
 export class Note {
+  config: MuseConfig;
   n: string = "";
   noteGroup: {
     x: string;
@@ -17,12 +17,9 @@ export class Note {
   notesY: number[] = [];
   pointsY: number[] = [];
   tailPointsX: number[] = [];
-  parse(json: string): void {}
-  stringify(): string {
-    return JSON.stringify(this);
-  }
   dimens: Dimens = new Dimens();
-  constructor(json: string) {
+  constructor(json: string, config: MuseConfig) {
+    this.config = config;
     let o: any = JSON.parse(json);
     if (o.n !== undefined) {
       this.n = o.n;
@@ -35,17 +32,17 @@ export class Note {
     }
   }
   settle() {
-    let width = this.dx + config.noteWidth + this.p * config.tailPointGap;
+    let width = this.dx + this.config.noteWidth + this.p * this.config.tailPointGap;
     let ny = 0;
     let mb = 0;
-    mb += this.l * config.pointGap;
+    mb += this.l * this.config.pointGap;
     let py = 0;
     this.noteGroup.forEach((it, idx) => {
       if (it.t < 0) {
         if (idx === 0) {
           let i = -it.t;
           for (; i > 0; --i) {
-            let x = config.pointGap;
+            let x = this.config.pointGap;
             mb += x / 2;
             this.pointsY.push(-mb);
             mb += x / 2;
@@ -54,7 +51,7 @@ export class Note {
         if (idx !== 0) {
           let i = -it.t;
           for (; i > 0; --i) {
-            let x = config.pointGap;
+            let x = this.config.pointGap;
             py += x / 2;
             this.pointsY.push(py);
             py += x / 2;
@@ -63,13 +60,13 @@ export class Note {
         }
       }
       this.notesY.push(ny);
-      let h = config.noteHeight;
+      let h = this.config.noteHeight;
       ny += h;
       py += h;
       if (it.t > 0) {
         let i = it.t;
         for (; i > 0; --i) {
-          let x = config.pointGap;
+          let x = this.config.pointGap;
           py += x / 2;
           this.pointsY.push(py);
           py += x / 2;
@@ -79,7 +76,7 @@ export class Note {
     });
     for (let i = 0; i < this.p; ++i) {
       this.tailPointsX.push(
-        this.dx + config.noteWidth + (i + 1 / 2) * config.tailPointGap
+        this.dx + this.config.noteWidth + (i + 1 / 2) * this.config.tailPointGap
       );
     }
     this.dimens.width = width;
@@ -102,7 +99,7 @@ export class Note {
           }
           this.noteGroup.push({ x, n, t });
           if (x !== "") {
-            this.dx = config.sigFontSize / 2;
+            this.dx = this.config.sigFontSize / 2;
           }
           break;
         }
@@ -134,7 +131,7 @@ function noteGroup(note: Note, clazz: string) {
         return (
           <g
             className={clazz + "__note-one"}
-            key={it.n + idx + it.x}
+            key={idx}
             width={note.dimens.width}
             height={note.notesY[idx]}
             transform={
@@ -146,20 +143,20 @@ function noteGroup(note: Note, clazz: string) {
             }
           >
             <text
-              fontFamily={config.noteFontFamily}
-              fontSize={config.noteFontSize}
+              fontFamily={note.config.noteFontFamily}
+              fontSize={note.config.noteFontSize}
               transform={"translate(" + note.dx + "," + 0 + ")"}
             >
               {it.n}
             </text>
             <text
-              fontFamily={config.noteFontFamily}
-              fontSize={config.sigFontSize}
+              fontFamily={note.config.noteFontFamily}
+              fontSize={note.config.sigFontSize}
               transform={
                 "translate(" +
                 0 +
                 "," +
-                (config.sigFontSize - config.noteHeight) +
+                (note.config.sigFontSize - note.config.noteHeight) +
                 ")"
               }
             >
@@ -178,13 +175,13 @@ function pointGroup(note: Note, clazz: string) {
       {note.pointsY.map((it, idx) => (
         <circle
           key={idx}
-          r={config.pointRound}
+          r={note.config.pointRound}
           fill="black"
           transform={
             "translate(" +
-            (note.dx + config.noteWidth / 2) +
+            (note.dx + note.config.noteWidth / 2) +
             "," +
-            (note.dimens.height - it + config.pointGap / 2) +
+            (note.dimens.height - it + note.config.pointGap / 2) +
             ")"
           }
         />
@@ -199,13 +196,13 @@ function tailPoint(note: Note, clazz: string) {
       {note.tailPointsX.map((it, idx) => (
         <circle
           key={idx}
-          r={config.pointRound}
+          r={note.config.pointRound}
           fill="black"
           transform={
             "translate(" +
             it +
             "," +
-            (note.dimens.height - config.noteHeight / 3) +
+            (note.dimens.height - note.config.noteHeight / 3) +
             ")"
           }
         />

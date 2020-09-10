@@ -1,16 +1,19 @@
 import React from "react";
 import Dimens from "./Dimens";
+import MuseConfig from "./MuseConfig";
 import MuseBar, { Bar } from "./MuseBar";
 import { border } from "./untils";
 
 export class Track {
+  config: MuseConfig;
   bars: Bar[] = [];
   dimens: Dimens = new Dimens();
-  constructor(json: string) {
+  constructor(json: string, config: MuseConfig) {
+    this.config = config;
     let o = JSON.parse(json);
     if (o.bars !== undefined) {
       o.bars.forEach((it: any) => {
-        this.bars.push(new Bar(JSON.stringify(it)));
+        this.bars.push(new Bar(JSON.stringify(it), this.config));
       });
     }
     if (o.dimens !== undefined) {

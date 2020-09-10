@@ -1,10 +1,11 @@
 import React from "react";
-import config from "./config";
+import MuseConfig from "./MuseConfig";
 import Dimens from "./Dimens";
 import MuseNote, { Note } from "./MuseNote";
 import { border } from "./untils";
 
 export class Bar {
+  config: MuseConfig;
   notes: Note[] = [];
   dimens: Dimens = new Dimens();
   unitNum: number = 0;
@@ -14,11 +15,12 @@ export class Bar {
     s: number;
     e: number;
   }[] = [];
-  constructor(json: string) {
+  constructor(json: string, config: MuseConfig) {
+    this.config = config;
     let o = JSON.parse(json);
     if (o.notes !== undefined) {
       o.notes.forEach((it: any) => {
-        this.notes.push(new Note(JSON.stringify(it)));
+        this.notes.push(new Note(JSON.stringify(it), this.config));
       });
       this.generateBaseline();
       this.notesX.push(1);
@@ -91,9 +93,9 @@ function baseLine(bar: Bar, clazz: string) {
         <line
           key={idx}
           x1={bar.notes[it.s].dimens.x}
-          y1={bar.notes[it.s].dimens.height + (it.y + 1) * config.pointGap}
+          y1={bar.notes[it.s].dimens.height + (it.y + 1) * bar.config.pointGap}
           x2={bar.notes[it.e].dimens.x + bar.notes[it.e].dimens.width}
-          y2={bar.notes[it.s].dimens.height + (it.y + 1) * config.pointGap}
+          y2={bar.notes[it.s].dimens.height + (it.y + 1) * bar.config.pointGap}
           stroke={"black"}
           strokeWidth={1}
         />
@@ -117,8 +119,8 @@ function MuseBar(props: { bar: Bar }) {
       {border(d, clazz)}
       {barLine(d, clazz)}
       {baseLine(props.bar, clazz)}
-      {props.bar.notes.map((it) => (
-        <MuseNote note={it} key={JSON.stringify(it)} />
+      {props.bar.notes.map((it, idx) => (
+        <MuseNote note={it} key={idx} />
       ))}
     </g>
   );

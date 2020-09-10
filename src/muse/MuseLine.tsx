@@ -1,16 +1,19 @@
 import React from "react";
 import Dimens from "./Dimens";
+import MuseConfig from "./MuseConfig";
 import MuseTrack, { Track } from "./MuseTrack";
 import { border } from "./untils";
 
 export class Line {
+  config: MuseConfig;
   tracks: Track[] = [];
   dimens: Dimens = new Dimens();
-  constructor(json: string) {
+  constructor(json: string, config: MuseConfig) {
+    this.config = config;
     let o = JSON.parse(json);
     if (o.tracks !== undefined) {
       o.tracks.forEach((it: any) => {
-        this.tracks.push(new Track(JSON.stringify(it)));
+        this.tracks.push(new Track(JSON.stringify(it), this.config));
       });
     }
     if (o.dimens !== undefined) {
@@ -41,8 +44,8 @@ function MuseLine(props: { line: Line }) {
     >
       {border(d, clazz)}
       {lineHead(d, clazz)}
-      {props.line.tracks.map((it) => (
-        <MuseTrack track={it} key={JSON.stringify(it)} />
+      {props.line.tracks.map((it, idx) => (
+        <MuseTrack track={it} key={idx} />
       ))}
     </g>
   );
