@@ -6,7 +6,7 @@
 
 ## 示例
 
-[清前往 Github Pages](https://shizuku.github.io/muse-react/)
+[请前往 Github Pages](https://shizuku.github.io/muse-react/)
 
 ## 鸣谢
 
