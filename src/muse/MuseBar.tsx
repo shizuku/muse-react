@@ -2,7 +2,7 @@ import React from "react";
 import MuseConfig from "./MuseConfig";
 import Dimens from "./Dimens";
 import MuseNote, { Note } from "./MuseNote";
-import { border } from "./untils";
+import { border } from "./Border";
 
 export class Bar {
   config: MuseConfig;

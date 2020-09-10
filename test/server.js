@@ -8,7 +8,7 @@ http
       "Access-Control-Allow-Credentials": "true",
       "Access-Control-Allow-Origin": "http://localhost:3000",
     });
-    fs.readFile("../data" + req.url, function (err, data) {
+    fs.readFile("./data" + req.url, function (err, data) {
       if (err) {
         return console.error(err);
       }

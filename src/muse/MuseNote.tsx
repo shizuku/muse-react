@@ -1,6 +1,6 @@
 import React from "react";
 import Dimens from "./Dimens";
-import { border } from "./untils";
+import { border } from "./Border";
 import MuseConfig from "./MuseConfig";
 
 export class Note {

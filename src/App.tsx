@@ -27,7 +27,7 @@ class App extends React.Component<
 
   componentDidMount() {
     let url = "";
-    if (false) {
+    if (true) {
       url = "https://cdn.jsdelivr.net/gh/shizuku/muse-react/test/data/";
     } else {
       url = "http://localhost:8888/";

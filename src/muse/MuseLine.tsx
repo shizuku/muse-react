@@ -2,7 +2,7 @@ import React from "react";
 import Dimens from "./Dimens";
 import MuseConfig from "./MuseConfig";
 import MuseTrack, { Track } from "./MuseTrack";
-import { border } from "./untils";
+import { border } from "./Border";
 
 export class Line {
   config: MuseConfig;

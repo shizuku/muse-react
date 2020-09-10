@@ -2,7 +2,7 @@ export default class MuseConfig {
   noteHeight = 22;
   noteWidth = 11;
   noteFontSize = 22;
-  noteFontFamily = "sans serif";
+  noteFontFamily = "serif";
   sigFontSize = 14;
 
   trackGap = 10;
@@ -18,13 +18,12 @@ export default class MuseConfig {
   pageMarginHorizontal = 100;
   pageMarginVertical = 110;
 
-
   infoTitleFontSize = 34;
   infoSubtitleFontSize = 22;
   infoGap = 8;
   infoFontSize = 20;
 
-  pageIndexFontSize = 16;
+  pageIndexFontSize = 20;
 
   textFontFamily = "serif";
 }

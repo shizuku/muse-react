@@ -2,7 +2,7 @@ import React from "react";
 import MuseConfig from "./MuseConfig";
 import Dimens from "./Dimens";
 import MuseLine, { Line } from "./MuseLine";
-import { border, outerBorder } from "./untils";
+import { border, outerBorder } from "./Border";
 
 export class Page {
   config: MuseConfig;
@@ -36,7 +36,8 @@ function pageIndex(idx: number, d: Dimens, clazz: string, config: MuseConfig) {
       }
     >
       <text
-        fontFamily={config.noteFontFamily}
+        textAnchor={"middle"}
+        fontFamily={config.textFontFamily}
         fontSize={config.pageIndexFontSize}
       >
         {idx.toString()}

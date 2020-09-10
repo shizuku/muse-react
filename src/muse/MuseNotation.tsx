@@ -2,7 +2,7 @@ import React from "react";
 import MuseConfig from "./MuseConfig";
 import Dimens from "./Dimens";
 import MusePage, { Page } from "./MusePage";
-import { border } from "./untils";
+import { border } from "./Border";
 
 export class Notation {
   config: MuseConfig;
@@ -88,10 +88,14 @@ function notationInfo(notation: Notation, clazz: string) {
     </text>
   );
   let y1 = y;
+  let x = notation.author.length;
   let author = (
     <g className={clazz + "__info-author"}>
       {notation.author.map((it, idx) => {
         y1 += config.infoFontSize + config.infoGap;
+        if (idx < x - 2) {
+          y += config.infoFontSize + config.infoGap;
+        }
         return (
           <text
             key={idx}
@@ -114,9 +118,8 @@ function notationInfo(notation: Notation, clazz: string) {
       })}
     </g>
   );
-
-  let y2 = y + config.infoGap + config.infoSubtitleFontSize;
-  let y3 = y2 + config.infoGap + config.infoFontSize;
+  let y2 = y + (config.infoGap + config.infoSubtitleFontSize);
+  let y3 = y2 + (config.infoGap + config.infoFontSize);
   let rythimic = (
     <g className={clazz + "__info-rythmic"} width={notation.dimens.width}>
       <text
