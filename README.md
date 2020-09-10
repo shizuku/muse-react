@@ -6,15 +6,7 @@
 
 ## 示例
 
-[Github Pages](https://shizuku.github.io/muse-react/)
-
-### a
-
-![example/a](example/a.jpg)
-
-### b
-
-![example/b](example/b.jpg)
+[清前往 Github Pages](https://shizuku.github.io/muse-react/)
 
 ## 鸣谢
 

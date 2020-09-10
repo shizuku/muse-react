@@ -20,7 +20,7 @@ export default class MuseConfig {
 
   infoTitleFontSize = 34;
   infoSubtitleFontSize = 22;
-  infoGap = 8;
+  infoGap = 7;
   infoFontSize = 20;
 
   pageIndexFontSize = 20;

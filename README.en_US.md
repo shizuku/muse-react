@@ -2,19 +2,11 @@
 
 # muse-react
 
-🎼A react project to show music score on web page.
+🎼A react project to show music score.
 
 ## Example
 
-[Github Pages](https://shizuku.github.io/muse-react/)
-
-### a
-
-![example/a](example/a.jpg)
-
-### b
-
-![example/b](example/b.jpg)
+[Please head to Github Pages](https://shizuku.github.io/muse-react/)
 
 ## Thanks
 
