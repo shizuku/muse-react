@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Dimens from "./Dimens";
-import { border } from "./Border";
+import { outerBorder } from "./Border";
 import MuseConfig from "./MuseConfig";
 import Selector from "./Selector";
 
@@ -117,7 +117,7 @@ function castX(x: string) {
     DF: "d",
     N: "n",
   };
-  return m["x"] || "";
+  return m[x] || "";
 }
 
 function noteGroup(note: Note, clazz: string) {
@@ -209,6 +209,7 @@ function tailPoint(note: Note, clazz: string) {
 
 function MuseNote(props: { note: Note }) {
   let [isSelect, setSelect] = useState(false);
+  let [note, setNote] = useState(props.note);
   let d = props.note.dimens;
   let clazz = "muse-note";
   return (
@@ -220,12 +221,15 @@ function MuseNote(props: { note: Note }) {
       width={d.width + d.marginLeft + d.marginRight}
       height={d.height + d.marginTop + d.marginBottom}
       onClick={() => {
-        Selector.getInstance().select((show: boolean) => {
-          setSelect(show);
+        Selector.getInstance().select({
+          isSelect: isSelect,
+          setSelect: setSelect,
+          note: note,
+          setNote: setNote,
         });
       }}
     >
-      {border(d, clazz, isSelect)}
+      {outerBorder(d, clazz, isSelect, "blue")}
       {noteGroup(props.note, clazz)}
       {pointGroup(props.note, clazz)}
       {tailPoint(props.note, clazz)}

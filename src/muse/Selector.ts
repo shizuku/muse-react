@@ -1,6 +1,16 @@
+import { Note } from "./MuseNote";
+
+interface T {
+  isSelect: Boolean;
+  setSelect: (s: boolean) => void;
+  note: Note;
+  setNote: (n: Note) => void;
+}
+
 class Selector {
   static instance: Selector;
   fun: ((show: boolean) => void) | undefined;
+  l: T[] = [];
   private constructor() {
     document.addEventListener("keydown", (ev) => {
       console.log(ev);
@@ -12,15 +22,16 @@ class Selector {
     }
     return this.instance;
   }
-  select(f: (show: boolean) => void) {
-    if (this.fun) {
-      this.fun(false);
-    }
-    f(true);
-    this.fun = f;
+  select(g: T) {
+    this.clear();
+    this.l.push(g);
+    g.setSelect(true);
   }
   clear() {
-      
+    this.l.forEach((it) => {
+      it.setSelect(false);
+    });
+    this.l.length = 0;
   }
 }
 
