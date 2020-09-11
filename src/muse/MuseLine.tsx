@@ -8,12 +8,11 @@ export class Line {
   config: MuseConfig;
   tracks: Track[] = [];
   dimens: Dimens = new Dimens();
-  constructor(json: string, config: MuseConfig) {
+  constructor(o:any, config: MuseConfig) {
     this.config = config;
-    let o = JSON.parse(json);
     if (o.tracks !== undefined) {
       o.tracks.forEach((it: any) => {
-        this.tracks.push(new Track(JSON.stringify(it), this.config));
+        this.tracks.push(new Track(it, this.config));
       });
     }
     if (o.dimens !== undefined) {

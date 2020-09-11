@@ -16,10 +16,10 @@ export class Notation {
   dimens: Dimens = new Dimens();
   constructor(json: string, config: MuseConfig) {
     this.config = config;
-    let o = JSON.parse(json);
+    let o: any = JSON.parse(json);
     if (o.pages !== undefined) {
       o.pages.forEach((it: any) => {
-        this.pages.push(new Page(JSON.stringify(it), this.config));
+        this.pages.push(new Page(it, this.config));
       });
     }
     if (o.dimens !== undefined) {

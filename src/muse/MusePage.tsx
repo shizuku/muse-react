@@ -9,12 +9,11 @@ export class Page {
   lines: Line[] = [];
   dimens: Dimens = new Dimens();
   index: number = 0;
-  constructor(json: string, config: MuseConfig) {
+  constructor(o: any, config: MuseConfig) {
     this.config = config;
-    let o = JSON.parse(json);
     if (o.lines !== undefined) {
       o.lines.forEach((it: any) => {
-        this.lines.push(new Line(JSON.stringify(it), this.config));
+        this.lines.push(new Line(it, this.config));
       });
     }
     if (o.dimens !== undefined) {

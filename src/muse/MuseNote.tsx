@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import Dimens from "./Dimens";
 import { border } from "./Border";
 import MuseConfig from "./MuseConfig";
+import Selector from "./Selector";
 
 export class Note {
   config: MuseConfig;
@@ -18,9 +19,8 @@ export class Note {
   pointsY: number[] = [];
   tailPointsX: number[] = [];
   dimens: Dimens = new Dimens();
-  constructor(json: string, config: MuseConfig) {
+  constructor(o: any, config: MuseConfig) {
     this.config = config;
-    let o: any = JSON.parse(json);
     if (o.n !== undefined) {
       this.n = o.n;
       this.generateGroup();
@@ -32,7 +32,8 @@ export class Note {
     }
   }
   settle() {
-    let width = this.dx + this.config.noteWidth + this.p * this.config.tailPointGap;
+    let width =
+      this.dx + this.config.noteWidth + this.p * this.config.tailPointGap;
     let ny = 0;
     let mb = 0;
     mb += this.l * this.config.pointGap;
@@ -109,19 +110,14 @@ export class Note {
 }
 
 function castX(x: string) {
-  if (x === "S") {
-    return "#";
-  } else if (x === "F") {
-    return "b";
-  } else if (x === "DS") {
-    return "x";
-  } else if (x === "DF") {
-    return "d";
-  } else if (x === "N") {
-    return "n";
-  } else {
-    return "";
-  }
+  let m: Record<string, string> = {
+    S: "#",
+    F: "b",
+    DS: "x",
+    DF: "d",
+    N: "n",
+  };
+  return m["x"] || "";
 }
 
 function noteGroup(note: Note, clazz: string) {
@@ -212,6 +208,7 @@ function tailPoint(note: Note, clazz: string) {
 }
 
 function MuseNote(props: { note: Note }) {
+  let [isSelect, setSelect] = useState(false);
   let d = props.note.dimens;
   let clazz = "muse-note";
   return (
@@ -222,8 +219,13 @@ function MuseNote(props: { note: Note }) {
       }
       width={d.width + d.marginLeft + d.marginRight}
       height={d.height + d.marginTop + d.marginBottom}
+      onClick={() => {
+        Selector.getInstance().select((show: boolean) => {
+          setSelect(show);
+        });
+      }}
     >
-      {border(d, clazz)}
+      {border(d, clazz, isSelect)}
       {noteGroup(props.note, clazz)}
       {pointGroup(props.note, clazz)}
       {tailPoint(props.note, clazz)}

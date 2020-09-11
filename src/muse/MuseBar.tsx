@@ -15,12 +15,11 @@ export class Bar {
     s: number;
     e: number;
   }[] = [];
-  constructor(json: string, config: MuseConfig) {
+  constructor(o: any, config: MuseConfig) {
     this.config = config;
-    let o = JSON.parse(json);
     if (o.notes !== undefined) {
       o.notes.forEach((it: any) => {
-        this.notes.push(new Note(JSON.stringify(it), this.config));
+        this.notes.push(new Note(it, this.config));
       });
       this.generateBaseline();
       this.notesX.push(1);
