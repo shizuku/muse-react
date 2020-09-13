@@ -3,12 +3,13 @@ import Dimens from "./Dimens";
 import MuseConfig from "./MuseConfig";
 import MuseBar, { Bar } from "./MuseBar";
 import { border } from "./Border";
+import Selector from "./Selector";
 
 export class Track {
   config: MuseConfig;
   bars: Bar[] = [];
   dimens: Dimens = new Dimens();
-  constructor(o:any, config: MuseConfig) {
+  constructor(o: any, config: MuseConfig) {
     this.config = config;
     if (o.bars !== undefined) {
       o.bars.forEach((it: any) => {
@@ -21,7 +22,7 @@ export class Track {
   }
 }
 
-function MuseTrack(props: { track: Track }) {
+function MuseTrack(props: { track: Track; cursor: number[]; selector: Selector }) {
   let d = props.track.dimens;
   let clazz = "muse-track";
   return (
@@ -35,7 +36,7 @@ function MuseTrack(props: { track: Track }) {
     >
       {border(d, clazz)}
       {props.track.bars.map((it, idx) => (
-        <MuseBar bar={it} key={idx} />
+        <MuseBar bar={it} key={idx} cursor={[...props.cursor, idx]} selector={props.selector}/>
       ))}
     </g>
   );

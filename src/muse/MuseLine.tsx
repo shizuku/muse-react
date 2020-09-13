@@ -3,12 +3,13 @@ import Dimens from "./Dimens";
 import MuseConfig from "./MuseConfig";
 import MuseTrack, { Track } from "./MuseTrack";
 import { border } from "./Border";
+import Selector from "./Selector";
 
 export class Line {
   config: MuseConfig;
   tracks: Track[] = [];
   dimens: Dimens = new Dimens();
-  constructor(o:any, config: MuseConfig) {
+  constructor(o: any, config: MuseConfig) {
     this.config = config;
     if (o.tracks !== undefined) {
       o.tracks.forEach((it: any) => {
@@ -29,7 +30,7 @@ function lineHead(d: Dimens, clazz: string) {
   );
 }
 
-function MuseLine(props: { line: Line }) {
+function MuseLine(props: { line: Line; cursor: number[]; selector: Selector }) {
   let d = props.line.dimens;
   let clazz = "muse-line";
   return (
@@ -44,7 +45,7 @@ function MuseLine(props: { line: Line }) {
       {border(d, clazz)}
       {lineHead(d, clazz)}
       {props.line.tracks.map((it, idx) => (
-        <MuseTrack track={it} key={idx} />
+        <MuseTrack track={it} key={idx} cursor={[...props.cursor, idx]} selector={props.selector}/>
       ))}
     </g>
   );

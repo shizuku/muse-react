@@ -3,6 +3,7 @@ import MuseConfig from "./MuseConfig";
 import Dimens from "./Dimens";
 import MuseNote, { Note } from "./MuseNote";
 import { border } from "./Border";
+import Selector from "./Selector";
 
 export class Bar {
   config: MuseConfig;
@@ -103,7 +104,7 @@ function baseLine(bar: Bar, clazz: string) {
   );
 }
 
-function MuseBar(props: { bar: Bar }) {
+function MuseBar(props: { bar: Bar; cursor: number[]; selector: Selector }) {
   let d = props.bar.dimens;
   let clazz = "muse-bar";
   return (
@@ -119,7 +120,7 @@ function MuseBar(props: { bar: Bar }) {
       {barLine(d, clazz)}
       {baseLine(props.bar, clazz)}
       {props.bar.notes.map((it, idx) => (
-        <MuseNote note={it} key={idx} />
+        <MuseNote note={it} key={idx} cursor={[...props.cursor, idx]} selector={props.selector} />
       ))}
     </g>
   );

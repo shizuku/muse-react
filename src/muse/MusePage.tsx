@@ -3,6 +3,7 @@ import MuseConfig from "./MuseConfig";
 import Dimens from "./Dimens";
 import MuseLine, { Line } from "./MuseLine";
 import { border, outerBorder } from "./Border";
+import Selector from "./Selector";
 
 export class Page {
   config: MuseConfig;
@@ -45,7 +46,7 @@ function pageIndex(idx: number, d: Dimens, clazz: string, config: MuseConfig) {
   );
 }
 
-function MusePage(props: { page: Page }) {
+function MusePage(props: { page: Page; cursor: number[]; selector: Selector }) {
   let d = props.page.dimens;
   let clazz = "muse-page";
   return (
@@ -58,10 +59,15 @@ function MusePage(props: { page: Page }) {
       height={d.height + d.marginTop + d.marginBottom}
     >
       {border(d, clazz)}
-      {outerBorder(d, clazz)}
+      {outerBorder(d, clazz, true)}
       {pageIndex(props.page.index, d, clazz, props.page.config)}
       {props.page.lines.map((it, idx) => (
-        <MuseLine line={it} key={idx} />
+        <MuseLine
+          line={it}
+          key={idx}
+          cursor={[...props.cursor, idx]}
+          selector={props.selector}
+        />
       ))}
     </g>
   );

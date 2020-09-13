@@ -65,16 +65,6 @@ class App extends React.Component<
   render() {
     return (
       <div className="app">
-        <h2>Example A</h2>
-        {this.state.isLoadedA ? (
-          this.state.errorA ? (
-            "error"
-          ) : (
-            <Muse data={this.state.a} />
-          )
-        ) : (
-          "loading..."
-        )}
         <h2>Example B</h2>
         {this.state.isLoadedB ? (
           this.state.errorB ? (

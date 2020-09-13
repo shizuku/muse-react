@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import MuseConfig from "./MuseConfig";
 import MuseNotation, { Notation } from "./MuseNotation";
+import Selector from "./Selector";
 
 function init(data: string, config: MuseConfig): Notation {
   let hm = config.pageMarginHorizontal;
@@ -113,12 +114,14 @@ function init(data: string, config: MuseConfig): Notation {
 }
 
 function Muse(props: { data: string; config?: MuseConfig }) {
+  let [notation, setNotation] = useState(
+    init(props.data, props.config ? props.config : new MuseConfig())
+  );
   return (
     <MuseNotation
-      notation={init(
-        props.data,
-        props.config ? props.config : new MuseConfig()
-      )}
+      notation={notation}
+      selector={new Selector({ notation, setNotation })}
+      
     />
   );
 }

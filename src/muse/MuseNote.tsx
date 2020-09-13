@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import Dimens from "./Dimens";
 import { outerBorder } from "./Border";
 import MuseConfig from "./MuseConfig";
@@ -19,6 +19,7 @@ export class Note {
   pointsY: number[] = [];
   tailPointsX: number[] = [];
   dimens: Dimens = new Dimens();
+  isSelect: boolean = false;
   constructor(o: any, config: MuseConfig) {
     this.config = config;
     if (o.n !== undefined) {
@@ -207,9 +208,7 @@ function tailPoint(note: Note, clazz: string) {
   );
 }
 
-function MuseNote(props: { note: Note }) {
-  let [isSelect, setSelect] = useState(false);
-  let [note, setNote] = useState(props.note);
+function MuseNote(props: { note: Note; cursor: number[]; selector: Selector }) {
   let d = props.note.dimens;
   let clazz = "muse-note";
   return (
@@ -220,16 +219,9 @@ function MuseNote(props: { note: Note }) {
       }
       width={d.width + d.marginLeft + d.marginRight}
       height={d.height + d.marginTop + d.marginBottom}
-      onClick={() => {
-        Selector.getInstance().select({
-          isSelect: isSelect,
-          setSelect: setSelect,
-          note: note,
-          setNote: setNote,
-        });
-      }}
+      onClick={() => {}}
     >
-      {outerBorder(d, clazz, isSelect, "blue")}
+      {outerBorder(d, clazz, props.note.isSelect, "blue")}
       {noteGroup(props.note, clazz)}
       {pointGroup(props.note, clazz)}
       {tailPoint(props.note, clazz)}

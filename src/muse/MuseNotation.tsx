@@ -3,6 +3,7 @@ import MuseConfig from "./MuseConfig";
 import Dimens from "./Dimens";
 import MusePage, { Page } from "./MusePage";
 import { border } from "./Border";
+import Selector from "./Selector";
 
 export class Notation {
   config: MuseConfig;
@@ -150,7 +151,7 @@ function notationInfo(notation: Notation, clazz: string) {
   );
 }
 
-function MuseNotation(props: { notation: Notation }) {
+function MuseNotation(props: { notation: Notation; selector: Selector }) {
   let margin = 10;
   let d = props.notation.dimens;
   let clazz = "muse-notation";
@@ -169,7 +170,12 @@ function MuseNotation(props: { notation: Notation }) {
         {border(d, clazz)}
         {notationInfo(props.notation, clazz)}
         {props.notation.pages.map((it, idx) => (
-          <MusePage page={it} key={idx} />
+          <MusePage
+            page={it}
+            key={idx}
+            cursor={[idx]}
+            selector={props.selector}
+          />
         ))}
       </g>
     </svg>
