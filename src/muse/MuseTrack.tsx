@@ -4,13 +4,17 @@ import MuseConfig from "./MuseConfig";
 import MuseBar, { Bar } from "./MuseBar";
 import { border } from "./Border";
 import Selector from "./Selector";
+import Codec from "./Codec";
 
-export class Track {
+export class Track implements Codec {
   config: MuseConfig;
   bars: Bar[] = [];
   dimens: Dimens = new Dimens();
   constructor(o: any, config: MuseConfig) {
     this.config = config;
+    this.decode(o);
+  }
+  decode(o: any): void {
     if (o.bars !== undefined) {
       o.bars.forEach((it: any) => {
         this.bars.push(new Bar(it, this.config));
@@ -20,9 +24,19 @@ export class Track {
       this.dimens = o.dimens;
     }
   }
+  code(): any {
+    let o: any = {};
+    o.bars = [];
+    this.bars.forEach((it) => o.bars.push(it.code()));
+    return o;
+  }
 }
 
-function MuseTrack(props: { track: Track; cursor: number[]; selector: Selector }) {
+function MuseTrack(props: {
+  track: Track;
+  cursor: number[];
+  selector: Selector;
+}) {
   let d = props.track.dimens;
   let clazz = "muse-track";
   return (
@@ -36,7 +50,12 @@ function MuseTrack(props: { track: Track; cursor: number[]; selector: Selector }
     >
       {border(d, clazz)}
       {props.track.bars.map((it, idx) => (
-        <MuseBar bar={it} key={idx} cursor={[...props.cursor, idx]} selector={props.selector}/>
+        <MuseBar
+          bar={it}
+          key={idx}
+          cursor={[...props.cursor, idx]}
+          selector={props.selector}
+        />
       ))}
     </g>
   );

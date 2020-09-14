@@ -4,14 +4,18 @@ import Dimens from "./Dimens";
 import MuseLine, { Line } from "./MuseLine";
 import { border, outerBorder } from "./Border";
 import Selector from "./Selector";
+import Codec from "./Codec";
 
-export class Page {
+export class Page implements Codec {
   config: MuseConfig;
   lines: Line[] = [];
   dimens: Dimens = new Dimens();
   index: number = 0;
   constructor(o: any, config: MuseConfig) {
     this.config = config;
+    this.decode(o);
+  }
+  decode(o: any): void {
     if (o.lines !== undefined) {
       o.lines.forEach((it: any) => {
         this.lines.push(new Line(it, this.config));
@@ -20,6 +24,12 @@ export class Page {
     if (o.dimens !== undefined) {
       this.dimens = o.dimens;
     }
+  }
+  code() {
+    let o: any = {};
+    o.lines = [];
+    this.lines.forEach((it) => o.lines.push(it.code()));
+    return o;
   }
 }
 

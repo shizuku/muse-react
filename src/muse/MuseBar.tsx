@@ -4,8 +4,9 @@ import Dimens from "./Dimens";
 import MuseNote, { Note } from "./MuseNote";
 import { border } from "./Border";
 import Selector from "./Selector";
+import Codec from "./Codec";
 
-export class Bar {
+export class Bar implements Codec {
   config: MuseConfig;
   notes: Note[] = [];
   dimens: Dimens = new Dimens();
@@ -18,6 +19,9 @@ export class Bar {
   }[] = [];
   constructor(o: any, config: MuseConfig) {
     this.config = config;
+    this.decode(o);
+  }
+  decode(o: any): void {
     if (o.notes !== undefined) {
       o.notes.forEach((it: any) => {
         this.notes.push(new Note(it, this.config));
@@ -48,6 +52,12 @@ export class Bar {
     if (o.dimens !== undefined) {
       this.dimens = o.dimens;
     }
+  }
+  code(): any {
+    let o: any = {};
+    o.notes = [];
+    this.notes.forEach((it) => o.notes.push(it.code()));
+    return o;
   }
   generateBaseline() {
     for (let i = 0; ; ++i) {
@@ -120,7 +130,12 @@ function MuseBar(props: { bar: Bar; cursor: number[]; selector: Selector }) {
       {barLine(d, clazz)}
       {baseLine(props.bar, clazz)}
       {props.bar.notes.map((it, idx) => (
-        <MuseNote note={it} key={idx} cursor={[...props.cursor, idx]} selector={props.selector} />
+        <MuseNote
+          note={it}
+          key={idx}
+          cursor={[...props.cursor, idx]}
+          selector={props.selector}
+        />
       ))}
     </g>
   );

@@ -4,13 +4,17 @@ import MuseConfig from "./MuseConfig";
 import MuseTrack, { Track } from "./MuseTrack";
 import { border } from "./Border";
 import Selector from "./Selector";
+import Codec from "./Codec";
 
-export class Line {
+export class Line implements Codec {
   config: MuseConfig;
   tracks: Track[] = [];
   dimens: Dimens = new Dimens();
   constructor(o: any, config: MuseConfig) {
     this.config = config;
+    this.decode(o);
+  }
+  decode(o: any): void {
     if (o.tracks !== undefined) {
       o.tracks.forEach((it: any) => {
         this.tracks.push(new Track(it, this.config));
@@ -19,6 +23,12 @@ export class Line {
     if (o.dimens !== undefined) {
       this.dimens = o.dimens;
     }
+  }
+  code() {
+    let o: any = {};
+    o.tracks = [];
+    this.tracks.forEach((it) => o.tracks.push(it.code()));
+    return o;
   }
 }
 
@@ -45,7 +55,12 @@ function MuseLine(props: { line: Line; cursor: number[]; selector: Selector }) {
       {border(d, clazz)}
       {lineHead(d, clazz)}
       {props.line.tracks.map((it, idx) => (
-        <MuseTrack track={it} key={idx} cursor={[...props.cursor, idx]} selector={props.selector}/>
+        <MuseTrack
+          track={it}
+          key={idx}
+          cursor={[...props.cursor, idx]}
+          selector={props.selector}
+        />
       ))}
     </g>
   );

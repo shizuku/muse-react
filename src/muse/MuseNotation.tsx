@@ -4,8 +4,9 @@ import Dimens from "./Dimens";
 import MusePage, { Page } from "./MusePage";
 import { border } from "./Border";
 import Selector from "./Selector";
+import Codec from "./Codec";
 
-export class Notation {
+export class Notation implements Codec {
   config: MuseConfig;
   pages: Page[] = [];
   title: string = "";
@@ -18,6 +19,9 @@ export class Notation {
   constructor(json: string, config: MuseConfig) {
     this.config = config;
     let o: any = JSON.parse(json);
+    this.decode(o);
+  }
+  decode(o: any): void {
     if (o.pages !== undefined) {
       o.pages.forEach((it: any) => {
         this.pages.push(new Page(it, this.config));
@@ -44,6 +48,12 @@ export class Notation {
     if (o.C) {
       this.C = "1=" + o.C;
     }
+  }
+  code() {
+    let o: any = {};
+    o.pages = [];
+    this.pages.forEach((it) => o.pages.push(it.code()));
+    return o;
   }
 }
 

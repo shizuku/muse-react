@@ -3,10 +3,11 @@ import Dimens from "./Dimens";
 import { outerBorder } from "./Border";
 import MuseConfig from "./MuseConfig";
 import Selector from "./Selector";
+import Codec from "./Codec";
+import Fraction from "./Fraction";
 
-export class Note {
+export class Note implements Codec {
   config: MuseConfig;
-  n: string = "";
   noteGroup: {
     x: string;
     n: string;
@@ -14,7 +15,9 @@ export class Note {
   }[] = [];
   l: number = 0;
   p: number = 0;
+  d: number = 0;
   dx: number = 0;
+  time: Fraction | null = null;
   notesY: number[] = [];
   pointsY: number[] = [];
   tailPointsX: number[] = [];
@@ -22,15 +25,69 @@ export class Note {
   isSelect: boolean = false;
   constructor(o: any, config: MuseConfig) {
     this.config = config;
+    this.decode(o);
+  }
+  decode(o: any): void {
     if (o.n !== undefined) {
-      this.n = o.n;
-      this.generateGroup();
-      this.l = o.l;
-      this.p = o.p;
+      let n: string = o.n;
+      let pos = n.search("@");
+      let ns = "";
+      let ts = "";
+      if (pos === -1) {
+        ns = n;
+        ts = "0|0";
+      } else {
+        ns = n.substr(0, pos);
+        ts = n.substr(pos + 1);
+      }
+      let ng = ns.split("|");
+      ng.forEach((it) => {
+        for (let i = 0; i < it.length; ++i) {
+          if (
+            (it.charCodeAt(i) <= 57 && it.charCodeAt(i) >= 48) ||
+            it.charCodeAt(i) === 45
+          ) {
+            let x = it.substr(0, i);
+            let n = it.charAt(i);
+            let t = it.substr(i + 1).length;
+            if (t !== 0 && it.charAt(i + 1) === "-") {
+              t = -t;
+            }
+            this.noteGroup.push({ x, n, t });
+            if (x !== "") {
+              this.dx = this.config.sigFontSize / 2;
+            }
+            break;
+          }
+        }
+      });
+      let tg = ts.split("|");
+      if (tg.length === 3) {
+        this.l = parseInt(tg[0]);
+        this.p = parseInt(tg[1]);
+        this.d = parseInt(tg[2]);
+      } else if (tg.length === 2) {
+        this.l = parseInt(tg[0]);
+        this.p = parseInt(tg[1]);
+        this.d = 1;
+      } else if (tg.length === 1) {
+        this.l = parseInt(tg[0]);
+        this.p = 0;
+        this.d = 1;
+      } else {
+        this.l = 0;
+        this.p = 0;
+        this.d = 1;
+      }
     }
     if (o.dimens !== undefined) {
       this.dimens = o.dimens;
     }
+  }
+  code(): any {
+    let o: any = {};
+    o.n = "@" + this.time?.toString();
+    return o;
   }
   settle() {
     let width =
@@ -84,29 +141,6 @@ export class Note {
     this.dimens.width = width;
     this.dimens.height = ny;
     this.dimens.marginBottom = mb;
-  }
-  generateGroup() {
-    let g = this.n.split("|");
-    g.forEach((it) => {
-      for (let i = 0; i < it.length; ++i) {
-        if (
-          (it.charCodeAt(i) <= 57 && it.charCodeAt(i) >= 48) ||
-          it.charCodeAt(i) === 45
-        ) {
-          let x = it.substr(0, i);
-          let n = it.charAt(i);
-          let t = it.substr(i + 1).length;
-          if (t !== 0 && it.charAt(i + 1) === "-") {
-            t = -t;
-          }
-          this.noteGroup.push({ x, n, t });
-          if (x !== "") {
-            this.dx = this.config.sigFontSize / 2;
-          }
-          break;
-        }
-      }
-    });
   }
 }
 

@@ -1,4 +1,4 @@
 export default interface Codec {
-  parse(json: string): void;
-  stringify(): string;
+  decode(o: any): void;
+  code(): any;
 }

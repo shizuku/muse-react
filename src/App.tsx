@@ -5,58 +5,36 @@ import Muse from "./muse/Muse";
 class App extends React.Component<
   {},
   {
-    errorA: any | null;
-    errorB: any | null;
-    isLoadedA: boolean;
-    isLoadedB: boolean;
-    a: string;
-    b: string;
+    error: any | null;
+    isLoaded: boolean;
+    data: string;
   }
 > {
   constructor(props: {}) {
     super(props);
     this.state = {
-      errorA: null,
-      errorB: null,
-      isLoadedA: false,
-      isLoadedB: false,
-      a: "",
-      b: "",
+      error: null,
+      isLoaded: false,
+      data: "",
     };
   }
 
   componentDidMount() {
-    let url = "https://cdn.jsdelivr.net/gh/shizuku/muse-react/test/data/";
-    //let url = "http://localhost:8888/";
-    fetch(url + "a.json")
-      .then((res) => res.text())
-      .then(
-        (result) => {
-          this.setState({
-            isLoadedA: true,
-            a: result,
-          });
-        },
-        (error) => {
-          this.setState({
-            isLoadedA: true,
-            errorA: error,
-          });
-        }
-      );
+    // let url = "https://cdn.jsdelivr.net/gh/shizuku/muse-react/test/data/";
+    let url = "http://localhost:8888/";
     fetch(url + "b.json")
       .then((res) => res.text())
       .then(
         (result) => {
           this.setState({
-            isLoadedB: true,
-            b: result,
+            isLoaded: true,
+            data: result,
           });
         },
         (error) => {
           this.setState({
-            isLoadedB: true,
-            errorB: error,
+            isLoaded: true,
+            error: error,
           });
         }
       );
@@ -65,12 +43,12 @@ class App extends React.Component<
   render() {
     return (
       <div className="app">
-        <h2>Example B</h2>
-        {this.state.isLoadedB ? (
-          this.state.errorB ? (
+        <h1>Example</h1>
+        {this.state.isLoaded ? (
+          this.state.error ? (
             "error"
           ) : (
-            <Muse data={this.state.b} />
+            <Muse data={this.state.data} />
           )
         ) : (
           "loading..."
