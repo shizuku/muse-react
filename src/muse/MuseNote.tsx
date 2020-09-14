@@ -242,14 +242,14 @@ function tailPoint(note: Note, clazz: string) {
   );
 }
 
-function MuseNote(props: { note: Note; cursor: number[]; selector: Selector }) {
+function MuseNote(props: { cursor: number[]; selector: Selector }) {
   let [note, setNote] = useState<Note | null>(null);
   useEffect(() => {
     function handleState(state: { note: Note }) {
       setNote(state.note);
     }
     props.selector.fetchNote(props.cursor, handleState);
-    return () => props.selector.unFetchNote(props.cursor, handleState);
+    return () => props.selector.unFetchNote(props.cursor);
   });
   if (note) {
     let d = note.dimens;

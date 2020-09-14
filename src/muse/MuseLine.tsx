@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Dimens from "./Dimens";
 import MuseConfig from "./MuseConfig";
 import MuseTrack, { Track } from "./MuseTrack";
@@ -40,30 +40,41 @@ function lineHead(d: Dimens, clazz: string) {
   );
 }
 
-function MuseLine(props: { line: Line; cursor: number[]; selector: Selector }) {
-  let d = props.line.dimens;
-  let clazz = "muse-line";
-  return (
-    <g
-      className={clazz}
-      transform={
-        "translate(" + (d.x - d.marginLeft) + "," + (d.y - d.marginTop) + ")"
-      }
-      width={d.width + d.marginLeft + d.marginRight}
-      height={d.height + d.marginTop + d.marginBottom}
-    >
-      {border(d, clazz)}
-      {lineHead(d, clazz)}
-      {props.line.tracks.map((it, idx) => (
-        <MuseTrack
-          track={it}
-          key={idx}
-          cursor={[...props.cursor, idx]}
-          selector={props.selector}
-        />
-      ))}
-    </g>
-  );
+function MuseLine(props: { cursor: number[]; selector: Selector }) {
+  let [line, setLine] = useState<Line | null>(null);
+  useEffect(() => {
+    function handleState(state: { line: Line }) {
+      setLine(state.line);
+    }
+    props.selector.fetchLine(props.cursor, handleState);
+    return () => props.selector.unFetchLine(props.cursor);
+  });
+  if (line) {
+    let d = line.dimens;
+    let clazz = "muse-line";
+    return (
+      <g
+        className={clazz}
+        transform={
+          "translate(" + (d.x - d.marginLeft) + "," + (d.y - d.marginTop) + ")"
+        }
+        width={d.width + d.marginLeft + d.marginRight}
+        height={d.height + d.marginTop + d.marginBottom}
+      >
+        {border(d, clazz)}
+        {lineHead(d, clazz)}
+        {line.tracks.map((it, idx) => (
+          <MuseTrack
+            key={idx}
+            cursor={[...props.cursor, idx]}
+            selector={props.selector}
+          />
+        ))}
+      </g>
+    );
+  } else {
+    return <></>;
+  }
 }
 
 export default MuseLine;

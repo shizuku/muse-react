@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import MuseConfig from "./MuseConfig";
 import Dimens from "./Dimens";
 import MusePage, { Page } from "./MusePage";
@@ -161,35 +161,42 @@ function notationInfo(notation: Notation, clazz: string) {
   );
 }
 
-function MuseNotation(props: { notation: Notation; selector: Selector }) {
-  let margin = 10;
-  let d = props.notation.dimens;
-  let clazz = "muse-notation";
-  return (
-    <svg
-      className="muse"
-      width={props.notation.dimens.width + margin * 2}
-      height={props.notation.dimens.height + margin * 2}
-    >
-      <g
-        className={clazz}
-        transform={"translate(" + margin + "," + margin + ")"}
-        width={props.notation.dimens.width}
-        height={props.notation.dimens.height}
+function MuseNotation(props: {  selector: Selector }) {
+  let [notation, setNotation] = useState<Notation | null>(null);
+  useEffect(() => {
+    function handleState(state: { notation: Notation }) {
+      setNotation(state.notation);
+    }
+    props.selector.fetchNotation(handleState);
+    return () => props.selector.unFetchNotation();
+  });
+  if (notation) {
+    let margin = 10;
+    let d = notation.dimens;
+    let clazz = "muse-notation";
+    return (
+      <svg
+        className="muse"
+        width={notation.dimens.width + margin * 2}
+        height={notation.dimens.height + margin * 2}
       >
-        {border(d, clazz)}
-        {notationInfo(props.notation, clazz)}
-        {props.notation.pages.map((it, idx) => (
-          <MusePage
-            page={it}
-            key={idx}
-            cursor={[idx]}
-            selector={props.selector}
-          />
-        ))}
-      </g>
-    </svg>
-  );
+        <g
+          className={clazz}
+          transform={"translate(" + margin + "," + margin + ")"}
+          width={notation.dimens.width}
+          height={notation.dimens.height}
+        >
+          {border(d, clazz)}
+          {notationInfo(notation, clazz)}
+          {notation.pages.map((it, idx) => (
+            <MusePage key={idx} cursor={[idx]} selector={props.selector} />
+          ))}
+        </g>
+      </svg>
+    );
+  } else {
+    return <></>;
+  }
 }
 
 export default MuseNotation;

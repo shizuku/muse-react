@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import MuseConfig from "./MuseConfig";
 import Dimens from "./Dimens";
 import MuseLine, { Line } from "./MuseLine";
@@ -56,31 +56,42 @@ function pageIndex(idx: number, d: Dimens, clazz: string, config: MuseConfig) {
   );
 }
 
-function MusePage(props: { page: Page; cursor: number[]; selector: Selector }) {
-  let d = props.page.dimens;
-  let clazz = "muse-page";
-  return (
-    <g
-      className={clazz}
-      transform={
-        "translate(" + (d.x - d.marginLeft) + "," + (d.y - d.marginTop) + ")"
-      }
-      width={d.width + d.marginLeft + d.marginRight}
-      height={d.height + d.marginTop + d.marginBottom}
-    >
-      {border(d, clazz)}
-      {outerBorder(d, clazz, true)}
-      {pageIndex(props.page.index, d, clazz, props.page.config)}
-      {props.page.lines.map((it, idx) => (
-        <MuseLine
-          line={it}
-          key={idx}
-          cursor={[...props.cursor, idx]}
-          selector={props.selector}
-        />
-      ))}
-    </g>
-  );
+function MusePage(props: {cursor: number[]; selector: Selector }) {
+  let [page, setPage] = useState<Page | null>(null);
+  useEffect(() => {
+    function handleState(state: { page: Page }) {
+      setPage(state.page);
+    }
+    props.selector.fetchPage(props.cursor, handleState);
+    return () => props.selector.unFetchPage(props.cursor);
+  });
+  if (page) {
+    let d = page.dimens;
+    let clazz = "muse-page";
+    return (
+      <g
+        className={clazz}
+        transform={
+          "translate(" + (d.x - d.marginLeft) + "," + (d.y - d.marginTop) + ")"
+        }
+        width={d.width + d.marginLeft + d.marginRight}
+        height={d.height + d.marginTop + d.marginBottom}
+      >
+        {border(d, clazz)}
+        {outerBorder(d, clazz, true)}
+        {pageIndex(page.index, d, clazz, page.config)}
+        {page.lines.map((it, idx) => (
+          <MuseLine
+            key={idx}
+            cursor={[...props.cursor, idx]}
+            selector={props.selector}
+          />
+        ))}
+      </g>
+    );
+  } else {
+    return <></>;
+  }
 }
 
 export default MusePage;

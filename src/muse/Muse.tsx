@@ -118,7 +118,7 @@ function Muse(props: { data: string; config?: MuseConfig }) {
     props.data,
     props.config ? props.config : new MuseConfig()
   );
-  return <MuseNotation notation={notation} selector={new Selector(notation)} />;
+  return <MuseNotation selector={new Selector(notation)} />;
 }
 
 export default Muse;

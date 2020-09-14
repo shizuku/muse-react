@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import MuseConfig from "./MuseConfig";
 import Dimens from "./Dimens";
 import MuseNote, { Note } from "./MuseNote";
@@ -114,31 +114,42 @@ function baseLine(bar: Bar, clazz: string) {
   );
 }
 
-function MuseBar(props: { bar: Bar; cursor: number[]; selector: Selector }) {
-  let d = props.bar.dimens;
-  let clazz = "muse-bar";
-  return (
-    <g
-      className={clazz}
-      transform={
-        "translate(" + (d.x - d.marginLeft) + "," + (d.y - d.marginTop) + ")"
-      }
-      width={d.width + d.marginLeft + d.marginRight}
-      height={d.height + d.marginTop + d.marginBottom}
-    >
-      {border(d, clazz)}
-      {barLine(d, clazz)}
-      {baseLine(props.bar, clazz)}
-      {props.bar.notes.map((it, idx) => (
-        <MuseNote
-          note={it}
-          key={idx}
-          cursor={[...props.cursor, idx]}
-          selector={props.selector}
-        />
-      ))}
-    </g>
-  );
+function MuseBar(props: { cursor: number[]; selector: Selector }) {
+  let [bar, setBar] = useState<Bar | null>(null);
+  useEffect(() => {
+    function handleState(state: { bar: Bar }) {
+      setBar(state.bar);
+    }
+    props.selector.fetchBar(props.cursor, handleState);
+    return () => props.selector.unFetchBar(props.cursor);
+  });
+  if (bar) {
+    let d = bar.dimens;
+    let clazz = "muse-bar";
+    return (
+      <g
+        className={clazz}
+        transform={
+          "translate(" + (d.x - d.marginLeft) + "," + (d.y - d.marginTop) + ")"
+        }
+        width={d.width + d.marginLeft + d.marginRight}
+        height={d.height + d.marginTop + d.marginBottom}
+      >
+        {border(d, clazz)}
+        {barLine(d, clazz)}
+        {baseLine(bar, clazz)}
+        {bar.notes.map((it, idx) => (
+          <MuseNote
+            key={idx}
+            cursor={[...props.cursor, idx]}
+            selector={props.selector}
+          />
+        ))}
+      </g>
+    );
+  } else {
+    return <></>;
+  }
 }
 
 export default MuseBar;
