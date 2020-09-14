@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Dimens from "./Dimens";
 import { outerBorder } from "./Border";
 import MuseConfig from "./MuseConfig";
@@ -243,24 +243,36 @@ function tailPoint(note: Note, clazz: string) {
 }
 
 function MuseNote(props: { note: Note; cursor: number[]; selector: Selector }) {
-  let d = props.note.dimens;
-  let clazz = "muse-note";
-  return (
-    <g
-      className={clazz}
-      transform={
-        "translate(" + (d.x - d.marginLeft) + "," + (d.y - d.marginTop) + ")"
-      }
-      width={d.width + d.marginLeft + d.marginRight}
-      height={d.height + d.marginTop + d.marginBottom}
-      onClick={() => {}}
-    >
-      {outerBorder(d, clazz, props.note.isSelect, "blue")}
-      {noteGroup(props.note, clazz)}
-      {pointGroup(props.note, clazz)}
-      {tailPoint(props.note, clazz)}
-    </g>
-  );
+  let [note, setNote] = useState<Note | null>(null);
+  useEffect(() => {
+    function handleState(state: { note: Note }) {
+      setNote(state.note);
+    }
+    props.selector.fetchNote(props.cursor, handleState);
+    return () => props.selector.unFetchNote(props.cursor, handleState);
+  });
+  if (note) {
+    let d = note.dimens;
+    let clazz = "muse-note";
+    return (
+      <g
+        className={clazz}
+        transform={
+          "translate(" + (d.x - d.marginLeft) + "," + (d.y - d.marginTop) + ")"
+        }
+        width={d.width + d.marginLeft + d.marginRight}
+        height={d.height + d.marginTop + d.marginBottom}
+        onClick={() => {}}
+      >
+        {outerBorder(d, clazz, note.isSelect, "blue")}
+        {noteGroup(note, clazz)}
+        {pointGroup(note, clazz)}
+        {tailPoint(note, clazz)}
+      </g>
+    );
+  } else {
+    return <></>;
+  }
 }
 
 export default MuseNote;

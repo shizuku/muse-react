@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import MuseConfig from "./MuseConfig";
 import MuseNotation, { Notation } from "./MuseNotation";
 import Selector from "./Selector";
@@ -114,16 +114,11 @@ function init(data: string, config: MuseConfig): Notation {
 }
 
 function Muse(props: { data: string; config?: MuseConfig }) {
-  let [notation, setNotation] = useState(
-    init(props.data, props.config ? props.config : new MuseConfig())
+  let notation = init(
+    props.data,
+    props.config ? props.config : new MuseConfig()
   );
-  return (
-    <MuseNotation
-      notation={notation}
-      selector={new Selector({ notation, setNotation })}
-      
-    />
-  );
+  return <MuseNotation notation={notation} selector={new Selector(notation)} />;
 }
 
 export default Muse;
