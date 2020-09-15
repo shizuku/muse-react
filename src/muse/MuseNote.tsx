@@ -6,7 +6,7 @@ import Codec from "./Codec";
 import Fraction from "./Fraction";
 import { INote } from "./repo/schema";
 import { observable } from "mobx";
-import { useObserver } from "mobx-react";
+import { observer, useObserver } from "mobx-react";
 
 export class Note implements Codec {
   readonly config: MuseConfig;
@@ -243,28 +243,59 @@ function tailPoint(note: Note, clazz: string) {
   );
 }
 
-function MuseNote(props: { note: Note }) {
-  let note = useObserver(() => {
-    return props.note;
-  });
-  let d = note.dimens;
-  let clazz = "muse-note";
-  return (
-    <g
-      className={clazz}
-      transform={
-        "translate(" + (d.x - d.marginLeft) + "," + (d.y - d.marginTop) + ")"
-      }
-      width={d.width + d.marginLeft + d.marginRight}
-      height={d.height + d.marginTop + d.marginBottom}
-      onClick={() => {}}
-    >
-      {outerBorder(d, clazz, note.isSelect, "blue")}
-      {noteGroup(note, clazz)}
-      {pointGroup(note, clazz)}
-      {tailPoint(note, clazz)}
-    </g>
-  );
+@observer
+class MuseNote extends React.Component<{ note: Note }, {}> {
+  render() {
+    let note = this.props.note;
+    let d = note.dimens;
+    let clazz = "muse-note";
+    return (
+      <g
+        className={clazz}
+        transform={
+          "translate(" + (d.x - d.marginLeft) + "," + (d.y - d.marginTop) + ")"
+        }
+        width={d.width + d.marginLeft + d.marginRight}
+        height={d.height + d.marginTop + d.marginBottom}
+        onClick={() => {
+          this.props.note.isSelect = !this.props.note.isSelect;
+          console.log("xxx");
+        }}
+      >
+        {outerBorder(d, clazz, note.isSelect, "blue")}
+        {noteGroup(note, clazz)}
+        {pointGroup(note, clazz)}
+        {tailPoint(note, clazz)}
+      </g>
+    );
+  }
 }
+
+// const MuseNote: React.FC<{ note: Note }> = ({ note }) => {
+//   let n = useObserver(() => {
+//     return note;
+//   });
+//   let d = n.dimens;
+//   let clazz = "muse-note";
+//   return (
+//     <g
+//       className={clazz}
+//       transform={
+//         "translate(" + (d.x - d.marginLeft) + "," + (d.y - d.marginTop) + ")"
+//       }
+//       width={d.width + d.marginLeft + d.marginRight}
+//       height={d.height + d.marginTop + d.marginBottom}
+//       onClick={() => {
+//         note.isSelect = !note.isSelect;
+//         console.log("xxx");
+//       }}
+//     >
+//       {outerBorder(d, clazz, n.isSelect, "blue")}
+//       {noteGroup(n, clazz)}
+//       {pointGroup(n, clazz)}
+//       {tailPoint(n, clazz)}
+//     </g>
+//   );
+// };
 
 export default MuseNote;

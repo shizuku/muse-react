@@ -20,9 +20,9 @@ class App extends React.Component<
   }
 
   componentDidMount() {
-    // let url = "https://cdn.jsdelivr.net/gh/shizuku/muse-react/test/data/";
-    let url = "http://localhost:8888/";
-    fetch(url + "b.json")
+    // let url = "https://cdn.jsdelivr.net/gh/shizuku/muse-react/test/data/b.json";
+    let url = "http://localhost:8888/b.json";
+    fetch(url)
       .then((res) => res.text())
       .then(
         (result) => {
