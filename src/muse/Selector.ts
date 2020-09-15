@@ -67,12 +67,25 @@ class Selector {
     //   }
     // });
   }
-  fetchNotation(handler: (state: { notation: Notation }) => void) {
-    let notation = this.data;
-    this.tree.handler = handler;
-    handler({ notation });
+  fetchNotation(
+    cursor: number[],
+    handler: (state: { notation: Notation }) => void
+  ) {
+    if (cursor.length === 0) {
+      let notation = this.data;
+      this.tree.handler = handler;
+      handler({ notation });
+    } else {
+      throw new Error("cursor size error");
+    }
   }
-  unFetchNotation() {}
+  unFetchNotation(cursor: number[]) {
+    if (cursor.length === 0) {
+      this.tree.handler = null;
+    } else {
+      throw new Error("cursor size error");
+    }
+  }
   fetchPage(cursor: number[], handler: (state: { page: Page }) => void) {
     if (cursor.length === 1) {
       let page = this.data.pages[cursor[0]];
@@ -84,6 +97,7 @@ class Selector {
   }
   unFetchPage(cursor: number[]) {
     if (cursor.length === 1) {
+      this.tree.pages[cursor[0]].handler = null;
     } else {
       throw new Error("cursor size error");
     }
@@ -99,6 +113,7 @@ class Selector {
   }
   unFetchLine(cursor: number[]) {
     if (cursor.length === 2) {
+      this.tree.pages[cursor[0]].lines[cursor[1]].handler = null;
     } else {
       throw new Error("cursor size error");
     }
@@ -116,6 +131,9 @@ class Selector {
   }
   unFetchTrack(cursor: number[]) {
     if (cursor.length === 3) {
+      this.tree.pages[cursor[0]].lines[cursor[1]].tracks[
+        cursor[2]
+      ].handler = null;
     } else {
       throw new Error("cursor size error");
     }
@@ -134,6 +152,9 @@ class Selector {
   }
   unFetchBar(cursor: number[]) {
     if (cursor.length === 4) {
+      this.tree.pages[cursor[0]].lines[cursor[1]].tracks[cursor[2]].bars[
+        cursor[3]
+      ].handler = null;
     } else {
       throw new Error("cursor size error");
     }
@@ -152,6 +173,25 @@ class Selector {
   }
   unFetchNote(cursor: number[]) {
     if (cursor.length === 5) {
+      this.tree.pages[cursor[0]].lines[cursor[1]].tracks[cursor[2]].bars[
+        cursor[3]
+      ].notes[cursor[4]].handler = null;
+    } else {
+      throw new Error("cursor size error");
+    }
+  }
+  selectNote(cursor: number[]) {
+    if (cursor.length === 5) {
+      let note = this.data.pages[cursor[0]].lines[cursor[1]].tracks[cursor[2]]
+        .bars[cursor[3]].notes[cursor[4]];
+      note.isSelect = !note.isSelect;
+      let handler = this.tree.pages[cursor[0]].lines[cursor[1]].tracks[
+        cursor[2]
+      ].bars[cursor[3]].notes[cursor[4]].handler;
+      if (handler) {
+        handler({ note });
+        console.log("invoke");
+      }
     } else {
       throw new Error("cursor size error");
     }

@@ -1,15 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Dimens from "./Dimens";
 import MuseConfig from "./MuseConfig";
 import MuseBar, { Bar } from "./MuseBar";
 import { border } from "./Border";
-import Selector from "./Selector";
 import Codec from "./Codec";
+import { IBar, ITrack } from "./repo/schema";
+import { observable } from "mobx";
+import { useObserver } from "mobx-react";
 
 export class Track implements Codec {
-  config: MuseConfig;
-  bars: Bar[] = [];
-  dimens: Dimens = new Dimens();
+  readonly config: MuseConfig;
+  @observable bars: Bar[] = [];
+  @observable dimens: Dimens = new Dimens();
   constructor(o: any, config: MuseConfig) {
     this.config = config;
     this.decode(o);
@@ -24,48 +26,34 @@ export class Track implements Codec {
       this.dimens = o.dimens;
     }
   }
-  code(): any {
-    let o: any = {};
-    o.bars = [];
-    this.bars.forEach((it) => o.bars.push(it.code()));
-    return o;
+  code(): ITrack {
+    let bars: IBar[] = this.bars.map((it) => it.code());
+    return { bars };
   }
 }
 
-function MuseTrack(props: { cursor: number[]; selector: Selector }) {
-  let [track, setTrack] = useState<Track | null>(null);
-  useEffect(() => {
-    function handleState(state: { track: Track }) {
-      setTrack(state.track);
-    }
-    props.selector.fetchTrack(props.cursor, handleState);
-    return () => props.selector.unFetchTrack(props.cursor);
+function MuseTrack(props: { track: Track }) {
+  let track = useObserver(() => {
+    return props.track;
   });
-  if (track) {
-    let d = track.dimens;
-    let clazz = "muse-track";
-    return (
-      <g
-        className={clazz}
-        transform={
-          "translate(" + (d.x - d.marginLeft) + "," + (d.y - d.marginTop) + ")"
-        }
-        width={d.width + d.marginLeft + d.marginRight}
-        height={d.height + d.marginTop + d.marginBottom}
-      >
-        {border(d, clazz)}
-        {track.bars.map((it, idx) => (
-          <MuseBar
-            key={idx}
-            cursor={[...props.cursor, idx]}
-            selector={props.selector}
-          />
-        ))}
-      </g>
-    );
-  } else {
-    return <></>;
-  }
+
+  let d = track.dimens;
+  let clazz = "muse-track";
+  return (
+    <g
+      className={clazz}
+      transform={
+        "translate(" + (d.x - d.marginLeft) + "," + (d.y - d.marginTop) + ")"
+      }
+      width={d.width + d.marginLeft + d.marginRight}
+      height={d.height + d.marginTop + d.marginBottom}
+    >
+      {border(d, clazz)}
+      {track.bars.map((it, idx) => (
+        <MuseBar key={idx} bar={it} />
+      ))}
+    </g>
+  );
 }
 
 export default MuseTrack;

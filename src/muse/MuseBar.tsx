@@ -1,15 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import MuseConfig from "./MuseConfig";
 import Dimens from "./Dimens";
 import MuseNote, { Note } from "./MuseNote";
 import { border } from "./Border";
-import Selector from "./Selector";
 import Codec from "./Codec";
+import { IBar, INote } from "./repo/schema";
+import { observable } from "mobx";
+import { useObserver } from "mobx-react";
 
 export class Bar implements Codec {
-  config: MuseConfig;
-  notes: Note[] = [];
-  dimens: Dimens = new Dimens();
+  readonly config: MuseConfig;
+  @observable notes: Note[] = [];
+  @observable dimens: Dimens = new Dimens();
   unitNum: number = 0;
   notesX: number[] = [];
   baselineGroup: {
@@ -20,6 +22,27 @@ export class Bar implements Codec {
   constructor(o: any, config: MuseConfig) {
     this.config = config;
     this.decode(o);
+  }
+  generateBaseline() {
+    for (let i = 0; ; ++i) {
+      let x = 0;
+      let s = 0;
+      let e = -1;
+      this.notes.forEach((it, idx) => {
+        if (it.l > i) {
+          e = idx;
+          x++;
+        } else {
+          if (s <= e) this.baselineGroup.push({ y: i, s: s, e: e });
+          s = idx + 1;
+          e = idx;
+        }
+      });
+      if (s <= e) this.baselineGroup.push({ y: i, s: s, e: e });
+      if (x === 0) {
+        break;
+      }
+    }
   }
   decode(o: any): void {
     if (o.notes !== undefined) {
@@ -53,32 +76,9 @@ export class Bar implements Codec {
       this.dimens = o.dimens;
     }
   }
-  code(): any {
-    let o: any = {};
-    o.notes = [];
-    this.notes.forEach((it) => o.notes.push(it.code()));
-    return o;
-  }
-  generateBaseline() {
-    for (let i = 0; ; ++i) {
-      let x = 0;
-      let s = 0;
-      let e = -1;
-      this.notes.forEach((it, idx) => {
-        if (it.l > i) {
-          e = idx;
-          x++;
-        } else {
-          if (s <= e) this.baselineGroup.push({ y: i, s: s, e: e });
-          s = idx + 1;
-          e = idx;
-        }
-      });
-      if (s <= e) this.baselineGroup.push({ y: i, s: s, e: e });
-      if (x === 0) {
-        break;
-      }
-    }
+  code(): IBar {
+    let notes: INote[] = this.notes.map((it) => it.code());
+    return { notes };
   }
 }
 
@@ -114,42 +114,32 @@ function baseLine(bar: Bar, clazz: string) {
   );
 }
 
-function MuseBar(props: { cursor: number[]; selector: Selector }) {
-  let [bar, setBar] = useState<Bar | null>(null);
-  useEffect(() => {
-    function handleState(state: { bar: Bar }) {
-      setBar(state.bar);
-    }
-    props.selector.fetchBar(props.cursor, handleState);
-    return () => props.selector.unFetchBar(props.cursor);
+function MuseBar(props: { bar: Bar }) {
+  let bar = useObserver(() => {
+    return props.bar;
   });
-  if (bar) {
-    let d = bar.dimens;
-    let clazz = "muse-bar";
-    return (
-      <g
-        className={clazz}
-        transform={
-          "translate(" + (d.x - d.marginLeft) + "," + (d.y - d.marginTop) + ")"
-        }
-        width={d.width + d.marginLeft + d.marginRight}
-        height={d.height + d.marginTop + d.marginBottom}
-      >
-        {border(d, clazz)}
-        {barLine(d, clazz)}
-        {baseLine(bar, clazz)}
-        {bar.notes.map((it, idx) => (
-          <MuseNote
-            key={idx}
-            cursor={[...props.cursor, idx]}
-            selector={props.selector}
-          />
-        ))}
-      </g>
-    );
-  } else {
-    return <></>;
-  }
+  let d = bar.dimens;
+  let clazz = "muse-bar";
+  return (
+    <g
+      className={clazz}
+      transform={
+        "translate(" + (d.x - d.marginLeft) + "," + (d.y - d.marginTop) + ")"
+      }
+      width={d.width + d.marginLeft + d.marginRight}
+      height={d.height + d.marginTop + d.marginBottom}
+    >
+      {border(d, clazz)}
+      {barLine(d, clazz)}
+      {baseLine(bar, clazz)}
+      {bar.notes.map((it, idx) => (
+        <MuseNote
+          key={idx}
+          note={it}
+        />
+      ))}
+    </g>
+  );
 }
 
 export default MuseBar;

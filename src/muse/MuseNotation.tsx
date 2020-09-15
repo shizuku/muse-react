@@ -1,21 +1,24 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import MuseConfig from "./MuseConfig";
 import Dimens from "./Dimens";
 import MusePage, { Page } from "./MusePage";
 import { border } from "./Border";
-import Selector from "./Selector";
 import Codec from "./Codec";
+import { INotation, IPage } from "./repo/schema";
+import { observable } from "mobx";
+import { useMuseRepo } from "./repo/muse-repo";
+import { useObserver } from "mobx-react";
 
 export class Notation implements Codec {
-  config: MuseConfig;
-  pages: Page[] = [];
-  title: string = "";
-  subtitle: string = "";
-  author: string[] = [];
-  speed: string = "";
-  rhythmic: string = "";
-  C: string = "";
-  dimens: Dimens = new Dimens();
+  readonly config: MuseConfig;
+  @observable pages: Page[] = [];
+  @observable title: string = "";
+  @observable subtitle: string = "";
+  @observable author: string[] = [];
+  @observable speed: string = "";
+  @observable rhythmic: string = "";
+  @observable C: string = "";
+  @observable dimens: Dimens = new Dimens();
   constructor(json: string, config: MuseConfig) {
     this.config = config;
     let o: any = JSON.parse(json);
@@ -49,11 +52,24 @@ export class Notation implements Codec {
       this.C = "1=" + o.C;
     }
   }
-  code() {
-    let o: any = {};
-    o.pages = [];
-    this.pages.forEach((it) => o.pages.push(it.code()));
-    return o;
+  code(): INotation {
+    let pages: IPage[] = this.pages.map((it) => it.code());
+    let author = this.author.reduce((p, c, idx) => {
+      if (idx === this.author.length - 1) {
+        return p + c;
+      } else {
+        return p + c + "|";
+      }
+    });
+    return {
+      title: this.title,
+      subtitle: this.subtitle,
+      author: author,
+      rhythmic: this.rhythmic,
+      speed: this.speed,
+      C: this.C,
+      pages,
+    };
   }
 }
 
@@ -161,42 +177,34 @@ function notationInfo(notation: Notation, clazz: string) {
   );
 }
 
-function MuseNotation(props: {  selector: Selector }) {
-  let [notation, setNotation] = useState<Notation | null>(null);
-  useEffect(() => {
-    function handleState(state: { notation: Notation }) {
-      setNotation(state.notation);
-    }
-    props.selector.fetchNotation(handleState);
-    return () => props.selector.unFetchNotation();
+const MuseNotation: React.FC = () => {
+  const repo = useMuseRepo();
+  let notation = useObserver(() => {
+    return repo.notation;
   });
-  if (notation) {
-    let margin = 10;
-    let d = notation.dimens;
-    let clazz = "muse-notation";
-    return (
-      <svg
-        className="muse"
-        width={notation.dimens.width + margin * 2}
-        height={notation.dimens.height + margin * 2}
+  let margin = 10;
+  let d = notation.dimens;
+  let clazz = "muse-notation";
+  return (
+    <svg
+      className="muse"
+      width={notation.dimens.width + margin * 2}
+      height={notation.dimens.height + margin * 2}
+    >
+      <g
+        className={clazz}
+        transform={"translate(" + margin + "," + margin + ")"}
+        width={notation.dimens.width}
+        height={notation.dimens.height}
       >
-        <g
-          className={clazz}
-          transform={"translate(" + margin + "," + margin + ")"}
-          width={notation.dimens.width}
-          height={notation.dimens.height}
-        >
-          {border(d, clazz)}
-          {notationInfo(notation, clazz)}
-          {notation.pages.map((it, idx) => (
-            <MusePage key={idx} cursor={[idx]} selector={props.selector} />
-          ))}
-        </g>
-      </svg>
-    );
-  } else {
-    return <></>;
-  }
-}
+        {border(d, clazz)}
+        {notationInfo(notation, clazz)}
+        {notation.pages.map((it, idx) => (
+          <MusePage key={idx} page={it} />
+        ))}
+      </g>
+    </svg>
+  );
+};
 
 export default MuseNotation;

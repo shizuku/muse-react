@@ -1,16 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import MuseConfig from "./MuseConfig";
 import Dimens from "./Dimens";
 import MuseLine, { Line } from "./MuseLine";
 import { border, outerBorder } from "./Border";
-import Selector from "./Selector";
 import Codec from "./Codec";
+import { ILine, IPage } from "./repo/schema";
+import { observable } from "mobx";
+import { useObserver } from "mobx-react";
 
 export class Page implements Codec {
-  config: MuseConfig;
-  lines: Line[] = [];
-  dimens: Dimens = new Dimens();
-  index: number = 0;
+  readonly config: MuseConfig;
+  @observable lines: Line[] = [];
+  @observable dimens: Dimens = new Dimens();
+  @observable index: number = 0;
   constructor(o: any, config: MuseConfig) {
     this.config = config;
     this.decode(o);
@@ -25,11 +27,9 @@ export class Page implements Codec {
       this.dimens = o.dimens;
     }
   }
-  code() {
-    let o: any = {};
-    o.lines = [];
-    this.lines.forEach((it) => o.lines.push(it.code()));
-    return o;
+  code(): IPage {
+    let lines: ILine[] = this.lines.map((it) => it.code());
+    return { lines };
   }
 }
 
@@ -56,42 +56,33 @@ function pageIndex(idx: number, d: Dimens, clazz: string, config: MuseConfig) {
   );
 }
 
-function MusePage(props: {cursor: number[]; selector: Selector }) {
-  let [page, setPage] = useState<Page | null>(null);
-  useEffect(() => {
-    function handleState(state: { page: Page }) {
-      setPage(state.page);
-    }
-    props.selector.fetchPage(props.cursor, handleState);
-    return () => props.selector.unFetchPage(props.cursor);
+function MusePage(props: { page: Page }) {
+  let page = useObserver(() => {
+    return props.page;
   });
-  if (page) {
-    let d = page.dimens;
-    let clazz = "muse-page";
-    return (
-      <g
-        className={clazz}
-        transform={
-          "translate(" + (d.x - d.marginLeft) + "," + (d.y - d.marginTop) + ")"
-        }
-        width={d.width + d.marginLeft + d.marginRight}
-        height={d.height + d.marginTop + d.marginBottom}
-      >
-        {border(d, clazz)}
-        {outerBorder(d, clazz, true)}
-        {pageIndex(page.index, d, clazz, page.config)}
-        {page.lines.map((it, idx) => (
-          <MuseLine
-            key={idx}
-            cursor={[...props.cursor, idx]}
-            selector={props.selector}
-          />
-        ))}
-      </g>
-    );
-  } else {
-    return <></>;
-  }
+
+  let d = page.dimens;
+  let clazz = "muse-page";
+  return (
+    <g
+      className={clazz}
+      transform={
+        "translate(" + (d.x - d.marginLeft) + "," + (d.y - d.marginTop) + ")"
+      }
+      width={d.width + d.marginLeft + d.marginRight}
+      height={d.height + d.marginTop + d.marginBottom}
+    >
+      {border(d, clazz)}
+      {outerBorder(d, clazz, true)}
+      {pageIndex(page.index, d, clazz, page.config)}
+      {page.lines.map((it, idx) => (
+        <MuseLine
+          key={idx}
+          line={it}
+        />
+      ))}
+    </g>
+  );
 }
 
 export default MusePage;

@@ -1,15 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Dimens from "./Dimens";
 import MuseConfig from "./MuseConfig";
 import MuseTrack, { Track } from "./MuseTrack";
 import { border } from "./Border";
-import Selector from "./Selector";
 import Codec from "./Codec";
+import { ILine, ITrack } from "./repo/schema";
+import { observable } from "mobx";
+import { useObserver } from "mobx-react";
 
 export class Line implements Codec {
-  config: MuseConfig;
-  tracks: Track[] = [];
-  dimens: Dimens = new Dimens();
+  readonly config: MuseConfig;
+  @observable tracks: Track[] = [];
+  @observable dimens: Dimens = new Dimens();
   constructor(o: any, config: MuseConfig) {
     this.config = config;
     this.decode(o);
@@ -24,11 +26,9 @@ export class Line implements Codec {
       this.dimens = o.dimens;
     }
   }
-  code() {
-    let o: any = {};
-    o.tracks = [];
-    this.tracks.forEach((it) => o.tracks.push(it.code()));
-    return o;
+  code(): ILine {
+    let tracks: ITrack[] = this.tracks.map((it) => it.code());
+    return { tracks };
   }
 }
 
@@ -40,41 +40,29 @@ function lineHead(d: Dimens, clazz: string) {
   );
 }
 
-function MuseLine(props: { cursor: number[]; selector: Selector }) {
-  let [line, setLine] = useState<Line | null>(null);
-  useEffect(() => {
-    function handleState(state: { line: Line }) {
-      setLine(state.line);
-    }
-    props.selector.fetchLine(props.cursor, handleState);
-    return () => props.selector.unFetchLine(props.cursor);
+function MuseLine(props: { line: Line }) {
+  let line = useObserver(() => {
+    return props.line;
   });
-  if (line) {
-    let d = line.dimens;
-    let clazz = "muse-line";
-    return (
-      <g
-        className={clazz}
-        transform={
-          "translate(" + (d.x - d.marginLeft) + "," + (d.y - d.marginTop) + ")"
-        }
-        width={d.width + d.marginLeft + d.marginRight}
-        height={d.height + d.marginTop + d.marginBottom}
-      >
-        {border(d, clazz)}
-        {lineHead(d, clazz)}
-        {line.tracks.map((it, idx) => (
-          <MuseTrack
-            key={idx}
-            cursor={[...props.cursor, idx]}
-            selector={props.selector}
-          />
-        ))}
-      </g>
-    );
-  } else {
-    return <></>;
-  }
+
+  let d = line.dimens;
+  let clazz = "muse-line";
+  return (
+    <g
+      className={clazz}
+      transform={
+        "translate(" + (d.x - d.marginLeft) + "," + (d.y - d.marginTop) + ")"
+      }
+      width={d.width + d.marginLeft + d.marginRight}
+      height={d.height + d.marginTop + d.marginBottom}
+    >
+      {border(d, clazz)}
+      {lineHead(d, clazz)}
+      {line.tracks.map((it, idx) => (
+        <MuseTrack key={idx} track={it} />
+      ))}
+    </g>
+  );
 }
 
 export default MuseLine;

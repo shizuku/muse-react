@@ -1,7 +1,8 @@
 import React from "react";
 import MuseConfig from "./MuseConfig";
 import MuseNotation, { Notation } from "./MuseNotation";
-import Selector from "./Selector";
+import { MuseRepo } from "./repo/muse-repo";
+import { Provider } from "mobx-react";
 
 function init(data: string, config: MuseConfig): Notation {
   let hm = config.pageMarginHorizontal;
@@ -118,7 +119,12 @@ function Muse(props: { data: string; config?: MuseConfig }) {
     props.data,
     props.config ? props.config : new MuseConfig()
   );
-  return <MuseNotation selector={new Selector(notation)} />;
+  let repo = new MuseRepo(notation);
+  return (
+    <Provider museRepo={repo}>
+      <MuseNotation />
+    </Provider>
+  );
 }
 
 export default Muse;

@@ -1,14 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Dimens from "./Dimens";
 import { outerBorder } from "./Border";
 import MuseConfig from "./MuseConfig";
-import Selector from "./Selector";
 import Codec from "./Codec";
 import Fraction from "./Fraction";
+import { INote } from "./repo/schema";
+import { observable } from "mobx";
+import { useObserver } from "mobx-react";
 
 export class Note implements Codec {
-  config: MuseConfig;
-  noteGroup: {
+  readonly config: MuseConfig;
+  @observable noteGroup: {
     x: string;
     n: string;
     t: number;
@@ -17,15 +19,68 @@ export class Note implements Codec {
   p: number = 0;
   d: number = 0;
   dx: number = 0;
-  time: Fraction | null = null;
+  @observable time: Fraction | null = null;
   notesY: number[] = [];
   pointsY: number[] = [];
   tailPointsX: number[] = [];
-  dimens: Dimens = new Dimens();
-  isSelect: boolean = false;
+  @observable dimens: Dimens = new Dimens();
+  @observable isSelect: boolean = false;
   constructor(o: any, config: MuseConfig) {
     this.config = config;
     this.decode(o);
+  }
+  settle() {
+    let width =
+      this.dx + this.config.noteWidth + this.p * this.config.tailPointGap;
+    let ny = 0;
+    let mb = 0;
+    mb += this.l * this.config.pointGap;
+    let py = 0;
+    this.noteGroup.forEach((it, idx) => {
+      if (it.t < 0) {
+        if (idx === 0) {
+          let i = -it.t;
+          for (; i > 0; --i) {
+            let x = this.config.pointGap;
+            mb += x / 2;
+            this.pointsY.push(-mb);
+            mb += x / 2;
+          }
+        }
+        if (idx !== 0) {
+          let i = -it.t;
+          for (; i > 0; --i) {
+            let x = this.config.pointGap;
+            py += x / 2;
+            this.pointsY.push(py);
+            py += x / 2;
+            ny += x;
+          }
+        }
+      }
+      this.notesY.push(ny);
+      let h = this.config.noteHeight;
+      ny += h;
+      py += h;
+      if (it.t > 0) {
+        let i = it.t;
+        for (; i > 0; --i) {
+          let x = this.config.pointGap;
+          py += x / 2;
+          this.pointsY.push(py);
+          py += x / 2;
+          ny += x;
+        }
+      }
+    });
+    for (let i = 0; i < this.p; ++i) {
+      this.tailPointsX.push(
+        this.dx + this.config.noteWidth + (i + 1 / 2) * this.config.tailPointGap
+      );
+    }
+    this.dimens.width = width;
+    this.dimens.height = ny;
+    this.dimens.marginBottom = mb;
   }
   decode(o: any): void {
     if (o.n !== undefined) {
@@ -84,63 +139,9 @@ export class Note implements Codec {
       this.dimens = o.dimens;
     }
   }
-  code(): any {
-    let o: any = {};
-    o.n = "@" + this.time?.toString();
-    return o;
-  }
-  settle() {
-    let width =
-      this.dx + this.config.noteWidth + this.p * this.config.tailPointGap;
-    let ny = 0;
-    let mb = 0;
-    mb += this.l * this.config.pointGap;
-    let py = 0;
-    this.noteGroup.forEach((it, idx) => {
-      if (it.t < 0) {
-        if (idx === 0) {
-          let i = -it.t;
-          for (; i > 0; --i) {
-            let x = this.config.pointGap;
-            mb += x / 2;
-            this.pointsY.push(-mb);
-            mb += x / 2;
-          }
-        }
-        if (idx !== 0) {
-          let i = -it.t;
-          for (; i > 0; --i) {
-            let x = this.config.pointGap;
-            py += x / 2;
-            this.pointsY.push(py);
-            py += x / 2;
-            ny += x;
-          }
-        }
-      }
-      this.notesY.push(ny);
-      let h = this.config.noteHeight;
-      ny += h;
-      py += h;
-      if (it.t > 0) {
-        let i = it.t;
-        for (; i > 0; --i) {
-          let x = this.config.pointGap;
-          py += x / 2;
-          this.pointsY.push(py);
-          py += x / 2;
-          ny += x;
-        }
-      }
-    });
-    for (let i = 0; i < this.p; ++i) {
-      this.tailPointsX.push(
-        this.dx + this.config.noteWidth + (i + 1 / 2) * this.config.tailPointGap
-      );
-    }
-    this.dimens.width = width;
-    this.dimens.height = ny;
-    this.dimens.marginBottom = mb;
+  code(): INote {
+    let n = "@" + this.time?.toString();
+    return { n };
   }
 }
 
@@ -242,37 +243,28 @@ function tailPoint(note: Note, clazz: string) {
   );
 }
 
-function MuseNote(props: { cursor: number[]; selector: Selector }) {
-  let [note, setNote] = useState<Note | null>(null);
-  useEffect(() => {
-    function handleState(state: { note: Note }) {
-      setNote(state.note);
-    }
-    props.selector.fetchNote(props.cursor, handleState);
-    return () => props.selector.unFetchNote(props.cursor);
+function MuseNote(props: { note: Note }) {
+  let note = useObserver(() => {
+    return props.note;
   });
-  if (note) {
-    let d = note.dimens;
-    let clazz = "muse-note";
-    return (
-      <g
-        className={clazz}
-        transform={
-          "translate(" + (d.x - d.marginLeft) + "," + (d.y - d.marginTop) + ")"
-        }
-        width={d.width + d.marginLeft + d.marginRight}
-        height={d.height + d.marginTop + d.marginBottom}
-        onClick={() => {}}
-      >
-        {outerBorder(d, clazz, note.isSelect, "blue")}
-        {noteGroup(note, clazz)}
-        {pointGroup(note, clazz)}
-        {tailPoint(note, clazz)}
-      </g>
-    );
-  } else {
-    return <></>;
-  }
+  let d = note.dimens;
+  let clazz = "muse-note";
+  return (
+    <g
+      className={clazz}
+      transform={
+        "translate(" + (d.x - d.marginLeft) + "," + (d.y - d.marginTop) + ")"
+      }
+      width={d.width + d.marginLeft + d.marginRight}
+      height={d.height + d.marginTop + d.marginBottom}
+      onClick={() => {}}
+    >
+      {outerBorder(d, clazz, note.isSelect, "blue")}
+      {noteGroup(note, clazz)}
+      {pointGroup(note, clazz)}
+      {tailPoint(note, clazz)}
+    </g>
+  );
 }
 
 export default MuseNote;
