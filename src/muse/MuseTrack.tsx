@@ -2,7 +2,7 @@ import React from "react";
 import Dimens from "./Dimens";
 import MuseConfig from "./MuseConfig";
 import MuseBar, { Bar } from "./MuseBar";
-import { border } from "./Border";
+import { Border } from "./Border";
 import Codec from "./Codec";
 import { IBar, ITrack } from "./repo/schema";
 import { observable } from "mobx";
@@ -32,12 +32,10 @@ export class Track implements Codec {
   }
 }
 
-function MuseTrack(props: { track: Track }) {
-  let track = useObserver(() => {
-    return props.track;
+const MuseTrack: React.FC<{ track: Track }> = ({ track }: { track: Track }) => {
+  let [bars, d] = useObserver(() => {
+    return [track.bars, track.dimens];
   });
-
-  let d = track.dimens;
   let clazz = "muse-track";
   return (
     <g
@@ -48,12 +46,12 @@ function MuseTrack(props: { track: Track }) {
       width={d.width + d.marginLeft + d.marginRight}
       height={d.height + d.marginTop + d.marginBottom}
     >
-      {border(d, clazz)}
-      {track.bars.map((it, idx) => (
+      <Border dimens={d} clazz={clazz} />
+      {bars.map((it, idx) => (
         <MuseBar key={idx} bar={it} />
       ))}
     </g>
   );
-}
+};
 
 export default MuseTrack;

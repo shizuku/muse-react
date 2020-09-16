@@ -1,12 +1,12 @@
 import React from "react";
 import Dimens from "./Dimens";
-import { outerBorder } from "./Border";
+import { OuterBorder } from "./Border";
 import MuseConfig from "./MuseConfig";
 import Codec from "./Codec";
 import Fraction from "./Fraction";
 import { INote } from "./repo/schema";
-import { observable } from "mobx";
-import { observer, useObserver } from "mobx-react";
+import { computed, observable } from "mobx";
+import { observer } from "mobx-react";
 
 export class Note implements Codec {
   readonly config: MuseConfig;
@@ -19,7 +19,15 @@ export class Note implements Codec {
   p: number = 0;
   d: number = 0;
   dx: number = 0;
-  @observable time: Fraction | null = null;
+  @computed get time(): Fraction {
+    let r = new Fraction("");
+    r.u = 1;
+    r.d *= Math.pow(2, this.l);
+    r.d *= this.d;
+    r.d *= Math.pow(2, this.p); //3/2 7/4 15/8
+    r.u *= Math.pow(2, this.p + 1) - 1;
+    return r.simplify();
+  }
   notesY: number[] = [];
   pointsY: number[] = [];
   tailPointsX: number[] = [];
@@ -140,7 +148,25 @@ export class Note implements Codec {
     }
   }
   code(): INote {
-    let n = "@" + this.time?.toString();
+    let ns: string = "";
+    this.noteGroup.forEach((it, idx) => {
+      let t = "";
+      if (it.t > 0) {
+        for (let i = 0; i < it.t; ++i) {
+          t += "+";
+        }
+      } else {
+        for (let i = 0; i < -it.t; ++i) {
+          t += "-";
+        }
+      }
+      if (idx + 1 >= this.noteGroup.length) {
+        ns += `${it.x}${it.n}${t}`;
+      } else {
+        ns += `${it.x}${it.n}${t}|`;
+      }
+    });
+    let n = `${ns}@${this.l}|${this.p}`;
     return { n };
   }
 }
@@ -259,10 +285,14 @@ class MuseNote extends React.Component<{ note: Note }, {}> {
         height={d.height + d.marginTop + d.marginBottom}
         onClick={() => {
           this.props.note.isSelect = !this.props.note.isSelect;
-          console.log("xxx");
         }}
       >
-        {outerBorder(d, clazz, note.isSelect, "blue")}
+        <OuterBorder
+          dimens={d}
+          clazz={clazz}
+          show={note.isSelect}
+          color={"blue"}
+        />
         {noteGroup(note, clazz)}
         {pointGroup(note, clazz)}
         {tailPoint(note, clazz)}
@@ -270,32 +300,5 @@ class MuseNote extends React.Component<{ note: Note }, {}> {
     );
   }
 }
-
-// const MuseNote: React.FC<{ note: Note }> = ({ note }) => {
-//   let n = useObserver(() => {
-//     return note;
-//   });
-//   let d = n.dimens;
-//   let clazz = "muse-note";
-//   return (
-//     <g
-//       className={clazz}
-//       transform={
-//         "translate(" + (d.x - d.marginLeft) + "," + (d.y - d.marginTop) + ")"
-//       }
-//       width={d.width + d.marginLeft + d.marginRight}
-//       height={d.height + d.marginTop + d.marginBottom}
-//       onClick={() => {
-//         note.isSelect = !note.isSelect;
-//         console.log("xxx");
-//       }}
-//     >
-//       {outerBorder(d, clazz, n.isSelect, "blue")}
-//       {noteGroup(n, clazz)}
-//       {pointGroup(n, clazz)}
-//       {tailPoint(n, clazz)}
-//     </g>
-//   );
-// };
 
 export default MuseNote;

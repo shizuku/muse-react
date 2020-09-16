@@ -24,7 +24,7 @@ function init(data: string, config: MuseConfig): Notation {
       let x = 0;
       x += config.infoTitleFontSize + config.infoGap;
       x += config.infoSubtitleFontSize + config.infoGap;
-      x += notation.author.length * (config.infoFontSize + config.infoGap);
+      x += notation.info.author.length * (config.infoFontSize + config.infoGap);
       page.dimens.marginTop += x;
       page.dimens.height -= x;
       page.dimens.y += x;
@@ -123,6 +123,9 @@ function Muse(props: { data: string; config?: MuseConfig }) {
   return (
     <Provider museRepo={repo}>
       <MuseNotation />
+      <button onClick={()=>{
+        console.log(repo.notation.code())
+      }}>log</button>
     </Provider>
   );
 }

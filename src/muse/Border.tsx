@@ -1,20 +1,29 @@
 import React from "react";
 import Dimens from "./Dimens";
 
-export function border(
-  d: Dimens,
-  clazz: string,
-  show: boolean = false,
-  color: string = "blue"
-) {
+interface BorderProps {
+  dimens: Dimens;
+  clazz: string;
+  show?: boolean;
+  color?: string;
+}
+
+export const Border: React.FC<BorderProps> = ({
+  dimens,
+  clazz,
+  show = false,
+  color = "blue",
+}: BorderProps) => {
   let ifShow = false;
   if (show || ifShow) {
     return (
       <rect
         className={clazz + "__border"}
-        transform={"translate(" + d.marginLeft + "," + d.marginTop + ")"}
-        width={d.width}
-        height={d.height}
+        transform={
+          "translate(" + dimens.marginLeft + "," + dimens.marginTop + ")"
+        }
+        width={dimens.width}
+        height={dimens.height}
         stroke={color}
         strokeWidth="0.4"
         fill="none"
@@ -23,21 +32,28 @@ export function border(
   } else {
     return <></>;
   }
+};
+
+interface OuterBorderProps {
+  dimens: Dimens;
+  clazz: string;
+  show?: boolean;
+  color?: string;
 }
 
-export function outerBorder(
-  d: Dimens,
-  clazz: string,
-  show: boolean = false,
-  color: string = "gray"
-) {
+export const OuterBorder: React.FC<OuterBorderProps> = ({
+  dimens,
+  clazz,
+  show = false,
+  color = "gray",
+}: OuterBorderProps) => {
   if (show) {
     return (
       <rect
         className={clazz + "__outer-border"}
         transform={"translate(0,0)"}
-        width={d.width + d.marginLeft + d.marginRight}
-        height={d.height + d.marginTop + d.marginBottom}
+        width={dimens.width + dimens.marginLeft + dimens.marginRight}
+        height={dimens.height + dimens.marginTop + dimens.marginBottom}
         stroke={color}
         strokeWidth="0.4"
         fill="none"
@@ -46,4 +62,4 @@ export function outerBorder(
   } else {
     return <></>;
   }
-}
+};

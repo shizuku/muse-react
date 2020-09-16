@@ -2,22 +2,26 @@ import React from "react";
 import MuseConfig from "./MuseConfig";
 import Dimens from "./Dimens";
 import MusePage, { Page } from "./MusePage";
-import { border } from "./Border";
+import { Border } from "./Border";
 import Codec from "./Codec";
 import { INotation, IPage } from "./repo/schema";
 import { observable } from "mobx";
 import { useMuseRepo } from "./repo/muse-repo";
 import { useObserver } from "mobx-react";
 
-export class Notation implements Codec {
-  readonly config: MuseConfig;
-  @observable pages: Page[] = [];
+export class NotationInfo {
   @observable title: string = "";
   @observable subtitle: string = "";
   @observable author: string[] = [];
   @observable speed: string = "";
   @observable rhythmic: string = "";
   @observable C: string = "";
+}
+
+export class Notation implements Codec {
+  readonly config: MuseConfig;
+  @observable pages: Page[] = [];
+  @observable info: NotationInfo = new NotationInfo();
   @observable dimens: Dimens = new Dimens();
   constructor(json: string, config: MuseConfig) {
     this.config = config;
@@ -34,65 +38,67 @@ export class Notation implements Codec {
       this.dimens = o.dimens;
     }
     if (o.title !== undefined) {
-      this.title = o.title;
+      this.info.title = o.title;
     }
     if (o.subtitle !== undefined) {
-      this.subtitle = o.subtitle;
+      this.info.subtitle = o.subtitle;
     }
     if (o.author !== undefined) {
-      this.author = o.author.toString().split("|");
+      this.info.author = o.author.toString().split("|");
     }
     if (o.speed !== undefined) {
-      this.speed = o.speed;
+      this.info.speed = o.speed;
     }
     if (o.rhythmic) {
-      this.rhythmic = o.rhythmic;
+      this.info.rhythmic = o.rhythmic;
     }
     if (o.C) {
-      this.C = "1=" + o.C;
+      this.info.C = "1=" + o.C;
     }
   }
   code(): INotation {
     let pages: IPage[] = this.pages.map((it) => it.code());
-    let author = this.author.reduce((p, c, idx) => {
-      if (idx === this.author.length - 1) {
+    let author = this.info.author.reduce((p, c, idx) => {
+      if (idx === this.info.author.length - 1) {
         return p + c;
       } else {
         return p + c + "|";
       }
     });
     return {
-      title: this.title,
-      subtitle: this.subtitle,
+      title: this.info.title,
+      subtitle: this.info.subtitle,
       author: author,
-      rhythmic: this.rhythmic,
-      speed: this.speed,
-      C: this.C,
+      rhythmic: this.info.rhythmic,
+      speed: this.info.speed,
+      C: this.info.C,
       pages,
     };
   }
 }
 
-function notationInfo(notation: Notation, clazz: string) {
-  let config = notation.config;
+const MuseNotationInfo: React.FC<{
+  notation: Notation;
+  clazz: string;
+}> = (props) => {
+  let config = props.notation.config;
+  let info = props.notation.info;
+  let clazz = props.clazz;
+  let dimens = props.notation.dimens;
   let y = 0;
   y += config.pageMarginVertical;
   let title = (
     <text
       className={clazz + "__info-title"}
       fontFamily={config.textFontFamily}
-      width={notation.dimens.width}
+      width={dimens.width}
       textAnchor={"middle"}
       fontSize={config.infoTitleFontSize}
       transform={
-        "translate(" +
-        (notation.dimens.marginLeft + notation.dimens.width / 2) +
-        "," +
-        y +
-        ")"
+        "translate(" + (dimens.marginLeft + dimens.width / 2) + "," + y + ")"
       }
     >
-      {notation.title}
+      {info.title}
     </text>
   );
   y += config.infoTitleFontSize + config.infoGap;
@@ -100,25 +106,21 @@ function notationInfo(notation: Notation, clazz: string) {
     <text
       className={clazz + "__info-subtitle"}
       fontFamily={config.textFontFamily}
-      width={notation.dimens.width}
+      width={dimens.width}
       textAnchor={"middle"}
       fontSize={config.infoSubtitleFontSize}
       transform={
-        "translate(" +
-        (notation.dimens.marginLeft + notation.dimens.width / 2) +
-        "," +
-        y +
-        ")"
+        "translate(" + (dimens.marginLeft + dimens.width / 2) + "," + y + ")"
       }
     >
-      {notation.subtitle}
+      {info.subtitle}
     </text>
   );
   let y1 = y;
-  let x = notation.author.length;
+  let x = info.author.length;
   let author = (
     <g className={clazz + "__info-author"}>
-      {notation.author.map((it, idx) => {
+      {info.author.map((it, idx) => {
         y1 += config.infoFontSize + config.infoGap;
         if (idx < x - 2) {
           y += config.infoFontSize + config.infoGap;
@@ -127,13 +129,13 @@ function notationInfo(notation: Notation, clazz: string) {
           <text
             key={idx}
             fontFamily={config.textFontFamily}
-            width={notation.dimens.width}
+            width={dimens.width}
             fontSize={config.infoFontSize}
             textAnchor={"end"}
             x={0}
             transform={
               "translate(" +
-              (notation.dimens.width - config.pageMarginHorizontal) +
+              (dimens.width - config.pageMarginHorizontal) +
               "," +
               y1 +
               ")"
@@ -148,34 +150,34 @@ function notationInfo(notation: Notation, clazz: string) {
   let y2 = y + (config.infoGap + config.infoSubtitleFontSize);
   let y3 = y2 + (config.infoGap + config.infoFontSize);
   let rythimic = (
-    <g className={clazz + "__info-rythmic"} width={notation.dimens.width}>
+    <g className={clazz + "__info-rythmic"} width={dimens.width}>
       <text
         fontFamily={config.textFontFamily}
-        width={notation.dimens.width}
+        width={dimens.width}
         fontSize={config.infoFontSize}
         transform={"translate(" + config.pageMarginHorizontal + "," + y2 + ")"}
       >
-        {notation.speed}
+        {info.speed}
       </text>
       <text
         fontFamily={config.textFontFamily}
-        width={notation.dimens.width}
+        width={dimens.width}
         fontSize={config.infoFontSize}
         transform={"translate(" + config.pageMarginHorizontal + "," + y3 + ")"}
       >
-        {notation.C + " " + notation.rhythmic}
+        {info.C + " " + info.rhythmic}
       </text>
     </g>
   );
   return (
-    <g className={clazz + "__info"} width={notation.dimens.width}>
+    <g className={clazz + "__info"} width={dimens.width}>
       {title}
       {subtitle}
       {author}
       {rythimic}
     </g>
   );
-}
+};
 
 const MuseNotation: React.FC = () => {
   const repo = useMuseRepo();
@@ -197,8 +199,8 @@ const MuseNotation: React.FC = () => {
         width={notation.dimens.width}
         height={notation.dimens.height}
       >
-        {border(d, clazz)}
-        {notationInfo(notation, clazz)}
+        <MuseNotationInfo notation={notation} clazz={clazz} />
+        <Border dimens={d} clazz={clazz} />
         {notation.pages.map((it, idx) => (
           <MusePage key={idx} page={it} />
         ))}

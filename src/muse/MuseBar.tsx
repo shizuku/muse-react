@@ -2,7 +2,7 @@ import React from "react";
 import MuseConfig from "./MuseConfig";
 import Dimens from "./Dimens";
 import MuseNote, { Note } from "./MuseNote";
-import { border } from "./Border";
+import { Border } from "./Border";
 import Codec from "./Codec";
 import { IBar, INote } from "./repo/schema";
 import { observable } from "mobx";
@@ -53,7 +53,7 @@ export class Bar implements Codec {
       this.notesX.push(1);
       this.notes.forEach((note, idx) => {
         let x = 0;
-        if (this.notes[idx + 1] === undefined) {
+        if (idx + 1 >= this.notes.length) {
           x += 1;
         } else if (
           this.notes[idx + 1] !== undefined &&
@@ -82,7 +82,13 @@ export class Bar implements Codec {
   }
 }
 
-function barLine(d: Dimens, clazz: string) {
+const BarLine: React.FC<{ d: Dimens; clazz: string }> = ({
+  d,
+  clazz,
+}: {
+  d: Dimens;
+  clazz: string;
+}) => {
   return (
     <line
       className={clazz + "__bar-line"}
@@ -94,9 +100,15 @@ function barLine(d: Dimens, clazz: string) {
       stroke="black"
     />
   );
-}
+};
 
-function baseLine(bar: Bar, clazz: string) {
+const BaseLine: React.FC<{ bar: Bar; clazz: string }> = ({
+  bar,
+  clazz,
+}: {
+  bar: Bar;
+  clazz: string;
+}) => {
   return (
     <g className={clazz + "__base-line"}>
       {bar.baselineGroup.map((it, idx) => (
@@ -112,13 +124,12 @@ function baseLine(bar: Bar, clazz: string) {
       ))}
     </g>
   );
-}
+};
 
-function MuseBar(props: { bar: Bar }) {
-  let bar = useObserver(() => {
-    return props.bar;
+const MuseBar: React.FC<{ bar: Bar }> = ({ bar }: { bar: Bar }) => {
+  let [d, notes] = useObserver(() => {
+    return [bar.dimens, bar.notes];
   });
-  let d = bar.dimens;
   let clazz = "muse-bar";
   return (
     <g
@@ -129,17 +140,14 @@ function MuseBar(props: { bar: Bar }) {
       width={d.width + d.marginLeft + d.marginRight}
       height={d.height + d.marginTop + d.marginBottom}
     >
-      {border(d, clazz)}
-      {barLine(d, clazz)}
-      {baseLine(bar, clazz)}
-      {bar.notes.map((it, idx) => (
-        <MuseNote
-          key={idx}
-          note={it}
-        />
+      <Border dimens={d} clazz={clazz} />
+      <BarLine d={d} clazz={clazz} />
+      {notes.map((it, idx) => (
+        <MuseNote key={idx} note={it} />
       ))}
+      <BaseLine bar={bar} clazz={clazz} />
     </g>
   );
-}
+};
 
 export default MuseBar;

@@ -2,7 +2,7 @@ import React from "react";
 import MuseConfig from "./MuseConfig";
 import Dimens from "./Dimens";
 import MuseLine, { Line } from "./MuseLine";
-import { border, outerBorder } from "./Border";
+import { Border, OuterBorder } from "./Border";
 import Codec from "./Codec";
 import { ILine, IPage } from "./repo/schema";
 import { observable } from "mobx";
@@ -33,15 +33,27 @@ export class Page implements Codec {
   }
 }
 
-function pageIndex(idx: number, d: Dimens, clazz: string, config: MuseConfig) {
+interface PageIndexProps {
+  index: number;
+  dimens: Dimens;
+  clazz: string;
+  config: MuseConfig;
+}
+
+const PageIndex: React.FC<PageIndexProps> = ({
+  index,
+  dimens,
+  clazz,
+  config,
+}: PageIndexProps) => {
   return (
     <g
       className={clazz + "__page-index"}
       transform={
         "translate(" +
-        (d.marginLeft + d.width / 2) +
+        (dimens.marginLeft + dimens.width / 2) +
         "," +
-        (d.marginTop + d.height + d.marginBottom / 2) +
+        (dimens.marginTop + dimens.height + dimens.marginBottom / 2) +
         ")"
       }
     >
@@ -50,18 +62,16 @@ function pageIndex(idx: number, d: Dimens, clazz: string, config: MuseConfig) {
         fontFamily={config.textFontFamily}
         fontSize={config.pageIndexFontSize}
       >
-        {idx.toString()}
+        {index.toString()}
       </text>
     </g>
   );
-}
+};
 
-function MusePage(props: { page: Page }) {
-  let page = useObserver(() => {
-    return props.page;
+const MusePage: React.FC<{ page: Page }> = ({ page }: { page: Page }) => {
+  let [lines, d, index] = useObserver(() => {
+    return [page.lines, page.dimens, page.index];
   });
-
-  let d = page.dimens;
   let clazz = "muse-page";
   return (
     <g
@@ -72,17 +82,14 @@ function MusePage(props: { page: Page }) {
       width={d.width + d.marginLeft + d.marginRight}
       height={d.height + d.marginTop + d.marginBottom}
     >
-      {border(d, clazz)}
-      {outerBorder(d, clazz, true)}
-      {pageIndex(page.index, d, clazz, page.config)}
-      {page.lines.map((it, idx) => (
-        <MuseLine
-          key={idx}
-          line={it}
-        />
+      <Border dimens={d} clazz={clazz} />
+      <OuterBorder dimens={d} clazz={clazz} show={true} />
+      <PageIndex index={index} dimens={d} clazz={clazz} config={page.config} />
+      {lines.map((it, idx) => (
+        <MuseLine key={idx} line={it} />
       ))}
     </g>
   );
-}
+};
 
 export default MusePage;
