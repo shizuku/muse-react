@@ -3,13 +3,15 @@ import MuseConfig from "./MuseConfig";
 import MuseNotation, { Notation } from "./MuseNotation";
 import { MuseRepo } from "./repo/muse-repo";
 import { Provider } from "mobx-react";
+import { INotation } from "./repo/schema";
 
 function init(data: string, config: MuseConfig): Notation {
   let hm = config.pageMarginHorizontal;
   let vm = config.pageMarginVertical;
   let w = config.notationWidth - hm * 2;
   let h = config.notationWidth * config.pageE - vm * 2;
-  let notation = new Notation(data, config);
+  let ino: INotation = JSON.parse(data);
+  let notation = new Notation(ino, config);
   let notationH = 0;
   notation.pages.forEach((page, pageIdx) => {
     page.dimens.x = hm;
@@ -123,9 +125,13 @@ function Muse(props: { data: string; config?: MuseConfig }) {
   return (
     <Provider museRepo={repo}>
       <MuseNotation />
-      <button onClick={()=>{
-        console.log(repo.notation.code())
-      }}>log</button>
+      <button
+        onClick={() => {
+          console.log(repo.notation.code());
+        }}
+      >
+        log
+      </button>
     </Provider>
   );
 }

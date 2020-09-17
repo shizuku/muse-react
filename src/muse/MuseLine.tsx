@@ -12,18 +12,15 @@ export class Line implements Codec {
   readonly config: MuseConfig;
   @observable tracks: Track[] = [];
   @observable dimens: Dimens = new Dimens();
-  constructor(o: any, config: MuseConfig) {
+  constructor(o: ILine, config: MuseConfig) {
     this.config = config;
     this.decode(o);
   }
-  decode(o: any): void {
+  decode(o: ILine): void {
     if (o.tracks !== undefined) {
       o.tracks.forEach((it: any) => {
         this.tracks.push(new Track(it, this.config));
       });
-    }
-    if (o.dimens !== undefined) {
-      this.dimens = o.dimens;
     }
   }
   code(): ILine {

@@ -12,18 +12,15 @@ export class Track implements Codec {
   readonly config: MuseConfig;
   @observable bars: Bar[] = [];
   @observable dimens: Dimens = new Dimens();
-  constructor(o: any, config: MuseConfig) {
+  constructor(o: ITrack, config: MuseConfig) {
     this.config = config;
     this.decode(o);
   }
-  decode(o: any): void {
+  decode(o: ITrack): void {
     if (o.bars !== undefined) {
       o.bars.forEach((it: any) => {
         this.bars.push(new Bar(it, this.config));
       });
-    }
-    if (o.dimens !== undefined) {
-      this.dimens = o.dimens;
     }
   }
   code(): ITrack {

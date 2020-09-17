@@ -7,18 +7,23 @@ import Fraction from "./Fraction";
 import { INote } from "./repo/schema";
 import { computed, observable } from "mobx";
 import { observer } from "mobx-react";
+import Selector from "./Selector";
+import { Bar } from "./MuseBar";
+
+class NoteGroup {
+  @observable x: string = "";
+  @observable n: string = "";
+  @observable t: number = 0;
+}
 
 export class Note implements Codec {
   readonly config: MuseConfig;
-  @observable noteGroup: {
-    x: string;
-    n: string;
-    t: number;
-  }[] = [];
-  l: number = 0;
-  p: number = 0;
-  d: number = 0;
-  dx: number = 0;
+  bar: Bar;
+  @observable noteGroup: NoteGroup[] = [];
+  @observable l: number = 0;
+  @observable p: number = 0;
+  @observable d: number = 0;
+  @observable dx: number = 0;
   @computed get time(): Fraction {
     let r = new Fraction("");
     r.u = 1;
@@ -30,11 +35,67 @@ export class Note implements Codec {
   }
   notesY: number[] = [];
   pointsY: number[] = [];
-  tailPointsX: number[] = [];
+  @observable mb: number = 0;
+  @observable ny: number = 0;
+  @computed get py() {
+    let r: number[] = [];
+    let py = 0;
+    this.ny = 0;
+    this.mb = 0;
+    this.mb += this.l * this.config.pointGap;
+    this.noteGroup.forEach((it, idx) => {
+      if (it.t < 0) {
+        if (idx === 0) {
+          let i = -it.t;
+          for (; i > 0; --i) {
+            let x = this.config.pointGap;
+            this.mb += x / 2;
+            r.push(-this.mb);
+            this.mb += x / 2;
+          }
+        }
+        if (idx !== 0) {
+          let i = -it.t;
+          for (; i > 0; --i) {
+            let x = this.config.pointGap;
+            py += x / 2;
+            r.push(py);
+            py += x / 2;
+            this.ny += x;
+          }
+        }
+      }
+      this.notesY.push(this.ny);
+      let h = this.config.noteHeight;
+      this.ny += h;
+      py += h;
+      if (it.t > 0) {
+        let i = it.t;
+        for (; i > 0; --i) {
+          let x = this.config.pointGap;
+          py += x / 2;
+          r.push(py);
+          py += x / 2;
+          this.ny += x;
+        }
+      }
+    });
+    return r;
+  }
+  @computed get tailPointsX() {
+    let r: number[] = [];
+    for (let i = 0; i < this.p; ++i) {
+      r.push(
+        this.dx + this.config.noteWidth + (i + 1 / 2) * this.config.tailPointGap
+      );
+    }
+    return r;
+  }
   @observable dimens: Dimens = new Dimens();
   @observable isSelect: boolean = false;
-  constructor(o: any, config: MuseConfig) {
-    this.config = config;
+  constructor(o: INote, bar: Bar) {
+    this.config = bar.config;
+    this.bar = bar;
     this.decode(o);
   }
   settle() {
@@ -81,16 +142,16 @@ export class Note implements Codec {
         }
       }
     });
-    for (let i = 0; i < this.p; ++i) {
-      this.tailPointsX.push(
-        this.dx + this.config.noteWidth + (i + 1 / 2) * this.config.tailPointGap
-      );
-    }
+    // for (let i = 0; i < this.p; ++i) {
+    //   this.tailPointsX.push(
+    //     this.dx + this.config.noteWidth + (i + 1 / 2) * this.config.tailPointGap
+    //   );
+    // }
     this.dimens.width = width;
     this.dimens.height = ny;
     this.dimens.marginBottom = mb;
   }
-  decode(o: any): void {
+  decode(o: INote): void {
     if (o.n !== undefined) {
       let n: string = o.n;
       let pos = n.search("@");
@@ -142,9 +203,6 @@ export class Note implements Codec {
         this.p = 0;
         this.d = 1;
       }
-    }
-    if (o.dimens !== undefined) {
-      this.dimens = o.dimens;
     }
   }
   code(): INote {
@@ -271,6 +329,28 @@ function tailPoint(note: Note, clazz: string) {
 
 @observer
 class MuseNote extends React.Component<{ note: Note }, {}> {
+  selection = {
+    setSelect: (s: boolean) => {
+      this.props.note.isSelect = s;
+    },
+    setNum: (n: string) => {
+      this.props.note.noteGroup[0].n = n;
+    },
+    reduceLine: (l: number) => {
+      this.props.note.l += l;
+      if (this.props.note.l < 0) {
+        this.props.note.l = 0;
+      }
+      //this.props.note.bar.baselineGroup = this.props.note.bar.generateBaselineGroup();
+      console.log(this.props.note.l);
+    },
+    reducePoint: (p: number) => {
+      this.props.note.p += p;
+      if (this.props.note.p < 0) {
+        this.props.note.p = 0;
+      }
+    },
+  };
   render() {
     let note = this.props.note;
     let d = note.dimens;
@@ -284,7 +364,7 @@ class MuseNote extends React.Component<{ note: Note }, {}> {
         width={d.width + d.marginLeft + d.marginRight}
         height={d.height + d.marginTop + d.marginBottom}
         onClick={() => {
-          this.props.note.isSelect = !this.props.note.isSelect;
+          Selector.instance.selectNote(this.selection, true);
         }}
       >
         <OuterBorder

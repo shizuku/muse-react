@@ -13,18 +13,15 @@ export class Page implements Codec {
   @observable lines: Line[] = [];
   @observable dimens: Dimens = new Dimens();
   @observable index: number = 0;
-  constructor(o: any, config: MuseConfig) {
+  constructor(o: IPage, config: MuseConfig) {
     this.config = config;
     this.decode(o);
   }
-  decode(o: any): void {
+  decode(o: IPage): void {
     if (o.lines !== undefined) {
       o.lines.forEach((it: any) => {
         this.lines.push(new Line(it, this.config));
       });
-    }
-    if (o.dimens !== undefined) {
-      this.dimens = o.dimens;
     }
   }
   code(): IPage {

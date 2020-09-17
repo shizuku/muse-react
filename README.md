@@ -8,6 +8,14 @@
 
 [请前往 Github Pages](https://shizuku.github.io/muse-react/)
 
+## 快捷键
+
+| 键   | 功能 |
+| ---- | ---- |
+| 数字 | 音   |
+| `q`  | x2   |
+| `a`  | /2   |
+
 ## 鸣谢
 
 - 团团子

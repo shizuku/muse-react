@@ -23,19 +23,15 @@ export class Notation implements Codec {
   @observable pages: Page[] = [];
   @observable info: NotationInfo = new NotationInfo();
   @observable dimens: Dimens = new Dimens();
-  constructor(json: string, config: MuseConfig) {
+  constructor(o: INotation, config: MuseConfig) {
     this.config = config;
-    let o: any = JSON.parse(json);
     this.decode(o);
   }
-  decode(o: any): void {
+  decode(o: INotation): void {
     if (o.pages !== undefined) {
       o.pages.forEach((it: any) => {
         this.pages.push(new Page(it, this.config));
       });
-    }
-    if (o.dimens !== undefined) {
-      this.dimens = o.dimens;
     }
     if (o.title !== undefined) {
       this.info.title = o.title;
@@ -53,16 +49,17 @@ export class Notation implements Codec {
       this.info.rhythmic = o.rhythmic;
     }
     if (o.C) {
-      this.info.C = "1=" + o.C;
+      this.info.C = o.C;
     }
   }
   code(): INotation {
     let pages: IPage[] = this.pages.map((it) => it.code());
-    let author = this.info.author.reduce((p, c, idx) => {
+    let author: string = "";
+    this.info.author.forEach((it, idx) => {
       if (idx === this.info.author.length - 1) {
-        return p + c;
+        author += it;
       } else {
-        return p + c + "|";
+        author += it + "|";
       }
     });
     return {
@@ -165,7 +162,7 @@ const MuseNotationInfo: React.FC<{
         fontSize={config.infoFontSize}
         transform={"translate(" + config.pageMarginHorizontal + "," + y3 + ")"}
       >
-        {info.C + " " + info.rhythmic}
+        {`1=${info.C} ${info.rhythmic}`}
       </text>
     </g>
   );

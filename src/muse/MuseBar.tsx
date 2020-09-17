@@ -5,8 +5,14 @@ import MuseNote, { Note } from "./MuseNote";
 import { Border } from "./Border";
 import Codec from "./Codec";
 import { IBar, INote } from "./repo/schema";
-import { observable } from "mobx";
-import { useObserver } from "mobx-react";
+import { comparer, computed, observable } from "mobx";
+import { observer } from "mobx-react";
+
+interface Baseline {
+  y: number;
+  s: number;
+  e: number;
+}
 
 export class Bar implements Codec {
   readonly config: MuseConfig;
@@ -14,16 +20,15 @@ export class Bar implements Codec {
   @observable dimens: Dimens = new Dimens();
   unitNum: number = 0;
   notesX: number[] = [];
-  baselineGroup: {
-    y: number;
-    s: number;
-    e: number;
-  }[] = [];
-  constructor(o: any, config: MuseConfig) {
-    this.config = config;
-    this.decode(o);
+  @computed({ equals: comparer.structural }) get baselineGroup(): Baseline[] {
+    return this.generateBaselineGroup();
   }
-  generateBaseline() {
+  generateBaselineGroup() {
+    let r: {
+      y: number;
+      s: number;
+      e: number;
+    }[] = [];
     for (let i = 0; ; ++i) {
       let x = 0;
       let s = 0;
@@ -33,23 +38,28 @@ export class Bar implements Codec {
           e = idx;
           x++;
         } else {
-          if (s <= e) this.baselineGroup.push({ y: i, s: s, e: e });
+          if (s <= e) r.push({ y: i, s: s, e: e });
           s = idx + 1;
           e = idx;
         }
       });
-      if (s <= e) this.baselineGroup.push({ y: i, s: s, e: e });
+      if (s <= e) r.push({ y: i, s: s, e: e });
       if (x === 0) {
         break;
       }
     }
+    console.log("xxxxxx");
+    return r;
   }
-  decode(o: any): void {
+  constructor(o: IBar, config: MuseConfig) {
+    this.config = config;
+    this.decode(o);
+  }
+  decode(o: IBar): void {
     if (o.notes !== undefined) {
       o.notes.forEach((it: any) => {
-        this.notes.push(new Note(it, this.config));
+        this.notes.push(new Note(it, this));
       });
-      this.generateBaseline();
       this.notesX.push(1);
       this.notes.forEach((note, idx) => {
         let x = 0;
@@ -71,9 +81,6 @@ export class Bar implements Codec {
         this.notesX.push(x);
         this.unitNum += x;
       });
-    }
-    if (o.dimens !== undefined) {
-      this.dimens = o.dimens;
     }
   }
   code(): IBar {
@@ -126,28 +133,30 @@ const BaseLine: React.FC<{ bar: Bar; clazz: string }> = ({
   );
 };
 
-const MuseBar: React.FC<{ bar: Bar }> = ({ bar }: { bar: Bar }) => {
-  let [d, notes] = useObserver(() => {
-    return [bar.dimens, bar.notes];
-  });
-  let clazz = "muse-bar";
-  return (
-    <g
-      className={clazz}
-      transform={
-        "translate(" + (d.x - d.marginLeft) + "," + (d.y - d.marginTop) + ")"
-      }
-      width={d.width + d.marginLeft + d.marginRight}
-      height={d.height + d.marginTop + d.marginBottom}
-    >
-      <Border dimens={d} clazz={clazz} />
-      <BarLine d={d} clazz={clazz} />
-      {notes.map((it, idx) => (
-        <MuseNote key={idx} note={it} />
-      ))}
-      <BaseLine bar={bar} clazz={clazz} />
-    </g>
-  );
-};
+@observer
+class MuseBar extends React.Component<{ bar: Bar }, {}> {
+  render() {
+    let d = this.props.bar.dimens;
+    let notes = this.props.bar.notes;
+    let clazz = "muse-bar";
+    return (
+      <g
+        className={clazz}
+        transform={
+          "translate(" + (d.x - d.marginLeft) + "," + (d.y - d.marginTop) + ")"
+        }
+        width={d.width + d.marginLeft + d.marginRight}
+        height={d.height + d.marginTop + d.marginBottom}
+      >
+        <Border dimens={d} clazz={clazz} />
+        <BarLine d={d} clazz={clazz} />
+        {notes.map((it, idx) => (
+          <MuseNote key={idx} note={it} />
+        ))}
+        <BaseLine bar={this.props.bar} clazz={clazz} />
+      </g>
+    );
+  }
+}
 
 export default MuseBar;
