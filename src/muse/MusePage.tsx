@@ -5,22 +5,57 @@ import MuseLine, { Line } from "./MuseLine";
 import { Border, OuterBorder } from "./Border";
 import Codec from "./Codec";
 import { ILine, IPage } from "./repo/schema";
-import { observable } from "mobx";
+import { computed, observable } from "mobx";
 import { useObserver } from "mobx-react";
+import { Notation } from "./MuseNotation";
 
 export class Page implements Codec {
+  readonly notation: Notation;
   readonly config: MuseConfig;
+  readonly index: number;
   @observable lines: Line[] = [];
-  @observable dimens: Dimens = new Dimens();
-  @observable index: number = 0;
-  constructor(o: IPage, config: MuseConfig) {
+  @observable dimensValue: Dimens = new Dimens();
+  @computed get dimens() {
+    let mt = 0;
+    if (this.index === 0) {
+      mt += this.config.pageMarginVertical;
+      let g = this.config.infoGap;
+      mt += this.config.infoTitleFontSize + g;
+      mt += this.config.infoSubtitleFontSize + g;
+      if (this.notation.info.author.length > 2) {
+        mt += this.notation.info.author.length * (this.config.infoFontSize + g);
+      } else {
+        mt += 2 * (this.config.infoFontSize + g);
+      }
+    } else {
+      mt = this.config.pageMarginVertical;
+    }
+    this.dimensValue.width =
+      this.config.pageWidth - this.config.pageMarginHorizontal * 2;
+    this.dimensValue.height =
+      this.config.pageWidth * this.config.pageE -
+      this.config.pageMarginVertical * 2;
+    this.dimensValue.marginBottom = this.config.pageMarginVertical;
+    this.dimensValue.marginTop = mt;
+    this.dimensValue.marginLeft = this.config.pageMarginHorizontal;
+    this.dimensValue.marginRight = this.config.pageMarginHorizontal;
+    this.dimensValue.x = this.config.pageMarginHorizontal;
+    this.dimensValue.y = mt + this.index * this.dimensValue.height;
+    return this.dimensValue;
+  }
+  set dimens(d: Dimens) {
+    this.dimensValue.copyFrom(d);
+  }
+  constructor(o: IPage, index: number, notation: Notation, config: MuseConfig) {
+    this.index = index;
+    this.notation = notation;
     this.config = config;
     this.decode(o);
   }
   decode(o: IPage): void {
     if (o.lines !== undefined) {
-      o.lines.forEach((it: any) => {
-        this.lines.push(new Line(it, this.config));
+      o.lines.forEach((it: ILine, idx) => {
+        this.lines.push(new Line(it, idx, this, this.config));
       });
     }
   }
@@ -59,7 +94,7 @@ const PageIndex: React.FC<PageIndexProps> = ({
         fontFamily={config.textFontFamily}
         fontSize={config.pageIndexFontSize}
       >
-        {index.toString()}
+        {(index + 1).toString()}
       </text>
     </g>
   );

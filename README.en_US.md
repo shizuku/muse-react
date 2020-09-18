@@ -8,6 +8,16 @@
 
 [Please head to Github Pages](https://shizuku.github.io/muse-react/)
 
+## Key map
+
+| Key | Action |
+| --- | ------ |
+| Num | voice  |
+| `q` | x2     |
+| `a` | /2     |
+| `s` | -1/2   |
+| `d` | +1/2   |
+
 ## Thanks
 
 - 团团子

@@ -6,7 +6,9 @@ import { Border } from "./Border";
 import Codec from "./Codec";
 import { IBar, INote } from "./repo/schema";
 import { comparer, computed, observable } from "mobx";
-import { observer } from "mobx-react";
+import { observer, useObserver } from "mobx-react";
+import Fraction from "./Fraction";
+import { Track } from "./MuseTrack";
 
 interface Baseline {
   y: number;
@@ -16,10 +18,28 @@ interface Baseline {
 
 export class Bar implements Codec {
   readonly config: MuseConfig;
+  readonly index: number;
+  @observable track: Track;
   @observable notes: Note[] = [];
-  @observable dimens: Dimens = new Dimens();
+  @observable dimensValue: Dimens = new Dimens();
+  notesHeight:number[]=[];
+  @computed get dimens() {
+    this.dimensValue.height = Math.max(...this.notesHeight);
+    return this.dimensValue;
+  }
+  set dimens(d: Dimens) {
+    this.dimensValue.copyFrom(d);
+  }
   unitNum: number = 0;
-  notesX: number[] = [];
+  notesT: number[] = [];
+  @computed get notesTime(): Fraction[] {
+    return this.notes.map((it) => it.time);
+  }
+  @computed get notesX(): number[] {
+    let r: number[] = [];
+
+    return r;
+  }
   @computed({ equals: comparer.structural }) get baselineGroup(): Baseline[] {
     return this.generateBaselineGroup();
   }
@@ -48,19 +68,20 @@ export class Bar implements Codec {
         break;
       }
     }
-    console.log("xxxxxx");
     return r;
   }
-  constructor(o: IBar, config: MuseConfig) {
+  constructor(o: IBar, index: number, track: Track, config: MuseConfig) {
+    this.index = index;
+    this.track = track;
     this.config = config;
     this.decode(o);
   }
   decode(o: IBar): void {
     if (o.notes !== undefined) {
-      o.notes.forEach((it: any) => {
-        this.notes.push(new Note(it, this));
+      o.notes.forEach((it: INote, idx) => {
+        this.notes.push(new Note(it, this, idx));
       });
-      this.notesX.push(1);
+      this.notesT.push(1);
       this.notes.forEach((note, idx) => {
         let x = 0;
         if (idx + 1 >= this.notes.length) {
@@ -78,7 +99,7 @@ export class Bar implements Codec {
           q += Math.pow(2, -i);
         }
         x *= q;
-        this.notesX.push(x);
+        this.notesT.push(x);
         this.unitNum += x;
       });
     }
@@ -89,16 +110,16 @@ export class Bar implements Codec {
   }
 }
 
-const BarLine: React.FC<{ d: Dimens; clazz: string }> = ({
-  d,
-  clazz,
-}: {
+const BarLine: React.FC<{ d: Dimens; clazz: string }> = (props: {
   d: Dimens;
   clazz: string;
 }) => {
+  let [d] = useObserver(() => {
+    return [props.d];
+  });
   return (
     <line
-      className={clazz + "__bar-line"}
+      className={props.clazz + "__bar-line"}
       x1={d.marginLeft + d.width + d.marginRight}
       y1={0}
       x2={d.marginLeft + d.width + d.marginRight}
@@ -116,15 +137,18 @@ const BaseLine: React.FC<{ bar: Bar; clazz: string }> = ({
   bar: Bar;
   clazz: string;
 }) => {
+  let [baselineGroup, notes] = useObserver(() => {
+    return [bar.baselineGroup, bar.notes];
+  });
   return (
     <g className={clazz + "__base-line"}>
-      {bar.baselineGroup.map((it, idx) => (
+      {baselineGroup.map((it, idx) => (
         <line
           key={idx}
-          x1={bar.notes[it.s].dimens.x}
-          y1={bar.notes[it.s].dimens.height + (it.y + 1) * bar.config.pointGap}
-          x2={bar.notes[it.e].dimens.x + bar.notes[it.e].dimens.width}
-          y2={bar.notes[it.s].dimens.height + (it.y + 1) * bar.config.pointGap}
+          x1={notes[it.s].dimens.x}
+          y1={notes[it.s].dimens.height + (it.y + 1) * bar.config.pointGap}
+          x2={notes[it.e].dimens.x + bar.notes[it.e].dimens.width}
+          y2={notes[it.s].dimens.height + (it.y + 1) * bar.config.pointGap}
           stroke={"black"}
           strokeWidth={1}
         />
@@ -145,8 +169,8 @@ class MuseBar extends React.Component<{ bar: Bar }, {}> {
         transform={
           "translate(" + (d.x - d.marginLeft) + "," + (d.y - d.marginTop) + ")"
         }
-        width={d.width + d.marginLeft + d.marginRight}
-        height={d.height + d.marginTop + d.marginBottom}
+        width={this.props.bar.dimens.width + d.marginLeft + d.marginRight}
+        height={this.props.bar.dimens.height + d.marginTop + d.marginBottom}
       >
         <Border dimens={d} clazz={clazz} />
         <BarLine d={d} clazz={clazz} />

@@ -5,21 +5,34 @@ import MuseTrack, { Track } from "./MuseTrack";
 import { Border } from "./Border";
 import Codec from "./Codec";
 import { ILine, ITrack } from "./repo/schema";
-import { observable } from "mobx";
+import { computed, observable } from "mobx";
 import { useObserver } from "mobx-react";
+import { Page } from "./MusePage";
 
 export class Line implements Codec {
+  readonly page: Page;
+  readonly index: number;
   readonly config: MuseConfig;
   @observable tracks: Track[] = [];
-  @observable dimens: Dimens = new Dimens();
-  constructor(o: ILine, config: MuseConfig) {
+  @observable dimensValue: Dimens = new Dimens();
+  @computed get dimens() {
+    this.dimensValue.width = this.page.dimens.width;
+    this.dimensValue.x = this.page.dimens.x;
+    return this.dimensValue;
+  }
+  set dimens(d: Dimens) {
+    this.dimensValue.copyFrom(d);
+  }
+  constructor(o: ILine, index: number, page: Page, config: MuseConfig) {
+    this.page = page;
+    this.index = index;
     this.config = config;
     this.decode(o);
   }
   decode(o: ILine): void {
     if (o.tracks !== undefined) {
-      o.tracks.forEach((it: any) => {
-        this.tracks.push(new Track(it, this.config));
+      o.tracks.forEach((it: ITrack, idx) => {
+        this.tracks.push(new Track(it, idx, this, this.config));
       });
     }
   }

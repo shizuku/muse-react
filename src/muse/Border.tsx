@@ -14,7 +14,7 @@ export const Border: React.FC<BorderProps> = ({
   show = false,
   color = "blue",
 }: BorderProps) => {
-  let ifShow = false;
+  let ifShow = true;
   if (show || ifShow) {
     return (
       <rect
@@ -63,3 +63,4 @@ export const OuterBorder: React.FC<OuterBorderProps> = ({
     return <></>;
   }
 };
+ 

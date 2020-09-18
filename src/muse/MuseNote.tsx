@@ -18,14 +18,15 @@ class NoteGroup {
 
 export class Note implements Codec {
   readonly config: MuseConfig;
-  bar: Bar;
+  @observable index: number;
+  @observable bar: Bar;
   @observable noteGroup: NoteGroup[] = [];
   @observable l: number = 0;
   @observable p: number = 0;
   @observable d: number = 0;
   @observable dx: number = 0;
   @computed get time(): Fraction {
-    let r = new Fraction("");
+    let r = new Fraction();
     r.u = 1;
     r.d *= Math.pow(2, this.l);
     r.d *= this.d;
@@ -33,25 +34,47 @@ export class Note implements Codec {
     r.u *= Math.pow(2, this.p + 1) - 1;
     return r.simplify();
   }
-  notesY: number[] = [];
-  pointsY: number[] = [];
-  @observable mb: number = 0;
-  @observable ny: number = 0;
-  @computed get py() {
+  @computed get notesY(): number[] {
+    let r: number[] = [];
+    let ny = 0;
+    this.noteGroup.forEach((it, idx) => {
+      if (it.t < 0) {
+        if (idx !== 0) {
+          let i = -it.t;
+          for (; i > 0; --i) {
+            let x = this.config.pointGap;
+            ny += x;
+          }
+        }
+      }
+      r.push(ny);
+      let h = this.config.noteHeight;
+      ny += h;
+      if (it.t > 0) {
+        let i = it.t;
+        for (; i > 0; --i) {
+          let x = this.config.pointGap;
+          ny += x;
+        }
+      }
+    });
+    return r;
+  }
+  @computed get pointsY() {
     let r: number[] = [];
     let py = 0;
-    this.ny = 0;
-    this.mb = 0;
-    this.mb += this.l * this.config.pointGap;
+    let ny = 0;
+    let mb = 0;
+    mb += this.l * this.config.pointGap;
     this.noteGroup.forEach((it, idx) => {
       if (it.t < 0) {
         if (idx === 0) {
           let i = -it.t;
           for (; i > 0; --i) {
             let x = this.config.pointGap;
-            this.mb += x / 2;
-            r.push(-this.mb);
-            this.mb += x / 2;
+            mb += x / 2;
+            r.push(-mb);
+            mb += x / 2;
           }
         }
         if (idx !== 0) {
@@ -60,68 +83,6 @@ export class Note implements Codec {
             let x = this.config.pointGap;
             py += x / 2;
             r.push(py);
-            py += x / 2;
-            this.ny += x;
-          }
-        }
-      }
-      this.notesY.push(this.ny);
-      let h = this.config.noteHeight;
-      this.ny += h;
-      py += h;
-      if (it.t > 0) {
-        let i = it.t;
-        for (; i > 0; --i) {
-          let x = this.config.pointGap;
-          py += x / 2;
-          r.push(py);
-          py += x / 2;
-          this.ny += x;
-        }
-      }
-    });
-    return r;
-  }
-  @computed get tailPointsX() {
-    let r: number[] = [];
-    for (let i = 0; i < this.p; ++i) {
-      r.push(
-        this.dx + this.config.noteWidth + (i + 1 / 2) * this.config.tailPointGap
-      );
-    }
-    return r;
-  }
-  @observable dimens: Dimens = new Dimens();
-  @observable isSelect: boolean = false;
-  constructor(o: INote, bar: Bar) {
-    this.config = bar.config;
-    this.bar = bar;
-    this.decode(o);
-  }
-  settle() {
-    let width =
-      this.dx + this.config.noteWidth + this.p * this.config.tailPointGap;
-    let ny = 0;
-    let mb = 0;
-    mb += this.l * this.config.pointGap;
-    let py = 0;
-    this.noteGroup.forEach((it, idx) => {
-      if (it.t < 0) {
-        if (idx === 0) {
-          let i = -it.t;
-          for (; i > 0; --i) {
-            let x = this.config.pointGap;
-            mb += x / 2;
-            this.pointsY.push(-mb);
-            mb += x / 2;
-          }
-        }
-        if (idx !== 0) {
-          let i = -it.t;
-          for (; i > 0; --i) {
-            let x = this.config.pointGap;
-            py += x / 2;
-            this.pointsY.push(py);
             py += x / 2;
             ny += x;
           }
@@ -136,20 +97,72 @@ export class Note implements Codec {
         for (; i > 0; --i) {
           let x = this.config.pointGap;
           py += x / 2;
-          this.pointsY.push(py);
+          r.push(py);
           py += x / 2;
           ny += x;
         }
       }
     });
-    // for (let i = 0; i < this.p; ++i) {
-    //   this.tailPointsX.push(
-    //     this.dx + this.config.noteWidth + (i + 1 / 2) * this.config.tailPointGap
-    //   );
-    // }
-    this.dimens.width = width;
-    this.dimens.height = ny;
-    this.dimens.marginBottom = mb;
+    return r;
+  }
+  @computed get tailPointsX() {
+    let r: number[] = [];
+    for (let i = 0; i < this.p; ++i) {
+      r.push(
+        this.dx + this.config.noteWidth + (i + 1 / 2) * this.config.tailPointGap
+      );
+    }
+    return r;
+  }
+  @observable dimensValue: Dimens = new Dimens();
+  @computed get dimens(): Dimens {
+    let w = this.dx + this.config.noteWidth + this.p * this.config.tailPointGap;
+    let h = 0;
+    let mb = 0;
+    mb += this.l * this.config.pointGap;
+    this.noteGroup.forEach((it, idx) => {
+      if (it.t < 0) {
+        if (idx === 0) {
+          let i = -it.t;
+          for (; i > 0; --i) {
+            let x = this.config.pointGap;
+            mb += x;
+          }
+        }
+        if (idx !== 0) {
+          let i = -it.t;
+          for (; i > 0; --i) {
+            let x = this.config.pointGap;
+            h += x;
+          }
+        }
+      }
+      h += this.config.noteHeight;
+      if (it.t > 0) {
+        let i = it.t;
+        for (; i > 0; --i) {
+          let x = this.config.pointGap;
+          h += x;
+        }
+      }
+    });
+    this.dimensValue.width = w;
+    this.dimensValue.height = h;
+    this.bar.notesHeight.push(h);
+    console.log(this.bar.dimens.height);
+    this.dimensValue.marginBottom = mb;
+    this.bar.dimens.marginBottom = Math.max(this.bar.dimens.marginBottom, mb);
+    return this.dimensValue;
+  }
+  set dimens(d: Dimens) {
+    this.dimensValue.copyFrom(d);
+  }
+  @observable isSelect: boolean = false;
+  constructor(o: INote, bar: Bar, idx: number) {
+    this.config = bar.config;
+    this.bar = bar;
+    this.index = idx;
+    this.decode(o);
   }
   decode(o: INote): void {
     if (o.n !== undefined) {
@@ -341,8 +354,6 @@ class MuseNote extends React.Component<{ note: Note }, {}> {
       if (this.props.note.l < 0) {
         this.props.note.l = 0;
       }
-      //this.props.note.bar.baselineGroup = this.props.note.bar.generateBaselineGroup();
-      console.log(this.props.note.l);
     },
     reducePoint: (p: number) => {
       this.props.note.p += p;

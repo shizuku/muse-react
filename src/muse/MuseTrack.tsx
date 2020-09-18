@@ -5,21 +5,34 @@ import MuseBar, { Bar } from "./MuseBar";
 import { Border } from "./Border";
 import Codec from "./Codec";
 import { IBar, ITrack } from "./repo/schema";
-import { observable } from "mobx";
+import { computed, observable } from "mobx";
 import { useObserver } from "mobx-react";
+import { Line } from "./MuseLine";
 
 export class Track implements Codec {
   readonly config: MuseConfig;
+  readonly index: number;
+  readonly line: Line;
   @observable bars: Bar[] = [];
-  @observable dimens: Dimens = new Dimens();
-  constructor(o: ITrack, config: MuseConfig) {
+  @observable dimensValue: Dimens = new Dimens();
+  @computed get dimens() {
+    this.dimensValue.width = this.line.dimens.width;
+    this.dimensValue.x = 0;
+    return this.dimensValue;
+  }
+  set dimens(d: Dimens) {
+    this.dimensValue.copyFrom(d);
+  }
+  constructor(o: ITrack, index: number, line: Line, config: MuseConfig) {
+    this.index = index;
+    this.line = line;
     this.config = config;
     this.decode(o);
   }
   decode(o: ITrack): void {
     if (o.bars !== undefined) {
-      o.bars.forEach((it: any) => {
-        this.bars.push(new Bar(it, this.config));
+      o.bars.forEach((it: any, idx) => {
+        this.bars.push(new Bar(it, idx, this, this.config));
       });
     }
   }

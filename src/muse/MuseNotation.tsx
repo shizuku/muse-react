@@ -5,9 +5,8 @@ import MusePage, { Page } from "./MusePage";
 import { Border } from "./Border";
 import Codec from "./Codec";
 import { INotation, IPage } from "./repo/schema";
-import { observable } from "mobx";
-import { useMuseRepo } from "./repo/muse-repo";
-import { useObserver } from "mobx-react";
+import { computed, observable } from "mobx";
+import { observer } from "mobx-react";
 
 export class NotationInfo {
   @observable title: string = "";
@@ -22,15 +21,28 @@ export class Notation implements Codec {
   readonly config: MuseConfig;
   @observable pages: Page[] = [];
   @observable info: NotationInfo = new NotationInfo();
-  @observable dimens: Dimens = new Dimens();
+  @observable dimensValue: Dimens = new Dimens();
+  @computed get dimens() {
+    this.dimensValue.width = this.config.pageWidth;
+    let h = 0;
+    this.pages.forEach(
+      (it) =>
+        (h += it.dimens.height + it.dimens.marginTop + it.dimens.marginBottom)
+    );
+    this.dimensValue.height = h;
+    return this.dimensValue;
+  }
+  set dimens(d: Dimens) {
+    this.dimensValue.copyFrom(d);
+  }
   constructor(o: INotation, config: MuseConfig) {
     this.config = config;
     this.decode(o);
   }
   decode(o: INotation): void {
     if (o.pages !== undefined) {
-      o.pages.forEach((it: any) => {
-        this.pages.push(new Page(it, this.config));
+      o.pages.forEach((it: IPage, idx) => {
+        this.pages.push(new Page(it, idx, this, this.config));
       });
     }
     if (o.title !== undefined) {
@@ -176,34 +188,35 @@ const MuseNotationInfo: React.FC<{
   );
 };
 
-const MuseNotation: React.FC = () => {
-  const repo = useMuseRepo();
-  let notation = useObserver(() => {
-    return repo.notation;
-  });
-  let margin = 10;
-  let d = notation.dimens;
-  let clazz = "muse-notation";
-  return (
-    <svg
-      className="muse"
-      width={notation.dimens.width + margin * 2}
-      height={notation.dimens.height + margin * 2}
-    >
-      <g
-        className={clazz}
-        transform={"translate(" + margin + "," + margin + ")"}
-        width={notation.dimens.width}
-        height={notation.dimens.height}
+@observer
+class MuseNotation extends React.Component<{ notation: Notation }, {}> {
+  render() {
+    let d = this.props.notation.dimens;
+    let notation = this.props.notation;
+    let pages = this.props.notation.pages;
+    let margin = 10;
+    let clazz = "muse-notation";
+    return (
+      <svg
+        className="muse"
+        width={d.width + margin * 2}
+        height={d.height + margin * 2}
       >
-        <MuseNotationInfo notation={notation} clazz={clazz} />
-        <Border dimens={d} clazz={clazz} />
-        {notation.pages.map((it, idx) => (
-          <MusePage key={idx} page={it} />
-        ))}
-      </g>
-    </svg>
-  );
-};
+        <g
+          className={clazz}
+          transform={"translate(" + margin + "," + margin + ")"}
+          width={d.width}
+          height={d.height}
+        >
+          <MuseNotationInfo notation={notation} clazz={clazz} />
+          <Border dimens={d} clazz={clazz} />
+          {pages.map((it, idx) => (
+            <MusePage key={idx} page={it} />
+          ))}
+        </g>
+      </svg>
+    );
+  }
+}
 
 export default MuseNotation;

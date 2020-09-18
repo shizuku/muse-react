@@ -14,7 +14,7 @@ export default class MuseConfig {
   pointRound = 1.5;
 
   pageE = 1.414;
-  notationWidth = 1000;
+  pageWidth = 1000;
   pageMarginHorizontal = 100;
   pageMarginVertical = 110;
 
