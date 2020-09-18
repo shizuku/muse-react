@@ -7,7 +7,7 @@ export default class MuseConfig {
 
   trackGap = 10;
 
-  lineGap = 20;
+  lineGap = 40;
 
   pointGap = 5;
   tailPointGap = 8;

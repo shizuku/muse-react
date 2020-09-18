@@ -16,9 +16,18 @@ export class Track implements Codec {
   @observable bars: Bar[] = [];
   @observable dimensValue: Dimens = new Dimens();
   @computed get dimens() {
-    this.dimensValue.width = this.line.dimens.width;
-    this.dimensValue.x = 0;
-    return this.dimensValue;
+    let d = new Dimens();
+    d.width = this.line.dimensValue.width;
+    let h = 0;
+    this.bars.forEach((it) => {
+      h = it.dimens.height > h ? it.dimens.height : h;
+    });
+    d.height = h;
+    d.x = 0;
+    d.y = this.line.tracksY;
+    this.line.tracksY += h + this.config.trackGap;
+    this.dimens = d;
+    return d;
   }
   set dimens(d: Dimens) {
     this.dimensValue.copyFrom(d);

@@ -13,14 +13,29 @@ export class Line implements Codec {
   readonly page: Page;
   readonly index: number;
   readonly config: MuseConfig;
+  tracksY: number = 0;
   @observable tracks: Track[] = [];
   @observable dimensValue: Dimens = new Dimens();
   @computed get dimens() {
-    this.dimensValue.width = this.page.dimens.width;
-    this.dimensValue.x = this.page.dimens.x;
-    return this.dimensValue;
+    let d = new Dimens();
+    d.width = this.page.dimensValue.width;
+    let h = 0;
+    this.tracks.forEach((it) => {
+      h += it.dimens.height + this.config.trackGap;
+    });
+    h -= this.config.trackGap;
+    d.height = h;
+    d.x = this.page.dimens.x;
+    d.y = this.page.linesY;
+    this.page.linesY += h + this.config.lineGap;
+    this.page.linesHeight.push(h);
+    this.dimens = d;
+    return d;
   }
   set dimens(d: Dimens) {
+    this.tracks.forEach((it) => {
+      it.dimens.width = d.width;
+    });
     this.dimensValue.copyFrom(d);
   }
   constructor(o: ILine, index: number, page: Page, config: MuseConfig) {

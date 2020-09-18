@@ -14,8 +14,11 @@ export class Page implements Codec {
   readonly config: MuseConfig;
   readonly index: number;
   @observable lines: Line[] = [];
+  linesHeight: number[] = [];
+  linesY: number = 0;
   @observable dimensValue: Dimens = new Dimens();
   @computed get dimens() {
+    let d = new Dimens();
     let mt = 0;
     if (this.index === 0) {
       mt += this.config.pageMarginVertical;
@@ -30,18 +33,20 @@ export class Page implements Codec {
     } else {
       mt = this.config.pageMarginVertical;
     }
-    this.dimensValue.width =
-      this.config.pageWidth - this.config.pageMarginHorizontal * 2;
-    this.dimensValue.height =
+    d.width = this.config.pageWidth - this.config.pageMarginHorizontal * 2;
+    d.height =
       this.config.pageWidth * this.config.pageE -
       this.config.pageMarginVertical * 2;
-    this.dimensValue.marginBottom = this.config.pageMarginVertical;
-    this.dimensValue.marginTop = mt;
-    this.dimensValue.marginLeft = this.config.pageMarginHorizontal;
-    this.dimensValue.marginRight = this.config.pageMarginHorizontal;
-    this.dimensValue.x = this.config.pageMarginHorizontal;
-    this.dimensValue.y = mt + this.index * this.dimensValue.height;
-    return this.dimensValue;
+    d.marginBottom = this.config.pageMarginVertical;
+    d.marginTop = mt;
+    d.marginLeft = this.config.pageMarginHorizontal;
+    d.marginRight = this.config.pageMarginHorizontal;
+    d.x = this.config.pageMarginHorizontal;
+    d.y = mt + this.index * this.dimensValue.height;
+    this.dimens = d;
+    this.linesY = mt;
+    console.log("page dimens");
+    return d;
   }
   set dimens(d: Dimens) {
     this.dimensValue.copyFrom(d);
@@ -51,6 +56,14 @@ export class Page implements Codec {
     this.notation = notation;
     this.config = config;
     this.decode(o);
+    let gap =
+      (this.dimensValue.height - this.linesHeight.reduce((r, c, ) => r + c)) /
+      this.lines.length;
+    let y = 0;
+    this.lines.forEach((it, idx) => {
+      it.dimensValue.y = y;
+      y += this.linesHeight[idx] + gap;
+    });
   }
   decode(o: IPage): void {
     if (o.lines !== undefined) {

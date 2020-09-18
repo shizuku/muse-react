@@ -22,10 +22,16 @@ export class Bar implements Codec {
   @observable track: Track;
   @observable notes: Note[] = [];
   @observable dimensValue: Dimens = new Dimens();
-  notesHeight:number[]=[];
   @computed get dimens() {
-    this.dimensValue.height = Math.max(...this.notesHeight);
-    return this.dimensValue;
+    let d = new Dimens();
+    let h = 0;
+    this.notes.forEach((it) => {
+      let u = it.dimens.height + it.dimens.marginBottom;
+      h = u > h ? u : h;
+    });
+    d.height = h;
+    this.dimens = d;
+    return d;
   }
   set dimens(d: Dimens) {
     this.dimensValue.copyFrom(d);
@@ -37,7 +43,6 @@ export class Bar implements Codec {
   }
   @computed get notesX(): number[] {
     let r: number[] = [];
-
     return r;
   }
   @computed({ equals: comparer.structural }) get baselineGroup(): Baseline[] {

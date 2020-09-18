@@ -115,7 +115,8 @@ export class Note implements Codec {
     return r;
   }
   @observable dimensValue: Dimens = new Dimens();
-  @computed get dimens(): Dimens {
+  get dimens(): Dimens {
+    let d = new Dimens();
     let w = this.dx + this.config.noteWidth + this.p * this.config.tailPointGap;
     let h = 0;
     let mb = 0;
@@ -146,16 +147,14 @@ export class Note implements Codec {
         }
       }
     });
-    this.dimensValue.width = w;
-    this.dimensValue.height = h;
-    this.bar.notesHeight.push(h);
-    console.log(this.bar.dimens.height);
-    this.dimensValue.marginBottom = mb;
-    this.bar.dimens.marginBottom = Math.max(this.bar.dimens.marginBottom, mb);
-    return this.dimensValue;
+    d.width = w;
+    d.height = h;
+    d.marginBottom = mb;
+    this.dimens = d;
+    return d;
   }
   set dimens(d: Dimens) {
-    this.dimensValue.copyFrom(d);
+    this.dimensValue = d;
   }
   @observable isSelect: boolean = false;
   constructor(o: INote, bar: Bar, idx: number) {
