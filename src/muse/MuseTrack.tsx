@@ -8,30 +8,56 @@ import { IBar, ITrack } from "./repo/schema";
 import { computed, observable } from "mobx";
 import { useObserver } from "mobx-react";
 import { Line } from "./MuseLine";
+import Fraction from "./Fraction";
 
 export class Track implements Codec {
   readonly config: MuseConfig;
   readonly index: number;
   readonly line: Line;
+  @computed get barsTime(): Fraction[] {
+    return this.bars.map((it) => it.time);
+  }
+  @computed get barsWidth(): number[] {
+    let sum = this.barsTime.reduce((a, b) => a.plus(b), new Fraction());
+    return this.barsTime.map((it) => it.divide(sum).toNumber() * this.width);
+  }
   @observable bars: Bar[] = [];
-  @observable dimensValue: Dimens = new Dimens();
-  @computed get dimens() {
-    let d = new Dimens();
-    d.width = this.line.dimensValue.width;
+  @computed get width(): number {
+    return this.line.dimensValue.width;
+  }
+  @computed get height(): number {
     let h = 0;
     this.bars.forEach((it) => {
-      h = it.dimens.height > h ? it.dimens.height : h;
+      h = it.height > h ? it.height : h;
     });
-    d.height = h;
-    d.x = 0;
-    d.y = this.line.tracksY;
-    this.line.tracksY += h + this.config.trackGap;
-    this.dimens = d;
-    return d;
+    return h;
   }
-  set dimens(d: Dimens) {
-    this.dimensValue.copyFrom(d);
+  @computed get x(): number {
+    return 0;
   }
+  @computed get y(): number {
+    let y = this.line.tracksY;
+    this.line.tracksY += this.height + this.config.trackGap;
+    return y;
+  }
+  // @observable dimensValue: Dimens = new Dimens();
+  // @computed get dimens() {
+  //   let d = new Dimens();
+  //   d.width = this.line.dimensValue.width;
+  //   let h = 0;
+  //   this.bars.forEach((it) => {
+  //     h = it.dimens.height > h ? it.dimens.height : h;
+  //   });
+  //   d.height = h;
+  //   d.x = 0;
+  //   d.y = this.line.tracksY;
+  //   this.line.tracksY += h + this.config.trackGap;
+  //   this.dimens = d;
+  //   return d;
+  // }
+  // set dimens(d: Dimens) {
+  //   this.dimensValue.copyFrom(d);
+  // }
   constructor(o: ITrack, index: number, line: Line, config: MuseConfig) {
     this.index = index;
     this.line = line;
@@ -52,18 +78,16 @@ export class Track implements Codec {
 }
 
 const MuseTrack: React.FC<{ track: Track }> = ({ track }: { track: Track }) => {
-  let [bars, d] = useObserver(() => {
-    return [track.bars, track.dimens];
+  let [bars, width, height, x, y] = useObserver(() => {
+    return [track.bars, track.width, track.height, track.x, track.y];
   });
   let clazz = "muse-track";
   return (
     <g
       className={clazz}
-      transform={
-        "translate(" + (d.x - d.marginLeft) + "," + (d.y - d.marginTop) + ")"
-      }
-      width={d.width + d.marginLeft + d.marginRight}
-      height={d.height + d.marginTop + d.marginBottom}
+      transform={"translate(" + x + "," + y + ")"}
+      width={width}
+      height={height}
     >
       <Border dimens={d} clazz={clazz} />
       {bars.map((it, idx) => (

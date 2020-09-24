@@ -21,25 +21,30 @@ export class Bar implements Codec {
   readonly index: number;
   @observable track: Track;
   @observable notes: Note[] = [];
-  @observable dimensValue: Dimens = new Dimens();
-  @computed get dimens() {
-    let d = new Dimens();
+  @computed get width(): number {
+    return this.track.barsWidth[this.index];
+  }
+  @computed get height(): number {
     let h = 0;
     this.notes.forEach((it) => {
       let u = it.dimens.height + it.dimens.marginBottom;
       h = u > h ? u : h;
     });
-    d.height = h;
-    this.dimens = d;
-    return d;
+    return h;
   }
-  set dimens(d: Dimens) {
-    this.dimensValue.copyFrom(d);
+  @computed get x() {
+    return 0;
+  }
+  @computed get y() {
+    return 0;
   }
   unitNum: number = 0;
   notesT: number[] = [];
   @computed get notesTime(): Fraction[] {
     return this.notes.map((it) => it.time);
+  }
+  @computed get time() {
+    return this.notesTime.reduce((a, b) => a.plus(b), new Fraction());
   }
   @computed get notesX(): number[] {
     let r: number[] = [];
@@ -165,19 +170,24 @@ const BaseLine: React.FC<{ bar: Bar; clazz: string }> = ({
 @observer
 class MuseBar extends React.Component<{ bar: Bar }, {}> {
   render() {
-    let d = this.props.bar.dimens;
     let notes = this.props.bar.notes;
     let clazz = "muse-bar";
     return (
       <g
         className={clazz}
         transform={
-          "translate(" + (d.x - d.marginLeft) + "," + (d.y - d.marginTop) + ")"
+          "translate(" + this.props.bar.x + "," + this.props.bar.y + ")"
         }
-        width={this.props.bar.dimens.width + d.marginLeft + d.marginRight}
-        height={this.props.bar.dimens.height + d.marginTop + d.marginBottom}
+        width={this.props.bar.width}
+        height={this.props.bar.height}
       >
-        <Border dimens={d} clazz={clazz} />
+        <Border
+          width={this.props.bar.width}
+          height={this.props.bar.height}
+          x={0}
+          y={0}
+          clazz={clazz}
+        />
         <BarLine d={d} clazz={clazz} />
         {notes.map((it, idx) => (
           <MuseNote key={idx} note={it} />

@@ -1,15 +1,20 @@
 import React from "react";
-import Dimens from "./Dimens";
 
 interface BorderProps {
-  dimens: Dimens;
+  width: number;
+  height: number;
+  x: number;
+  y: number;
   clazz: string;
   show?: boolean;
   color?: string;
 }
 
 export const Border: React.FC<BorderProps> = ({
-  dimens,
+  width,
+  height,
+  x,
+  y,
   clazz,
   show = false,
   color = "blue",
@@ -20,10 +25,10 @@ export const Border: React.FC<BorderProps> = ({
       <rect
         className={clazz + "__border"}
         transform={
-          "translate(" + dimens.marginLeft + "," + dimens.marginTop + ")"
+          "translate(" + x + "," + y + ")"
         }
-        width={dimens.width}
-        height={dimens.height}
+        width={width}
+        height={height}
         stroke={color}
         strokeWidth="0.4"
         fill="none"
@@ -35,14 +40,16 @@ export const Border: React.FC<BorderProps> = ({
 };
 
 interface OuterBorderProps {
-  dimens: Dimens;
+  width: number;
+  height: number;
   clazz: string;
   show?: boolean;
   color?: string;
 }
 
 export const OuterBorder: React.FC<OuterBorderProps> = ({
-  dimens,
+  width,
+  height,
   clazz,
   show = false,
   color = "gray",
@@ -52,8 +59,8 @@ export const OuterBorder: React.FC<OuterBorderProps> = ({
       <rect
         className={clazz + "__outer-border"}
         transform={"translate(0,0)"}
-        width={dimens.width + dimens.marginLeft + dimens.marginRight}
-        height={dimens.height + dimens.marginTop + dimens.marginBottom}
+        width={width}
+        height={height}
         stroke={color}
         strokeWidth="0.4"
         fill="none"
@@ -63,4 +70,3 @@ export const OuterBorder: React.FC<OuterBorderProps> = ({
     return <></>;
   }
 };
- 

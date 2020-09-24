@@ -32,7 +32,7 @@ export default class Fraction {
     }
     return this;
   }
-  add(f: Fraction): Fraction {
+  plus(f: Fraction): Fraction {
     let r = new Fraction();
     r.u = this.u * f.d + this.d * f.u;
     r.d = this.d * f.d;
@@ -61,9 +61,9 @@ export default class Fraction {
   }
   toString(): string {
     if (this.d === 1) {
-      return this.u.toString();
+      return `${this.u}`
     } else {
-      return this.u.toString() + "/" + this.d.toString();
+      return `${this.u}/${this.d}`
     }
   }
 }

@@ -1,5 +1,4 @@
 import React from "react";
-import Dimens from "./Dimens";
 import MuseConfig from "./MuseConfig";
 import MuseTrack, { Track } from "./MuseTrack";
 import { Border } from "./Border";
@@ -15,28 +14,25 @@ export class Line implements Codec {
   readonly config: MuseConfig;
   tracksY: number = 0;
   @observable tracks: Track[] = [];
-  @observable dimensValue: Dimens = new Dimens();
-  @computed get dimens() {
-    let d = new Dimens();
-    d.width = this.page.dimensValue.width;
+  @computed get width() {
+    return this.page.dimensValue.width;
+  }
+  @computed get height() {
     let h = 0;
     this.tracks.forEach((it) => {
-      h += it.dimens.height + this.config.trackGap;
+      h += it.height + this.config.trackGap;
     });
     h -= this.config.trackGap;
-    d.height = h;
-    d.x = this.page.dimens.x;
-    d.y = this.page.linesY;
-    this.page.linesY += h + this.config.lineGap;
-    this.page.linesHeight.push(h);
-    this.dimens = d;
-    return d;
+    return h;
   }
-  set dimens(d: Dimens) {
-    this.tracks.forEach((it) => {
-      it.dimens.width = d.width;
-    });
-    this.dimensValue.copyFrom(d);
+  @computed get x() {
+    return this.page.dimens.x;
+  }
+  @computed get y() {
+    let y = this.page.linesY;
+    this.page.linesY += this.height + this.config.lineGap;
+    this.page.linesHeight.push(this.height);
+    return y;
   }
   constructor(o: ILine, index: number, page: Page, config: MuseConfig) {
     this.page = page;
@@ -57,43 +53,34 @@ export class Line implements Codec {
   }
 }
 
-const LineHead: React.FC<{ dimens: Dimens; clazz: string }> = ({
-  dimens,
+const LineHead: React.FC<{ height: number; clazz: string }> = ({
+  height,
   clazz,
 }: {
-  dimens: Dimens;
+  height: number;
   clazz: string;
 }) => {
   return (
     <g className={clazz + "__line-head"}>
-      <line
-        x1={0}
-        y1={0}
-        x2={0}
-        y2={dimens.height}
-        strokeWidth={1}
-        stroke="black"
-      />
+      <line x1={0} y1={0} x2={0} y2={height} strokeWidth={1} stroke="black" />
     </g>
   );
 };
 
 const MuseLine: React.FC<{ line: Line }> = ({ line }: { line: Line }) => {
-  let [tracks, d] = useObserver(() => {
-    return [line.tracks, line.dimens];
+  let [tracks, width, height, x, y] = useObserver(() => {
+    return [line.tracks, line.width, line.height, line.index, line.y];
   });
   let clazz = "muse-line";
   return (
     <g
       className={clazz}
-      transform={
-        "translate(" + (d.x - d.marginLeft) + "," + (d.y - d.marginTop) + ")"
-      }
-      width={d.width + d.marginLeft + d.marginRight}
-      height={d.height + d.marginTop + d.marginBottom}
+      transform={"translate(" + x + "," + y + ")"}
+      width={width}
+      height={height}
     >
-      <Border dimens={d} clazz={clazz} />
-      <LineHead dimens={d} clazz={clazz} />
+      <Border width={width} height={height} x={x} y={y} clazz={clazz} />
+      <LineHead height={height} clazz={clazz} />
       {tracks.map((it, idx) => (
         <MuseTrack key={idx} track={it} />
       ))}

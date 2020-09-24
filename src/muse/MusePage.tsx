@@ -57,7 +57,7 @@ export class Page implements Codec {
     this.config = config;
     this.decode(o);
     let gap =
-      (this.dimensValue.height - this.linesHeight.reduce((r, c, ) => r + c)) /
+      (this.dimensValue.height - this.linesHeight.reduce((r, c) => r + c,0)) /
       this.lines.length;
     let y = 0;
     this.lines.forEach((it, idx) => {
