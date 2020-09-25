@@ -1,12 +1,15 @@
 import React from "react";
 import MuseConfig from "./MuseConfig";
-import MuseTrack, { Track } from "./MuseTrack";
+import MuseTrack, { ITrack, Track } from "./MuseTrack";
 import { Border } from "./Border";
 import Codec from "./Codec";
-import { ILine, ITrack } from "./repo/schema";
 import { computed, observable } from "mobx";
-import { useObserver } from "mobx-react";
+import { observer } from "mobx-react";
 import { Page } from "./MusePage";
+
+export interface ILine {
+  tracks: ITrack[];
+}
 
 export class Line implements Codec {
   readonly page: Page;
@@ -15,7 +18,7 @@ export class Line implements Codec {
   tracksY: number = 0;
   @observable tracks: Track[] = [];
   @computed get width() {
-    return this.page.dimensValue.width;
+    return this.page.width;
   }
   @computed get height() {
     let h = 0;
@@ -26,13 +29,10 @@ export class Line implements Codec {
     return h;
   }
   @computed get x() {
-    return this.page.dimens.x;
+    return this.page.x;
   }
   @computed get y() {
-    let y = this.page.linesY;
-    this.page.linesY += this.height + this.config.lineGap;
-    this.page.linesHeight.push(this.height);
-    return y;
+    return this.page.linesY[this.index];
   }
   constructor(o: ILine, index: number, page: Page, config: MuseConfig) {
     this.page = page;
@@ -67,25 +67,34 @@ const LineHead: React.FC<{ height: number; clazz: string }> = ({
   );
 };
 
-const MuseLine: React.FC<{ line: Line }> = ({ line }: { line: Line }) => {
-  let [tracks, width, height, x, y] = useObserver(() => {
-    return [line.tracks, line.width, line.height, line.index, line.y];
-  });
-  let clazz = "muse-line";
-  return (
-    <g
-      className={clazz}
-      transform={"translate(" + x + "," + y + ")"}
-      width={width}
-      height={height}
-    >
-      <Border width={width} height={height} x={x} y={y} clazz={clazz} />
-      <LineHead height={height} clazz={clazz} />
-      {tracks.map((it, idx) => (
-        <MuseTrack key={idx} track={it} />
-      ))}
-    </g>
-  );
-};
+@observer
+class MuseLine extends React.Component<{ line: Line }> {
+  render() {
+    let clazz = "muse-line";
+    return (
+      <g
+        className={clazz}
+        transform={
+          "translate(" + this.props.line.x + "," + this.props.line.y + ")"
+        }
+        width={this.props.line.width}
+        height={this.props.line.height}
+      >
+        <Border
+          w={this.props.line.width}
+          h={this.props.line.height}
+          x={0}
+          y={0}
+          clazz={clazz}
+          show={this.props.line.config.showBorder}
+        />
+        <LineHead height={this.props.line.height} clazz={clazz} />
+        {this.props.line.tracks.map((it, idx) => (
+          <MuseTrack key={idx} track={it} />
+        ))}
+      </g>
+    );
+  }
+}
 
 export default MuseLine;

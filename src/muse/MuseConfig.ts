@@ -26,4 +26,6 @@ export default class MuseConfig {
   pageIndexFontSize = 20;
 
   textFontFamily = "serif";
+
+  showBorder = true;
 }

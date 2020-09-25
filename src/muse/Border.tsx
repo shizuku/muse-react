@@ -1,8 +1,8 @@
 import React from "react";
 
 interface BorderProps {
-  width: number;
-  height: number;
+  w: number;
+  h: number;
   x: number;
   y: number;
   clazz: string;
@@ -11,24 +11,21 @@ interface BorderProps {
 }
 
 export const Border: React.FC<BorderProps> = ({
-  width,
-  height,
+  w,
+  h,
   x,
   y,
   clazz,
   show = false,
   color = "blue",
 }: BorderProps) => {
-  let ifShow = true;
-  if (show || ifShow) {
+  if (show) {
     return (
       <rect
         className={clazz + "__border"}
-        transform={
-          "translate(" + x + "," + y + ")"
-        }
-        width={width}
-        height={height}
+        transform={"translate(" + x + "," + y + ")"}
+        width={w}
+        height={h}
         stroke={color}
         strokeWidth="0.4"
         fill="none"
@@ -40,16 +37,16 @@ export const Border: React.FC<BorderProps> = ({
 };
 
 interface OuterBorderProps {
-  width: number;
-  height: number;
+  w: number;
+  h: number;
   clazz: string;
   show?: boolean;
   color?: string;
 }
 
 export const OuterBorder: React.FC<OuterBorderProps> = ({
-  width,
-  height,
+  w,
+  h,
   clazz,
   show = false,
   color = "gray",
@@ -59,8 +56,8 @@ export const OuterBorder: React.FC<OuterBorderProps> = ({
       <rect
         className={clazz + "__outer-border"}
         transform={"translate(0,0)"}
-        width={width}
-        height={height}
+        width={w}
+        height={h}
         stroke={color}
         strokeWidth="0.4"
         fill="none"

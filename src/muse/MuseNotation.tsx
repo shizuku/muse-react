@@ -1,10 +1,8 @@
 import React from "react";
 import MuseConfig from "./MuseConfig";
-import Dimens from "./Dimens";
-import MusePage, { Page } from "./MusePage";
+import MusePage, { IPage, Page } from "./MusePage";
 import { Border } from "./Border";
 import Codec from "./Codec";
-import { INotation, IPage } from "./repo/schema";
 import { computed, observable } from "mobx";
 import { observer } from "mobx-react";
 
@@ -17,23 +15,29 @@ export class NotationInfo {
   @observable C: string = "";
 }
 
+export interface INotation {
+  title: string;
+  subtitle: string;
+  author: string;
+  rhythmic: string;
+  speed:string,
+  C: string;
+  pages: IPage[];
+}
+
 export class Notation implements Codec {
   readonly config: MuseConfig;
   @observable pages: Page[] = [];
   @observable info: NotationInfo = new NotationInfo();
-  @observable dimensValue: Dimens = new Dimens();
-  @computed get dimens() {
-    this.dimensValue.width = this.config.pageWidth;
+  @computed get height() {
     let h = 0;
     this.pages.forEach(
-      (it) =>
-        (h += it.dimens.height + it.dimens.marginTop + it.dimens.marginBottom)
+      (it) => (h += it.height + it.marginTop + it.marginBottom)
     );
-    this.dimensValue.height = h;
-    return this.dimensValue;
+    return h;
   }
-  set dimens(d: Dimens) {
-    this.dimensValue.copyFrom(d);
+  @computed get width() {
+    return this.config.pageWidth;
   }
   constructor(o: INotation, config: MuseConfig) {
     this.config = config;
@@ -86,25 +90,32 @@ export class Notation implements Codec {
   }
 }
 
-const MuseNotationInfo: React.FC<{
-  notation: Notation;
+interface MuseNotationInfoProps {
+  info: NotationInfo;
+  config: MuseConfig;
   clazz: string;
-}> = (props) => {
-  let config = props.notation.config;
-  let info = props.notation.info;
-  let clazz = props.clazz;
-  let dimens = props.notation.dimens;
+}
+
+const MuseNotationInfo: React.FC<MuseNotationInfoProps> = ({
+  info,
+  config,
+  clazz,
+}: MuseNotationInfoProps) => {
   let y = 0;
   y += config.pageMarginVertical;
   let title = (
     <text
       className={clazz + "__info-title"}
       fontFamily={config.textFontFamily}
-      width={dimens.width}
+      width={config.pageWidth}
       textAnchor={"middle"}
       fontSize={config.infoTitleFontSize}
       transform={
-        "translate(" + (dimens.marginLeft + dimens.width / 2) + "," + y + ")"
+        "translate(" +
+        (config.pageMarginHorizontal + config.pageWidth / 2) +
+        "," +
+        y +
+        ")"
       }
     >
       {info.title}
@@ -115,11 +126,15 @@ const MuseNotationInfo: React.FC<{
     <text
       className={clazz + "__info-subtitle"}
       fontFamily={config.textFontFamily}
-      width={dimens.width}
+      width={config.pageWidth}
       textAnchor={"middle"}
       fontSize={config.infoSubtitleFontSize}
       transform={
-        "translate(" + (dimens.marginLeft + dimens.width / 2) + "," + y + ")"
+        "translate(" +
+        (config.pageMarginHorizontal + config.pageWidth / 2) +
+        "," +
+        y +
+        ")"
       }
     >
       {info.subtitle}
@@ -138,13 +153,13 @@ const MuseNotationInfo: React.FC<{
           <text
             key={idx}
             fontFamily={config.textFontFamily}
-            width={dimens.width}
+            width={config.pageWidth}
             fontSize={config.infoFontSize}
             textAnchor={"end"}
             x={0}
             transform={
               "translate(" +
-              (dimens.width - config.pageMarginHorizontal) +
+              (config.pageWidth - config.pageMarginHorizontal) +
               "," +
               y1 +
               ")"
@@ -159,10 +174,10 @@ const MuseNotationInfo: React.FC<{
   let y2 = y + (config.infoGap + config.infoSubtitleFontSize);
   let y3 = y2 + (config.infoGap + config.infoFontSize);
   let rythimic = (
-    <g className={clazz + "__info-rythmic"} width={dimens.width}>
+    <g className={clazz + "__info-rythmic"} width={config.pageWidth}>
       <text
         fontFamily={config.textFontFamily}
-        width={dimens.width}
+        width={config.pageWidth}
         fontSize={config.infoFontSize}
         transform={"translate(" + config.pageMarginHorizontal + "," + y2 + ")"}
       >
@@ -170,7 +185,7 @@ const MuseNotationInfo: React.FC<{
       </text>
       <text
         fontFamily={config.textFontFamily}
-        width={dimens.width}
+        width={config.pageWidth}
         fontSize={config.infoFontSize}
         transform={"translate(" + config.pageMarginHorizontal + "," + y3 + ")"}
       >
@@ -179,7 +194,7 @@ const MuseNotationInfo: React.FC<{
     </g>
   );
   return (
-    <g className={clazz + "__info"} width={dimens.width}>
+    <g className={clazz + "__info"} width={config.pageWidth}>
       {title}
       {subtitle}
       {author}
@@ -191,26 +206,33 @@ const MuseNotationInfo: React.FC<{
 @observer
 class MuseNotation extends React.Component<{ notation: Notation }, {}> {
   render() {
-    let d = this.props.notation.dimens;
-    let notation = this.props.notation;
-    let pages = this.props.notation.pages;
     let margin = 10;
     let clazz = "muse-notation";
     return (
       <svg
         className="muse"
-        width={d.width + margin * 2}
-        height={d.height + margin * 2}
+        width={this.props.notation.width + margin * 2}
+        height={this.props.notation.height + margin * 2}
       >
         <g
           className={clazz}
           transform={"translate(" + margin + "," + margin + ")"}
-          width={d.width}
-          height={d.height}
+          width={this.props.notation.width}
+          height={this.props.notation.height}
         >
-          <MuseNotationInfo notation={notation} clazz={clazz} />
-          <Border dimens={d} clazz={clazz} />
-          {pages.map((it, idx) => (
+          <MuseNotationInfo
+            info={this.props.notation.info}
+            config={this.props.notation.config}
+            clazz={clazz}
+          />
+          <Border
+            w={this.props.notation.width}
+            h={this.props.notation.height}
+            x={0}
+            y={0}
+            clazz={clazz}
+          />
+          {this.props.notation.pages.map((it, idx) => (
             <MusePage key={idx} page={it} />
           ))}
         </g>

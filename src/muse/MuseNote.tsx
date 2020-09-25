@@ -1,10 +1,8 @@
 import React from "react";
-import Dimens from "./Dimens";
 import { OuterBorder } from "./Border";
 import MuseConfig from "./MuseConfig";
 import Codec from "./Codec";
 import Fraction from "./Fraction";
-import { INote } from "./repo/schema";
 import { computed, observable } from "mobx";
 import { observer } from "mobx-react";
 import Selector from "./Selector";
@@ -16,6 +14,10 @@ class NoteGroup {
   @observable t: number = 0;
 }
 
+export interface INote {
+  n: string;
+}
+
 export class Note implements Codec {
   readonly config: MuseConfig;
   @observable index: number;
@@ -24,7 +26,15 @@ export class Note implements Codec {
   @observable l: number = 0;
   @observable p: number = 0;
   @observable d: number = 0;
-  @observable dx: number = 0;
+  @computed get dx() {
+    let dxx = false;
+    this.noteGroup.forEach((it) => {
+      if (it.x !== "") {
+        dxx = true;
+      }
+    });
+    return dxx ? this.config.sigFontSize / 2 : 0;
+  }
   @computed get time(): Fraction {
     let r = new Fraction();
     r.u = 1;
@@ -60,7 +70,7 @@ export class Note implements Codec {
     });
     return r;
   }
-  @computed get pointsY() {
+  @computed get pointsY(): number[] {
     let r: number[] = [];
     let py = 0;
     let ny = 0;
@@ -105,7 +115,7 @@ export class Note implements Codec {
     });
     return r;
   }
-  @computed get tailPointsX() {
+  @computed get tailPointsX(): number[] {
     let r: number[] = [];
     for (let i = 0; i < this.p; ++i) {
       r.push(
@@ -114,22 +124,13 @@ export class Note implements Codec {
     }
     return r;
   }
-  @observable dimensValue: Dimens = new Dimens();
-  get dimens(): Dimens {
-    let d = new Dimens();
-    let w = this.dx + this.config.noteWidth + this.p * this.config.tailPointGap;
+  @computed get width(): number {
+    return this.dx + this.config.noteWidth + this.p * this.config.tailPointGap;
+  }
+  @computed get preHeight(): number {
     let h = 0;
-    let mb = 0;
-    mb += this.l * this.config.pointGap;
     this.noteGroup.forEach((it, idx) => {
       if (it.t < 0) {
-        if (idx === 0) {
-          let i = -it.t;
-          for (; i > 0; --i) {
-            let x = this.config.pointGap;
-            mb += x;
-          }
-        }
         if (idx !== 0) {
           let i = -it.t;
           for (; i > 0; --i) {
@@ -147,14 +148,32 @@ export class Note implements Codec {
         }
       }
     });
-    d.width = w;
-    d.height = h;
-    d.marginBottom = mb;
-    this.dimens = d;
-    return d;
+    return h;
   }
-  set dimens(d: Dimens) {
-    this.dimensValue = d;
+  @computed get height(): number {
+    return this.bar.notesMaxHeight;
+  }
+  @computed get x(): number {
+    return this.bar.notesX[this.index];
+  }
+  @computed get preMarginBottom(): number {
+    let mb = 0;
+    mb += this.l * this.config.pointGap;
+    this.noteGroup.forEach((it, idx) => {
+      if (it.t < 0) {
+        if (idx === 0) {
+          let i = -it.t;
+          for (; i > 0; --i) {
+            let x = this.config.pointGap;
+            mb += x;
+          }
+        }
+      }
+    });
+    return mb;
+  }
+  @computed get marginBottom(): number {
+    return this.bar.notesMaxMarginBottom;
   }
   @observable isSelect: boolean = false;
   constructor(o: INote, bar: Bar, idx: number) {
@@ -190,9 +209,6 @@ export class Note implements Codec {
               t = -t;
             }
             this.noteGroup.push({ x, n, t });
-            if (x !== "") {
-              this.dx = this.config.sigFontSize / 2;
-            }
             break;
           }
         }
@@ -260,14 +276,10 @@ function noteGroup(note: Note, clazz: string) {
           <g
             className={clazz + "__note-one"}
             key={idx}
-            width={note.dimens.width}
+            width={note.width}
             height={note.notesY[idx]}
             transform={
-              "translate(" +
-              0 +
-              "," +
-              (note.dimens.height - note.notesY[idx]) +
-              ")"
+              "translate(" + 0 + "," + (note.height - note.notesY[idx]) + ")"
             }
           >
             <text
@@ -309,7 +321,7 @@ function pointGroup(note: Note, clazz: string) {
             "translate(" +
             (note.dx + note.config.noteWidth / 2) +
             "," +
-            (note.dimens.height - it + note.config.pointGap / 2) +
+            (note.height - it + note.config.pointGap / 2) +
             ")"
           }
         />
@@ -330,7 +342,7 @@ function tailPoint(note: Note, clazz: string) {
             "translate(" +
             it +
             "," +
-            (note.dimens.height - note.config.noteHeight / 3) +
+            (note.height - note.config.noteHeight / 3) +
             ")"
           }
         />
@@ -362,30 +374,27 @@ class MuseNote extends React.Component<{ note: Note }, {}> {
     },
   };
   render() {
-    let note = this.props.note;
-    let d = note.dimens;
     let clazz = "muse-note";
     return (
       <g
         className={clazz}
-        transform={
-          "translate(" + (d.x - d.marginLeft) + "," + (d.y - d.marginTop) + ")"
-        }
-        width={d.width + d.marginLeft + d.marginRight}
-        height={d.height + d.marginTop + d.marginBottom}
+        transform={"translate(" + 0 + "," + 0 + ")"}
+        width={this.props.note.width}
+        height={this.props.note.height}
         onClick={() => {
           Selector.instance.selectNote(this.selection, true);
         }}
       >
         <OuterBorder
-          dimens={d}
+          w={this.props.note.width}
+          h={this.props.note.height}
           clazz={clazz}
-          show={note.isSelect}
+          show={this.props.note.isSelect}
           color={"blue"}
         />
-        {noteGroup(note, clazz)}
-        {pointGroup(note, clazz)}
-        {tailPoint(note, clazz)}
+        {noteGroup(this.props.note, clazz)}
+        {pointGroup(this.props.note, clazz)}
+        {tailPoint(this.props.note, clazz)}
       </g>
     );
   }

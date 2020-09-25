@@ -1,10 +1,8 @@
 import React from "react";
 import MuseConfig from "./MuseConfig";
-import Dimens from "./Dimens";
-import MuseNote, { Note } from "./MuseNote";
+import MuseNote, { INote, Note } from "./MuseNote";
 import { Border } from "./Border";
 import Codec from "./Codec";
-import { IBar, INote } from "./repo/schema";
 import { comparer, computed, observable } from "mobx";
 import { observer, useObserver } from "mobx-react";
 import Fraction from "./Fraction";
@@ -14,6 +12,10 @@ interface Baseline {
   y: number;
   s: number;
   e: number;
+}
+
+export interface IBar {
+  notes: INote[];
 }
 
 export class Bar implements Codec {
@@ -27,19 +29,17 @@ export class Bar implements Codec {
   @computed get height(): number {
     let h = 0;
     this.notes.forEach((it) => {
-      let u = it.dimens.height + it.dimens.marginBottom;
+      let u = it.height + it.marginBottom;
       h = u > h ? u : h;
     });
     return h;
   }
   @computed get x() {
-    return 0;
+    return this.track.barsX[this.index];
   }
   @computed get y() {
     return 0;
   }
-  unitNum: number = 0;
-  notesT: number[] = [];
   @computed get notesTime(): Fraction[] {
     return this.notes.map((it) => it.time);
   }
@@ -47,8 +47,19 @@ export class Bar implements Codec {
     return this.notesTime.reduce((a, b) => a.plus(b), new Fraction());
   }
   @computed get notesX(): number[] {
-    let r: number[] = [];
-    return r;
+    return this.notes.map((it) => 0);
+  }
+  @computed get preNotesMaxHeight(): number {
+    return Math.max(...this.notes.map((it) => it.preHeight));
+  }
+  @computed get notesMaxHeight(): number {
+    return this.track.notesMaxHeight;
+  }
+  @computed get preNotesMaxMarginBottom(): number {
+    return Math.max(...this.notes.map((it) => it.preMarginBottom));
+  }
+  @computed get notesMaxMarginBottom(): number {
+    return this.track.notesMaxMarginBottom;
   }
   @computed({ equals: comparer.structural }) get baselineGroup(): Baseline[] {
     return this.generateBaselineGroup();
@@ -91,27 +102,6 @@ export class Bar implements Codec {
       o.notes.forEach((it: INote, idx) => {
         this.notes.push(new Note(it, this, idx));
       });
-      this.notesT.push(1);
-      this.notes.forEach((note, idx) => {
-        let x = 0;
-        if (idx + 1 >= this.notes.length) {
-          x += 1;
-        } else if (
-          this.notes[idx + 1] !== undefined &&
-          this.notes[idx + 1].l < note.l
-        ) {
-          x += Math.pow(2, -this.notes[idx + 1].l);
-        } else {
-          x += Math.pow(2, -note.l);
-        }
-        let q = 1;
-        for (let i = 1; i <= note.p; ++i) {
-          q += Math.pow(2, -i);
-        }
-        x *= q;
-        this.notesT.push(x);
-        this.unitNum += x;
-      });
     }
   }
   code(): IBar {
@@ -120,20 +110,21 @@ export class Bar implements Codec {
   }
 }
 
-const BarLine: React.FC<{ d: Dimens; clazz: string }> = (props: {
-  d: Dimens;
+const BarLine: React.FC<{ w: number; h: number; clazz: string }> = (props: {
+  w: number;
+  h: number;
   clazz: string;
 }) => {
-  let [d] = useObserver(() => {
-    return [props.d];
+  let [width, height] = useObserver(() => {
+    return [props.w, props.h];
   });
   return (
     <line
       className={props.clazz + "__bar-line"}
-      x1={d.marginLeft + d.width + d.marginRight}
+      x1={width}
       y1={0}
-      x2={d.marginLeft + d.width + d.marginRight}
-      y2={d.height}
+      x2={width}
+      y2={height}
       strokeWidth={1}
       stroke="black"
     />
@@ -155,10 +146,10 @@ const BaseLine: React.FC<{ bar: Bar; clazz: string }> = ({
       {baselineGroup.map((it, idx) => (
         <line
           key={idx}
-          x1={notes[it.s].dimens.x}
-          y1={notes[it.s].dimens.height + (it.y + 1) * bar.config.pointGap}
-          x2={notes[it.e].dimens.x + bar.notes[it.e].dimens.width}
-          y2={notes[it.s].dimens.height + (it.y + 1) * bar.config.pointGap}
+          x1={notes[it.s].x}
+          y1={notes[it.s].height + (it.y + 1) * bar.config.pointGap}
+          x2={notes[it.e].x + bar.notes[it.e].width}
+          y2={notes[it.s].height + (it.y + 1) * bar.config.pointGap}
           stroke={"black"}
           strokeWidth={1}
         />
@@ -182,13 +173,18 @@ class MuseBar extends React.Component<{ bar: Bar }, {}> {
         height={this.props.bar.height}
       >
         <Border
-          width={this.props.bar.width}
-          height={this.props.bar.height}
+          w={this.props.bar.width}
+          h={this.props.bar.height}
           x={0}
           y={0}
           clazz={clazz}
+          show={this.props.bar.config.showBorder}
         />
-        <BarLine d={d} clazz={clazz} />
+        <BarLine
+          w={this.props.bar.width}
+          h={this.props.bar.height}
+          clazz={clazz}
+        />
         {notes.map((it, idx) => (
           <MuseNote key={idx} note={it} />
         ))}
