@@ -15,7 +15,6 @@ export class Line implements Codec {
   readonly page: Page;
   readonly index: number;
   readonly config: MuseConfig;
-  tracksY: number = 0;
   @observable tracks: Track[] = [];
   @computed get width() {
     return this.page.width;
@@ -33,6 +32,14 @@ export class Line implements Codec {
   }
   @computed get y() {
     return this.page.linesY[this.index];
+  }
+  @computed get tracksY(): number[] {
+    let y = 0;
+    return this.tracks.map((it) => {
+      let r = y;
+      y += it.height + this.config.trackGap;
+      return r;
+    });
   }
   constructor(o: ILine, index: number, page: Page, config: MuseConfig) {
     this.page = page;

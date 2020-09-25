@@ -3,7 +3,7 @@ import MuseConfig from "./MuseConfig";
 import MuseNote, { INote, Note } from "./MuseNote";
 import { Border } from "./Border";
 import Codec from "./Codec";
-import { comparer, computed, observable } from "mobx";
+import { computed, observable } from "mobx";
 import { observer, useObserver } from "mobx-react";
 import Fraction from "./Fraction";
 import { Track } from "./MuseTrack";
@@ -61,10 +61,7 @@ export class Bar implements Codec {
   @computed get notesMaxMarginBottom(): number {
     return this.track.notesMaxMarginBottom;
   }
-  @computed({ equals: comparer.structural }) get baselineGroup(): Baseline[] {
-    return this.generateBaselineGroup();
-  }
-  generateBaselineGroup() {
+  @computed get baselineGroup(): Baseline[] {
     let r: {
       y: number;
       s: number;
@@ -90,6 +87,11 @@ export class Bar implements Codec {
       }
     }
     return r;
+  }
+  @computed get notesWidthSum(): number {
+    let w = 0;
+    this.notes.forEach((it) => (w += it.width));
+    return w;
   }
   constructor(o: IBar, index: number, track: Track, config: MuseConfig) {
     this.index = index;

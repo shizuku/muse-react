@@ -31,9 +31,7 @@ export class Track implements Codec {
     return 0;
   }
   @computed get y(): number {
-    let y = this.line.tracksY;
-    this.line.tracksY += this.height + this.config.trackGap;
-    return y;
+    return this.line.tracksY[this.index];
   }
   @computed get barsTime(): Fraction[] {
     return this.bars.map((it) => it.time);
@@ -56,6 +54,11 @@ export class Track implements Codec {
   @computed get notesMaxMarginBottom(): number {
     return Math.max(...this.bars.map((it) => it.preNotesMaxMarginBottom));
   }
+  @computed get notesWidthSum(): number {
+    let w = 0;
+    this.bars.forEach((it) => (w += it.notesWidthSum));
+    return w;
+  } 
   constructor(o: ITrack, index: number, line: Line, config: MuseConfig) {
     this.index = index;
     this.line = line;
