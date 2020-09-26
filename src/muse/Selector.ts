@@ -43,12 +43,14 @@ class Selector {
     });
   }
   select(s: SelectionNote | SelectionSubNote, clear: boolean) {
-    if (this.s !== null && s.level <= this.s.level) {
-      if (clear) {
-        this.clear();
+    if (this.s !== null) {
+      if (s.level <= this.s.level) {
+        if (clear) {
+          this.clear();
+        }
+        this.s = s;
+        s.setSelect(true);
       }
-      this.s = s;
-      s.setSelect(true);
     } else {
       if (clear) {
         this.clear();

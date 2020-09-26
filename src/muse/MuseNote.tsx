@@ -363,13 +363,12 @@ class MuseSubNote extends React.Component<MuseSubNoteProps, {}> {
     return (
       <g
         className={"muse-note__subnote"}
-        transform={"translate(" + this.props.dx + "," + this.props.y + ")"}
+        transform={"translate(" + 0 + "," + this.props.y + ")"}
         width={this.props.w}
         height={this.props.h}
         onClick={() => {
-          console.log("subnote");
           Selector.instance.select(this.props.subNote.selection, true);
-          console.log(this.props.subNote.isSelect);
+          console.log(`subnote ${this.props.subNote.isSelect}`);
         }}
       >
         <text
@@ -395,7 +394,7 @@ class MuseSubNote extends React.Component<MuseSubNoteProps, {}> {
         <Border
           x={0}
           y={0}
-          w={24}
+          w={this.props.w}
           h={24}
           clazz={"muse-note__subnote"}
           show={this.props.subNote.isSelect}
@@ -416,8 +415,8 @@ class MuseNote extends React.Component<{ note: Note }, {}> {
         width={this.props.note.width}
         height={this.props.note.height}
         onClick={() => {
-          console.log("note");
           Selector.instance.select(this.props.note.selection, true);
+          console.log(`note ${this.props.note.isSelect}`);
         }}
       >
         <OuterBorder
