@@ -27,5 +27,5 @@ export default class MuseConfig {
 
   textFontFamily = "serif";
 
-  showBorder = true;
+  showBorder = false;
 }

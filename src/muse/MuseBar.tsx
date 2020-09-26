@@ -34,20 +34,32 @@ export class Bar implements Codec {
     });
     return h;
   }
-  @computed get x() {
+  @computed get x(): number {
     return this.track.barsX[this.index];
   }
-  @computed get y() {
+  @computed get y(): number {
     return 0;
   }
   @computed get notesTime(): Fraction[] {
     return this.notes.map((it) => it.time);
   }
-  @computed get time() {
-    return this.notesTime.reduce((a, b) => a.plus(b), new Fraction());
+  @computed get notesTimeSum(): Fraction {
+    return this.notesTime
+      .reduce((a, b) => a.plus(b), new Fraction())
+      .plus(new Fraction().init(1, 1));
+  }
+  @computed get notesWidth(): number[] {
+    return this.notes.map((it) => it.width);
   }
   @computed get notesX(): number[] {
-    return this.notes.map((it) => 0);
+    let space = this.width - this.notesWidthSum;
+    let unit = new Fraction().init(space, 1).divide(this.notesTimeSum);
+    let x = unit.toNumber();
+    return this.notesWidth.map((it, idx) => {
+      let r = x;
+      x += it + this.notesTime[idx].multiply(unit).toNumber();
+      return r;
+    });
   }
   @computed get preNotesMaxHeight(): number {
     return Math.max(...this.notes.map((it) => it.preHeight));

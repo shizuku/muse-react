@@ -1,34 +1,53 @@
 import React from "react";
-import { OuterBorder } from "./Border";
+import { Border, OuterBorder } from "./Border";
 import MuseConfig from "./MuseConfig";
 import Codec from "./Codec";
 import Fraction from "./Fraction";
 import { computed, observable } from "mobx";
 import { observer } from "mobx-react";
-import Selector from "./Selector";
+import Selector, { SelectionNote, SelectionSubNote } from "./Selector";
 import { Bar } from "./MuseBar";
-
-class NoteGroup {
-  @observable x: string = "";
-  @observable n: string = "";
-  @observable t: number = 0;
-}
 
 export interface INote {
   n: string;
+}
+
+class SubNote {
+  @observable x: string = "";
+  @observable n: string = "";
+  @observable t: number = 0;
+  @observable isSelect = false;
+  selection: SelectionSubNote = {
+    kind: "subnote",
+    level: 0,
+    setSelect: (s: boolean) => {
+      this.isSelect = s;
+    },
+    setNum: (n: string) => {
+      this.n = n;
+    },
+    reducePoint: (h: number) => {
+      this.t += h;
+    },
+  };
+  constructor({ x, n, t }: { x: string; n: string; t: number }) {
+    this.x = x;
+    this.n = n;
+    this.t = t;
+  }
 }
 
 export class Note implements Codec {
   readonly config: MuseConfig;
   @observable index: number;
   @observable bar: Bar;
-  @observable noteGroup: NoteGroup[] = [];
+  @observable subNotes: SubNote[] = [];
   @observable l: number = 0;
   @observable p: number = 0;
   @observable d: number = 0;
-  @computed get dx() {
+  @computed get dx(): number {
     let dxx = false;
-    this.noteGroup.forEach((it) => {
+    this.subNotes.forEach((it) => {
       if (it.x !== "") {
         dxx = true;
       }
@@ -47,7 +66,7 @@ export class Note implements Codec {
   @computed get notesY(): number[] {
     let r: number[] = [];
     let ny = 0;
-    this.noteGroup.forEach((it, idx) => {
+    this.subNotes.forEach((it, idx) => {
       if (it.t < 0) {
         if (idx !== 0) {
           let i = -it.t;
@@ -76,7 +95,7 @@ export class Note implements Codec {
     let ny = 0;
     let mb = 0;
     mb += this.l * this.config.pointGap;
-    this.noteGroup.forEach((it, idx) => {
+    this.subNotes.forEach((it, idx) => {
       if (it.t < 0) {
         if (idx === 0) {
           let i = -it.t;
@@ -129,7 +148,7 @@ export class Note implements Codec {
   }
   @computed get preHeight(): number {
     let h = 0;
-    this.noteGroup.forEach((it, idx) => {
+    this.subNotes.forEach((it, idx) => {
       if (it.t < 0) {
         if (idx !== 0) {
           let i = -it.t;
@@ -159,7 +178,7 @@ export class Note implements Codec {
   @computed get preMarginBottom(): number {
     let mb = 0;
     mb += this.l * this.config.pointGap;
-    this.noteGroup.forEach((it, idx) => {
+    this.subNotes.forEach((it, idx) => {
       if (it.t < 0) {
         if (idx === 0) {
           let i = -it.t;
@@ -182,6 +201,26 @@ export class Note implements Codec {
     this.index = idx;
     this.decode(o);
   }
+  selection: SelectionNote = {
+    kind: "note",
+    level: 1,
+    setSelect: (s: boolean) => {
+      this.isSelect = s;
+    },
+
+    reduceLine: (l: number) => {
+      this.l += l;
+      if (this.l < 0) {
+        this.l = 0;
+      }
+    },
+    reduceTailPoint: (p: number) => {
+      this.p += p;
+      if (this.p < 0) {
+        this.p = 0;
+      }
+    },
+  };
   decode(o: INote): void {
     if (o.n !== undefined) {
       let n: string = o.n;
@@ -208,7 +247,7 @@ export class Note implements Codec {
             if (t !== 0 && it.charAt(i + 1) === "-") {
               t = -t;
             }
-            this.noteGroup.push({ x, n, t });
+            this.subNotes.push(new SubNote({ x, n, t }));
             break;
           }
         }
@@ -235,7 +274,7 @@ export class Note implements Codec {
   }
   code(): INote {
     let ns: string = "";
-    this.noteGroup.forEach((it, idx) => {
+    this.subNotes.forEach((it, idx) => {
       let t = "";
       if (it.t > 0) {
         for (let i = 0; i < it.t; ++i) {
@@ -246,7 +285,7 @@ export class Note implements Codec {
           t += "-";
         }
       }
-      if (idx + 1 >= this.noteGroup.length) {
+      if (idx + 1 >= this.subNotes.length) {
         ns += `${it.x}${it.n}${t}`;
       } else {
         ns += `${it.x}${it.n}${t}|`;
@@ -266,47 +305,6 @@ function castX(x: string) {
     N: "n",
   };
   return m[x] || "";
-}
-
-function noteGroup(note: Note, clazz: string) {
-  return (
-    <g className={clazz + "__group-note"}>
-      {note.noteGroup.map((it, idx) => {
-        return (
-          <g
-            className={clazz + "__note-one"}
-            key={idx}
-            width={note.width}
-            height={note.notesY[idx]}
-            transform={
-              "translate(" + 0 + "," + (note.height - note.notesY[idx]) + ")"
-            }
-          >
-            <text
-              fontFamily={note.config.noteFontFamily}
-              fontSize={note.config.noteFontSize}
-              transform={"translate(" + note.dx + "," + 0 + ")"}
-            >
-              {it.n}
-            </text>
-            <text
-              fontFamily={note.config.noteFontFamily}
-              fontSize={note.config.sigFontSize}
-              transform={
-                "translate(" +
-                0 +
-                "," +
-                (note.config.sigFontSize - note.config.noteHeight) +
-                ")"
-              }
-            >
-              {castX(it.x)}
-            </text>
-          </g>
-        );
-      })}
-    </g>
-  );
 }
 
 function pointGroup(note: Note, clazz: string) {
@@ -351,48 +349,95 @@ function tailPoint(note: Note, clazz: string) {
   );
 }
 
+interface MuseSubNoteProps {
+  dx: number;
+  y: number;
+  w: number;
+  h: number;
+  config: MuseConfig;
+  subNote: SubNote;
+}
+@observer
+class MuseSubNote extends React.Component<MuseSubNoteProps, {}> {
+  render() {
+    return (
+      <g
+        className={"muse-note__subnote"}
+        transform={"translate(" + this.props.dx + "," + this.props.y + ")"}
+        width={this.props.w}
+        height={this.props.h}
+        onClick={() => {
+          console.log("subnote");
+          Selector.instance.select(this.props.subNote.selection, true);
+          console.log(this.props.subNote.isSelect);
+        }}
+      >
+        <text
+          fontFamily={this.props.config.noteFontFamily}
+          fontSize={this.props.config.noteFontSize}
+          transform={"translate(" + this.props.dx + "," + 0 + ")"}
+        >
+          {this.props.subNote.n}
+        </text>
+        <text
+          fontFamily={this.props.config.noteFontFamily}
+          fontSize={this.props.config.sigFontSize}
+          transform={
+            "translate(" +
+            0 +
+            "," +
+            (this.props.config.sigFontSize - this.props.config.noteHeight) +
+            ")"
+          }
+        >
+          {castX(this.props.subNote.x)}
+        </text>
+        <Border
+          x={0}
+          y={0}
+          w={24}
+          h={24}
+          clazz={"muse-note__subnote"}
+          show={this.props.subNote.isSelect}
+        />
+      </g>
+    );
+  }
+}
+
 @observer
 class MuseNote extends React.Component<{ note: Note }, {}> {
-  selection = {
-    setSelect: (s: boolean) => {
-      this.props.note.isSelect = s;
-    },
-    setNum: (n: string) => {
-      this.props.note.noteGroup[0].n = n;
-    },
-    reduceLine: (l: number) => {
-      this.props.note.l += l;
-      if (this.props.note.l < 0) {
-        this.props.note.l = 0;
-      }
-    },
-    reducePoint: (p: number) => {
-      this.props.note.p += p;
-      if (this.props.note.p < 0) {
-        this.props.note.p = 0;
-      }
-    },
-  };
   render() {
     let clazz = "muse-note";
     return (
       <g
         className={clazz}
-        transform={"translate(" + 0 + "," + 0 + ")"}
+        transform={"translate(" + this.props.note.x + "," + 0 + ")"}
         width={this.props.note.width}
         height={this.props.note.height}
         onClick={() => {
-          Selector.instance.selectNote(this.selection, true);
+          console.log("note");
+          Selector.instance.select(this.props.note.selection, true);
         }}
       >
         <OuterBorder
           w={this.props.note.width}
-          h={this.props.note.height}
+          h={this.props.note.height + this.props.note.marginBottom}
           clazz={clazz}
           show={this.props.note.isSelect}
           color={"blue"}
         />
-        {noteGroup(this.props.note, clazz)}
+        {this.props.note.subNotes.map((it, idx) => (
+          <MuseSubNote
+            key={idx}
+            dx={this.props.note.dx}
+            y={this.props.note.height - this.props.note.notesY[idx]}
+            w={this.props.note.width}
+            h={22}
+            config={this.props.note.config}
+            subNote={it}
+          />
+        ))}
         {pointGroup(this.props.note, clazz)}
         {tailPoint(this.props.note, clazz)}
       </g>

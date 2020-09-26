@@ -20,7 +20,7 @@ export interface INotation {
   subtitle: string;
   author: string;
   rhythmic: string;
-  speed:string,
+  speed: string;
   C: string;
   pages: IPage[];
 }
@@ -110,13 +110,7 @@ const MuseNotationInfo: React.FC<MuseNotationInfoProps> = ({
       width={config.pageWidth}
       textAnchor={"middle"}
       fontSize={config.infoTitleFontSize}
-      transform={
-        "translate(" +
-        (config.pageMarginHorizontal + config.pageWidth / 2) +
-        "," +
-        y +
-        ")"
-      }
+      transform={"translate(" + config.pageWidth / 2 + "," + y + ")"}
     >
       {info.title}
     </text>
@@ -129,13 +123,7 @@ const MuseNotationInfo: React.FC<MuseNotationInfoProps> = ({
       width={config.pageWidth}
       textAnchor={"middle"}
       fontSize={config.infoSubtitleFontSize}
-      transform={
-        "translate(" +
-        (config.pageMarginHorizontal + config.pageWidth / 2) +
-        "," +
-        y +
-        ")"
-      }
+      transform={"translate(" + config.pageWidth / 2 + "," + y + ")"}
     >
       {info.subtitle}
     </text>

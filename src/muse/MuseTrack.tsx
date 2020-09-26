@@ -34,11 +34,15 @@ export class Track implements Codec {
     return this.line.tracksY[this.index];
   }
   @computed get barsTime(): Fraction[] {
-    return this.bars.map((it) => it.time);
+    return this.bars.map((it) => it.notesTimeSum);
   }
   @computed get barsWidth(): number[] {
-    let sum = this.barsTime.reduce((a, b) => a.plus(b), new Fraction());
-    return this.barsTime.map((it) => it.divide(sum).toNumber() * this.width);
+    let timeSum = this.barsTime.reduce((a, b) => a.plus(b), new Fraction());
+    let space = this.width - this.notesWidthSum;
+    let unit = new Fraction().init(space, 1).divide(timeSum);
+    return this.barsNotesWidth.map((it, idx) => {
+      return it + this.barsTime[idx].multiply(unit).toNumber();
+    });
   }
   @computed get barsX(): number[] {
     let x = 0;
@@ -55,10 +59,11 @@ export class Track implements Codec {
     return Math.max(...this.bars.map((it) => it.preNotesMaxMarginBottom));
   }
   @computed get notesWidthSum(): number {
-    let w = 0;
-    this.bars.forEach((it) => (w += it.notesWidthSum));
-    return w;
-  } 
+    return this.barsNotesWidth.reduce((a, b) => a + b, 0);
+  }
+  @computed get barsNotesWidth(): number[] {
+    return this.bars.map((it) => it.notesWidthSum);
+  }
   constructor(o: ITrack, index: number, line: Line, config: MuseConfig) {
     this.index = index;
     this.line = line;

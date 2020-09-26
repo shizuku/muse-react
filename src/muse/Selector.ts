@@ -1,40 +1,64 @@
-interface SelectionNote {
+export interface SelectionNote {
+  kind: "note";
+  level: 1;
+  setSelect: (i: boolean) => void;
+  reduceLine: (l: number) => void;
+  reduceTailPoint: (p: number) => void;
+}
+
+export interface SelectionSubNote {
+  kind: "subnote";
+  level: 0;
   setSelect: (i: boolean) => void;
   setNum: (n: string) => void;
-  reduceLine: (l: number) => void;
-  reducePoint: (p: number) => void;
+  reducePoint: (h: number) => void;
 }
 
 class Selector {
-  list: SelectionNote[] = [];
+  s: SelectionNote | SelectionSubNote | null = null;
   static instance = new Selector();
   private constructor() {
     document.addEventListener("keydown", (ev) => {
-      if (this.list.length === 1) {
-        if ((ev.key >= "0" && ev.key <= "9") || ev.key === "-") {
-          this.list[0].setNum(ev.key);
-        } else if (ev.key === "q") {
-          this.list[0].reduceLine(-1);
-        } else if (ev.key === "a") {
-          this.list[0].reduceLine(1);
-        } else if (ev.key === "s") {
-          this.list[0].reducePoint(-1);
-        } else if (ev.key === "d") {
-          this.list[0].reducePoint(1);
+      if (this.s !== null) {
+        if (this.s.kind === "note") {
+          if (ev.key === "q") {
+            this.s.reduceLine(-1);
+          } else if (ev.key === "a") {
+            this.s.reduceLine(1);
+          } else if (ev.key === "s") {
+            this.s.reduceTailPoint(-1);
+          } else if (ev.key === "d") {
+            this.s.reduceTailPoint(1);
+          }
+        } else if (this.s.kind === "subnote") {
+          if ((ev.key >= "0" && ev.key <= "9") || ev.key === "-") {
+            this.s.setNum(ev.key);
+          } else if (ev.key === "r") {
+            this.s.reducePoint(1);
+          } else if (ev.key === "f") {
+            this.s.reducePoint(-1);
+          }
         }
       }
     });
   }
-  selectNote(s: SelectionNote, clear: boolean) {
-    if (clear) {
-      this.clear();
+  select(s: SelectionNote | SelectionSubNote, clear: boolean) {
+    if (this.s !== null && s.level <= this.s.level) {
+      if (clear) {
+        this.clear();
+      }
+      this.s = s;
+      s.setSelect(true);
+    } else {
+      if (clear) {
+        this.clear();
+      }
+      this.s = s;
+      s.setSelect(true);
     }
-    this.list.push(s);
-    s.setSelect(true);
   }
   clear() {
-    this.list.forEach((it) => it.setSelect(false));
-    this.list.length = 0;
+    this.s?.setSelect(false);
   }
 }
 
