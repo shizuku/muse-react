@@ -7,6 +7,7 @@ import { computed, observable } from "mobx";
 import { Line } from "./MuseLine";
 import Fraction from "./Fraction";
 import { observer } from "mobx-react";
+import { SelectionTrack } from "./Selector";
 
 export interface ITrack {
   bars: IBar[];
@@ -17,6 +18,7 @@ export class Track implements Codec {
   readonly index: number;
   readonly line: Line;
   @observable bars: Bar[] = [];
+  @observable isSelect: boolean = false;
   @computed get width(): number {
     return this.line.width;
   }
@@ -70,6 +72,12 @@ export class Track implements Codec {
     this.config = config;
     this.decode(o);
   }
+  selection: SelectionTrack = {
+    setSelect: (s: boolean) => {
+      this.isSelect = s;
+    },
+    getThis: () => this,
+  };
   decode(o: ITrack): void {
     if (o.bars !== undefined) {
       o.bars.forEach((it: any, idx) => {
@@ -102,7 +110,7 @@ class MuseTrack extends React.Component<{ track: Track }> {
           x={0}
           y={0}
           clazz={clazz}
-          show={this.props.track.config.showBorder}
+          show={this.props.track.isSelect}
         />
         {this.props.track.bars.map((it, idx) => (
           <MuseBar key={idx} bar={it} />

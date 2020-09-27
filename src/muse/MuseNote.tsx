@@ -12,7 +12,7 @@ export interface INote {
   n: string;
 }
 
-export class SubNote {
+export class SubNote implements SelectionSubNote {
   @observable isSelect = false;
   readonly note: Note;
   readonly index: number;
@@ -20,30 +20,6 @@ export class SubNote {
   @observable x: string = "";
   @observable n: string = "";
   @observable t: number = 0;
-  selection: SelectionSubNote = {
-    setSelect: (s: boolean) => {
-      this.isSelect = s;
-    },
-    setNum: (n: string) => {
-      this.n = n;
-    },
-    reducePoint: (h: number) => {
-      this.t += h;
-    },
-    reduceLine: (l: number) => {
-      this.note.l += l;
-      if (this.note.l < 0) {
-        this.note.l = 0;
-      }
-    },
-    reduceTailPoint: (p: number) => {
-      this.note.p += p;
-      if (this.note.p < 0) {
-        this.note.p = 0;
-      }
-    },
-    getThis: () => this,
-  };
   constructor(
     x: string,
     n: string,
@@ -58,6 +34,30 @@ export class SubNote {
     this.note = note;
     this.index = index;
     this.config = config;
+  }
+  setSelect(s: boolean) {
+    this.isSelect = s;
+  }
+  setNum(n: string) {
+    this.n = n;
+  }
+  reducePoint(h: number) {
+    this.t += h;
+  }
+  reduceLine(l: number) {
+    this.note.l += l;
+    if (this.note.l < 0) {
+      this.note.l = 0;
+    }
+  }
+  reduceTailPoint(p: number) {
+    this.note.p += p;
+    if (this.note.p < 0) {
+      this.note.p = 0;
+    }
+  }
+  getThis() {
+    return this;
   }
 }
 
@@ -246,7 +246,7 @@ export class Note implements Codec {
         new SubNote("", n, 0, this, this.subNotes.length, this.config)
       );
       Selector.instance.selectSubNote(
-        this.subNotes[this.subNotes.length - 1].selection
+        this.subNotes[this.subNotes.length - 1]
       );
     },
     removeSubNote: (index: number) => {
@@ -400,7 +400,7 @@ class MuseSubNote extends React.Component<MuseSubNoteProps, {}> {
         width={this.props.w}
         height={this.props.h}
         onClick={() => {
-          Selector.instance.selectSubNote(this.props.subNote.selection);
+          Selector.instance.selectSubNote(this.props.subNote);
         }}
       >
         <text

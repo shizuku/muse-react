@@ -6,6 +6,7 @@ import Codec from "./Codec";
 import { computed, observable } from "mobx";
 import { Notation } from "./MuseNotation";
 import { observer } from "mobx-react";
+import { SelectionPage } from "./Selector";
 
 export interface IPage {
   lines: ILine[];
@@ -16,6 +17,7 @@ export class Page implements Codec {
   readonly config: MuseConfig;
   readonly index: number;
   @observable lines: Line[] = [];
+  @observable isSelect: boolean = false;
   @computed get width() {
     return this.config.pageWidth - this.config.pageMarginHorizontal * 2;
   }
@@ -76,6 +78,12 @@ export class Page implements Codec {
     this.config = config;
     this.decode(o);
   }
+  selection: SelectionPage = {
+    setSelect: (s: boolean) => {
+      this.isSelect = s;
+    },
+    getThis: () => this,
+  };
   decode(o: IPage): void {
     if (o.lines !== undefined) {
       o.lines.forEach((it: ILine, idx) => {
@@ -151,7 +159,7 @@ class MusePage extends React.Component<{ page: Page }> {
           x={this.props.page.x}
           y={this.props.page.y}
           clazz={clazz}
-          show={this.props.page.config.showBorder}
+          show={this.props.page.isSelect}
         />
         <OuterBorder
           w={

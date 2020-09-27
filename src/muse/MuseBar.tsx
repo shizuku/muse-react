@@ -200,7 +200,7 @@ class MuseBar extends React.Component<{ bar: Bar }, {}> {
           x={0}
           y={0}
           clazz={clazz}
-          show={this.props.bar.config.showBorder}
+          show={this.props.bar.isSelect}
         />
         <BarLine
           w={this.props.bar.width}

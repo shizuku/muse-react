@@ -6,6 +6,7 @@ import Codec from "./Codec";
 import { computed, observable } from "mobx";
 import { observer } from "mobx-react";
 import { Page } from "./MusePage";
+import { SelectionLine } from "./Selector";
 
 export interface ILine {
   tracks: ITrack[];
@@ -16,6 +17,7 @@ export class Line implements Codec {
   readonly index: number;
   readonly config: MuseConfig;
   @observable tracks: Track[] = [];
+  @observable isSelect: boolean = false;
   @computed get width() {
     return this.page.width;
   }
@@ -47,6 +49,12 @@ export class Line implements Codec {
     this.config = config;
     this.decode(o);
   }
+  selection: SelectionLine = {
+    setSelect: (s: boolean) => {
+      this.isSelect = s;
+    },
+    getThis: () => this,
+  };
   decode(o: ILine): void {
     if (o.tracks !== undefined) {
       o.tracks.forEach((it: ITrack, idx) => {
@@ -93,7 +101,7 @@ class MuseLine extends React.Component<{ line: Line }> {
           x={0}
           y={0}
           clazz={clazz}
-          show={this.props.line.config.showBorder}
+          show={this.props.line.isSelect}
         />
         <LineHead height={this.props.line.height} clazz={clazz} />
         {this.props.line.tracks.map((it, idx) => (
