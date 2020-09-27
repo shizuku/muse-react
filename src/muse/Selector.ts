@@ -1,26 +1,33 @@
-import { Note } from "./MuseNote";
+import { Bar } from "./MuseBar";
+import { Note, SubNote } from "./MuseNote";
 
 export interface SelectionNote {
   setSelect: (i: boolean) => void;
+  getThis: () => Note;
   reduceLine: (l: number) => void;
   reduceTailPoint: (p: number) => void;
   addSubNote: (n: string) => void;
   removeSubNote: (index: number) => void;
-  getThis: () => Note;
 }
 
 export interface SelectionSubNote {
   setSelect: (i: boolean) => void;
+  getThis: () => SubNote;
   setNum: (n: string) => void;
   reducePoint: (h: number) => void;
   reduceLine: (l: number) => void;
   reduceTailPoint: (p: number) => void;
-  getIndex: () => number;
+}
+
+export interface SelectionBar {
+  setSelect: (i: boolean) => void;
+  getThis: () => Bar;
 }
 
 class Selector {
   subnote: SelectionSubNote | null = null;
   note: SelectionNote | null = null;
+  bar: SelectionBar | null = null;
   static instance = new Selector();
   private constructor() {
     document.addEventListener("keydown", (ev) => {
@@ -44,17 +51,17 @@ class Selector {
           this.subnote = null;
           this.note?.setSelect(true);
         } else if (ev.key === "Backspace") {
-          this.note?.removeSubNote(this.subnote.getIndex());
+          this.note?.removeSubNote(this.subnote.getThis().index);
           this.note?.setSelect(true);
           this.subnote.setSelect(false);
           this.subnote = null;
         } else if (ev.key === "ArrowUp") {
           if (this.note) {
             let l = this.note.getThis().subNotes.length;
-            if (l > this.subnote.getIndex() + 1) {
+            if (l > this.subnote.getThis().index + 1) {
               this.subnote.setSelect(false);
               this.subnote = this.note.getThis().subNotes[
-                this.subnote.getIndex() + 1
+                this.subnote.getThis().index + 1
               ].selection;
               this.subnote.setSelect(true);
             }
@@ -62,10 +69,10 @@ class Selector {
           ev.returnValue = false;
         } else if (ev.key === "ArrowDown") {
           if (this.note) {
-            if (this.subnote.getIndex() > 0) {
+            if (this.subnote.getThis().index > 0) {
               this.subnote.setSelect(false);
               this.subnote = this.note.getThis().subNotes[
-                this.subnote.getIndex() - 1
+                this.subnote.getThis().index - 1
               ].selection;
               this.subnote.setSelect(true);
             }
@@ -102,12 +109,18 @@ class Selector {
     this.note?.setSelect(false);
     this.note = s;
     if (this.subnote === null) this.note.setSelect(true);
+    this.selectBar(s.getThis().bar.selection);
   }
   selectSubNote(s: SelectionSubNote) {
     this.subnote?.setSelect(false);
-    this.note?.setSelect(false);
     this.subnote = s;
     this.subnote.setSelect(true);
+    this.selectNote(s.getThis().note.selection);
+  }
+  selectBar(s: SelectionBar) {
+    this.bar?.setSelect(false);
+    this.bar = s;
+    this.bar.setSelect(true);
   }
 }
 

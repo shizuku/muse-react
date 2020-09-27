@@ -12,7 +12,7 @@ export interface INote {
   n: string;
 }
 
-class SubNote {
+export class SubNote {
   @observable isSelect = false;
   readonly note: Note;
   readonly index: number;
@@ -42,9 +42,7 @@ class SubNote {
         this.note.p = 0;
       }
     },
-    getIndex: () => {
-      return this.index;
-    },
+    getThis: () => this,
   };
   constructor(
     x: string,

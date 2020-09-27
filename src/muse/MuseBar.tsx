@@ -7,6 +7,7 @@ import { computed, observable } from "mobx";
 import { observer, useObserver } from "mobx-react";
 import Fraction from "./Fraction";
 import { Track } from "./MuseTrack";
+import { SelectionBar } from "./Selector";
 
 interface Baseline {
   y: number;
@@ -23,6 +24,7 @@ export class Bar implements Codec {
   readonly index: number;
   @observable track: Track;
   @observable notes: Note[] = [];
+  @observable isSelect: boolean = false;
   @computed get width(): number {
     return this.track.barsWidth[this.index];
   }
@@ -111,6 +113,12 @@ export class Bar implements Codec {
     this.config = config;
     this.decode(o);
   }
+  selection: SelectionBar = {
+    setSelect: (s: boolean) => {
+      this.isSelect = s;
+    },
+    getThis: () => this,
+  };
   decode(o: IBar): void {
     if (o.notes !== undefined) {
       o.notes.forEach((it: INote, idx) => {
