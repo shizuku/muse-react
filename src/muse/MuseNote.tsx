@@ -13,11 +13,13 @@ export interface INote {
 }
 
 class SubNote {
+  @observable isSelect = false;
+  readonly note: Note;
+  readonly index: number;
+  config: MuseConfig;
   @observable x: string = "";
   @observable n: string = "";
   @observable t: number = 0;
-  @observable isSelect = false;
-  @observable note: Note;
   selection: SelectionSubNote = {
     setSelect: (s: boolean) => {
       this.isSelect = s;
@@ -40,22 +42,24 @@ class SubNote {
         this.note.p = 0;
       }
     },
+    getIndex: () => {
+      return this.index;
+    },
   };
-  constructor({
-    x,
-    n,
-    t,
-    note,
-  }: {
-    x: string;
-    n: string;
-    t: number;
-    note: Note;
-  }) {
+  constructor(
+    x: string,
+    n: string,
+    t: number,
+    note: Note,
+    index: number,
+    config: MuseConfig
+  ) {
     this.x = x;
     this.n = n;
     this.t = t;
     this.note = note;
+    this.index = index;
+    this.config = config;
   }
 }
 
@@ -240,8 +244,17 @@ export class Note implements Codec {
       }
     },
     addSubNote: (n: string) => {
-      this.subNotes.push(new SubNote({ x: "", n, t: 0, note: this }));
+      this.subNotes.push(
+        new SubNote("", n, 0, this, this.subNotes.length, this.config)
+      );
+      Selector.instance.selectSubNote(
+        this.subNotes[this.subNotes.length - 1].selection
+      );
     },
+    removeSubNote: (index: number) => {
+      this.subNotes = this.subNotes.filter((it) => it.index !== index);
+    },
+    getThis: () => this,
   };
   decode(o: INote): void {
     if (o.n !== undefined) {
@@ -257,7 +270,7 @@ export class Note implements Codec {
         ts = n.substr(pos + 1);
       }
       let ng = ns.split("|");
-      ng.forEach((it) => {
+      ng.forEach((it, idx) => {
         for (let i = 0; i < it.length; ++i) {
           if (
             (it.charCodeAt(i) <= 57 && it.charCodeAt(i) >= 48) ||
@@ -269,7 +282,7 @@ export class Note implements Codec {
             if (t !== 0 && it.charAt(i + 1) === "-") {
               t = -t;
             }
-            this.subNotes.push(new SubNote({ x, n, t, note: this }));
+            this.subNotes.push(new SubNote(x, n, t, this, idx, this.config));
             break;
           }
         }
@@ -376,9 +389,7 @@ interface MuseSubNoteProps {
   y: number;
   w: number;
   h: number;
-  config: MuseConfig;
   subNote: SubNote;
-  note: Note;
 }
 
 @observer
@@ -395,20 +406,21 @@ class MuseSubNote extends React.Component<MuseSubNoteProps, {}> {
         }}
       >
         <text
-          fontFamily={this.props.config.noteFontFamily}
-          fontSize={this.props.config.noteFontSize}
+          fontFamily={this.props.subNote.config.noteFontFamily}
+          fontSize={this.props.subNote.config.noteFontSize}
           transform={"translate(" + this.props.dx + "," + 0 + ")"}
         >
           {this.props.subNote.n}
         </text>
         <text
-          fontFamily={this.props.config.noteFontFamily}
-          fontSize={this.props.config.sigFontSize}
+          fontFamily={this.props.subNote.config.noteFontFamily}
+          fontSize={this.props.subNote.config.sigFontSize}
           transform={
             "translate(" +
             0 +
             "," +
-            (this.props.config.sigFontSize - this.props.config.noteHeight) +
+            (this.props.subNote.config.sigFontSize -
+              this.props.subNote.config.noteHeight) +
             ")"
           }
         >
@@ -418,7 +430,7 @@ class MuseSubNote extends React.Component<MuseSubNoteProps, {}> {
           x={0}
           y={-this.props.h}
           w={this.props.w}
-          h={22}
+          h={this.props.subNote.config.noteFontSize}
           clazz={"muse-note__subnote"}
           show={this.props.subNote.isSelect}
         />
@@ -455,9 +467,7 @@ class MuseNote extends React.Component<{ note: Note }, {}> {
             y={this.props.note.height - this.props.note.notesY[idx]}
             w={this.props.note.width}
             h={22}
-            config={this.props.note.config}
             subNote={it}
-            note={this.props.note}
           />
         ))}
         {pointGroup(this.props.note, clazz)}

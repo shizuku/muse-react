@@ -1,8 +1,12 @@
+import { Note } from "./MuseNote";
+
 export interface SelectionNote {
   setSelect: (i: boolean) => void;
   reduceLine: (l: number) => void;
   reduceTailPoint: (p: number) => void;
   addSubNote: (n: string) => void;
+  removeSubNote: (index: number) => void;
+  getThis: () => Note;
 }
 
 export interface SelectionSubNote {
@@ -11,6 +15,7 @@ export interface SelectionSubNote {
   reducePoint: (h: number) => void;
   reduceLine: (l: number) => void;
   reduceTailPoint: (p: number) => void;
+  getIndex: () => number;
 }
 
 class Selector {
@@ -38,6 +43,34 @@ class Selector {
           this.subnote.setSelect(false);
           this.subnote = null;
           this.note?.setSelect(true);
+        } else if (ev.key === "Backspace") {
+          this.note?.removeSubNote(this.subnote.getIndex());
+          this.note?.setSelect(true);
+          this.subnote.setSelect(false);
+          this.subnote = null;
+        } else if (ev.key === "ArrowUp") {
+          if (this.note) {
+            let l = this.note.getThis().subNotes.length;
+            if (l > this.subnote.getIndex() + 1) {
+              this.subnote.setSelect(false);
+              this.subnote = this.note.getThis().subNotes[
+                this.subnote.getIndex() + 1
+              ].selection;
+              this.subnote.setSelect(true);
+            }
+          }
+          ev.returnValue = false;
+        } else if (ev.key === "ArrowDown") {
+          if (this.note) {
+            if (this.subnote.getIndex() > 0) {
+              this.subnote.setSelect(false);
+              this.subnote = this.note.getThis().subNotes[
+                this.subnote.getIndex() - 1
+              ].selection;
+              this.subnote.setSelect(true);
+            }
+          }
+          ev.returnValue = false;
         }
       } else if (this.note !== null) {
         if (ev.key === "q") {
@@ -48,8 +81,19 @@ class Selector {
           this.note.reduceTailPoint(-1);
         } else if (ev.key === "d") {
           this.note.reduceTailPoint(1);
-        } else if ((ev.key >= "0" && ev.key <= "9") || ev.key === "-") {
-          this.note.addSubNote(ev.key);
+        } else if (ev.key === " ") {
+          this.note.addSubNote("0");
+        } else if (ev.key === "ArrowUp") {
+          this.subnote = this.note.getThis().subNotes[0].selection;
+          this.subnote.setSelect(true);
+          this.note.setSelect(false);
+          ev.returnValue = false;
+        } else if (ev.key === "ArrowDown") {
+          let l = this.note.getThis().subNotes.length;
+          this.subnote = this.note.getThis().subNotes[l - 1].selection;
+          this.subnote.setSelect(true);
+          this.note.setSelect(false);
+          ev.returnValue = false;
         }
       }
     });
@@ -61,6 +105,7 @@ class Selector {
   }
   selectSubNote(s: SelectionSubNote) {
     this.subnote?.setSelect(false);
+    this.note?.setSelect(false);
     this.subnote = s;
     this.subnote.setSelect(true);
   }
