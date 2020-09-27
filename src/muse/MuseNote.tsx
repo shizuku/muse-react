@@ -17,9 +17,8 @@ class SubNote {
   @observable n: string = "";
   @observable t: number = 0;
   @observable isSelect = false;
+  @observable note: Note;
   selection: SelectionSubNote = {
-    kind: "subnote",
-    level: 0,
     setSelect: (s: boolean) => {
       this.isSelect = s;
     },
@@ -29,11 +28,34 @@ class SubNote {
     reducePoint: (h: number) => {
       this.t += h;
     },
+    reduceLine: (l: number) => {
+      this.note.l += l;
+      if (this.note.l < 0) {
+        this.note.l = 0;
+      }
+    },
+    reduceTailPoint: (p: number) => {
+      this.note.p += p;
+      if (this.note.p < 0) {
+        this.note.p = 0;
+      }
+    },
   };
-  constructor({ x, n, t }: { x: string; n: string; t: number }) {
+  constructor({
+    x,
+    n,
+    t,
+    note,
+  }: {
+    x: string;
+    n: string;
+    t: number;
+    note: Note;
+  }) {
     this.x = x;
     this.n = n;
     this.t = t;
+    this.note = note;
   }
 }
 
@@ -202,12 +224,9 @@ export class Note implements Codec {
     this.decode(o);
   }
   selection: SelectionNote = {
-    kind: "note",
-    level: 1,
     setSelect: (s: boolean) => {
       this.isSelect = s;
     },
-
     reduceLine: (l: number) => {
       this.l += l;
       if (this.l < 0) {
@@ -219,6 +238,9 @@ export class Note implements Codec {
       if (this.p < 0) {
         this.p = 0;
       }
+    },
+    addSubNote: (n: string) => {
+      this.subNotes.push(new SubNote({ x: "", n, t: 0, note: this }));
     },
   };
   decode(o: INote): void {
@@ -247,7 +269,7 @@ export class Note implements Codec {
             if (t !== 0 && it.charAt(i + 1) === "-") {
               t = -t;
             }
-            this.subNotes.push(new SubNote({ x, n, t }));
+            this.subNotes.push(new SubNote({ x, n, t, note: this }));
             break;
           }
         }
@@ -356,7 +378,9 @@ interface MuseSubNoteProps {
   h: number;
   config: MuseConfig;
   subNote: SubNote;
+  note: Note;
 }
+
 @observer
 class MuseSubNote extends React.Component<MuseSubNoteProps, {}> {
   render() {
@@ -367,8 +391,7 @@ class MuseSubNote extends React.Component<MuseSubNoteProps, {}> {
         width={this.props.w}
         height={this.props.h}
         onClick={() => {
-          Selector.instance.select(this.props.subNote.selection, true);
-          console.log(`subnote ${this.props.subNote.isSelect}`);
+          Selector.instance.selectSubNote(this.props.subNote.selection);
         }}
       >
         <text
@@ -393,9 +416,9 @@ class MuseSubNote extends React.Component<MuseSubNoteProps, {}> {
         </text>
         <Border
           x={0}
-          y={0}
+          y={-this.props.h}
           w={this.props.w}
-          h={24}
+          h={22}
           clazz={"muse-note__subnote"}
           show={this.props.subNote.isSelect}
         />
@@ -415,8 +438,7 @@ class MuseNote extends React.Component<{ note: Note }, {}> {
         width={this.props.note.width}
         height={this.props.note.height}
         onClick={() => {
-          Selector.instance.select(this.props.note.selection, true);
-          console.log(`note ${this.props.note.isSelect}`);
+          Selector.instance.selectNote(this.props.note.selection);
         }}
       >
         <OuterBorder
@@ -435,6 +457,7 @@ class MuseNote extends React.Component<{ note: Note }, {}> {
             h={22}
             config={this.props.note.config}
             subNote={it}
+            note={this.props.note}
           />
         ))}
         {pointGroup(this.props.note, clazz)}
