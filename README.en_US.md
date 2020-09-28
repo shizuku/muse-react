@@ -10,15 +10,18 @@
 
 ## Key map
 
-| Key | Action |
-| --- | ------ |
-| Num | voice  |
-| `q` | x2     |
-| `a` | /2     |
-| `s` | -1/2   |
-| `d` | +1/2   |
-| `r` | +7     |
-| `f` | -7     |
+|             |   subnote   |    note     |     bar     |    track    |    line     |    page     |  notation   |
+| :---------: | :---------: | :---------: | :---------: | :---------: | :---------: | :---------: | :---------: |
+|   `Space`   |  new child  |  new child  |  new child  |  new child  |  new child  |  new child  |  new child  |
+|   `Enter`   |  to parent  |  to parent  |  to parent  |  to parent  |  to parent  |  to parent  |  to parent  |
+| `Backspace` | del element | del element | del element | del element | del element | del element | del element |
+|  `Number`   |    voice    |      /      |      /      |      /      |      /      |      /      |      /      |
+|     `q`     |     x2      |     x2      |      /      |      /      |      /      |      /      |      /      |
+|     `a`     |     /2      |     /2      |      /      |      /      |      /      |      /      |      /      |
+|     `s`     |    -1/2     |    -1/2     |      /      |      /      |      /      |      /      |      /      |
+|     `d`     |    +1/2     |    +1/2     |      /      |      /      |      /      |      /      |      /      |
+|     `r`     |     +7      |      /      |      /      |      /      |      /      |      /      |      /      |
+|     `f`     |     -7      |      /      |      /      |      /      |      /      |      /      |      /      |
 
 ## Thanks
 

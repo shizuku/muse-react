@@ -105,6 +105,9 @@ class Selector {
           this.note.setSelect(false);
           this.note = null;
           this.bar?.setSelect(true);
+        } else if (ev.key === " ") {
+          this.note.addSubNote("0");
+          ev.returnValue = false;
         } else if (ev.key === "Backspace") {
         } else if (ev.key === "ArrowUp") {
           this.subnote = this.note.getThis().subNotes[0];
@@ -125,29 +128,41 @@ class Selector {
           this.note.reduceTailPoint(-1);
         } else if (ev.key === "d") {
           this.note.reduceTailPoint(1);
-        } else if (ev.key === " ") {
-          this.note.addSubNote("0");
-          ev.returnValue = false;
         }
       } else if (this.bar !== null) {
         if (ev.key === "Enter") {
           this.bar.setSelect(false);
           this.bar = null;
           this.track?.setSelect(true);
+        } else if (ev.key === " ") {
+          ev.returnValue = false;
+        } else if (ev.key === "Backspace") {
+          ev.returnValue = false;
         }
       } else if (this.track !== null) {
         if (ev.key === "Enter") {
           this.track.setSelect(false);
           this.track = null;
           this.line?.setSelect(true);
+        } else if (ev.key === " ") {
+          ev.returnValue = false;
+        } else if (ev.key === "Backspace") {
+          ev.returnValue = false;
         }
       } else if (this.line !== null) {
         if (ev.key === "Enter") {
           this.line.setSelect(false);
           this.line = null;
           this.page?.setSelect(true);
+        } else if (ev.key === " ") {
+          ev.returnValue = false;
+        } else if (ev.key === "Backspace") {
+          ev.returnValue = false;
         }
       } else if (this.page !== null) {
+        if (ev.key === " ") {
+          ev.returnValue = false;
+        }
       }
     });
   }
