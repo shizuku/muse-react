@@ -1,10 +1,11 @@
 import React from "react";
 import MuseConfig from "./MuseConfig";
 import MusePage, { IPage, Page } from "./MusePage";
-import { Border } from "./Border";
+import { Border, OuterBorder } from "./Border";
 import Codec from "./Codec";
 import { computed, observable } from "mobx";
 import { observer } from "mobx-react";
+import Selector, { SelectionNotation } from "./Selector";
 
 export class NotationInfo {
   @observable title: string = "";
@@ -25,9 +26,10 @@ export interface INotation {
   pages: IPage[];
 }
 
-export class Notation implements Codec {
+export class Notation implements Codec, SelectionNotation {
   readonly config: MuseConfig;
   @observable pages: Page[] = [];
+  @observable isSelect = false;
   @observable info: NotationInfo = new NotationInfo();
   @computed get height() {
     let h = 0;
@@ -42,6 +44,26 @@ export class Notation implements Codec {
   constructor(o: INotation, config: MuseConfig) {
     this.config = config;
     this.decode(o);
+  }
+  addPage() {
+    this.pages.push(
+      new Page(
+        { lines: [{ tracks: [{ bars: [{ notes: [{ n: "0" }] }] }] }] },
+        this.pages.length,
+        this,
+        this.config
+      )
+    );
+    Selector.instance.selectPage(this.pages[this.pages.length - 1]);
+  }
+  reomvePage(index: number) {
+    this.pages = this.pages.filter((it, idx) => idx !== index);
+  }
+  setSelect(s: boolean) {
+    this.isSelect = s;
+  }
+  getThis() {
+    return this;
   }
   decode(o: INotation): void {
     if (o.pages !== undefined) {
@@ -218,6 +240,12 @@ class MuseNotation extends React.Component<{ notation: Notation }, {}> {
             h={this.props.notation.height}
             x={0}
             y={0}
+            clazz={clazz}
+            show={this.props.notation.isSelect}
+          />
+          <OuterBorder
+            w={this.props.notation.width}
+            h={this.props.notation.height}
             clazz={clazz}
           />
           {this.props.notation.pages.map((it, idx) => (

@@ -6,7 +6,7 @@ import Codec from "./Codec";
 import { computed, observable } from "mobx";
 import { Notation } from "./MuseNotation";
 import { observer } from "mobx-react";
-import { SelectionPage } from "./Selector";
+import Selector, { SelectionPage } from "./Selector";
 
 export interface IPage {
   lines: ILine[];
@@ -77,6 +77,20 @@ export class Page implements Codec, SelectionPage {
     this.notation = notation;
     this.config = config;
     this.decode(o);
+  }
+  addLine() {
+    this.lines.push(
+      new Line(
+        { tracks: [{ bars: [{ notes: [{ n: "0" }] }] }] },
+        this.lines.length,
+        this,
+        this.config
+      )
+    );
+    Selector.instance.selectLine(this.lines[this.lines.length - 1]);
+  }
+  removeLine(index: number) {
+    this.lines = this.lines.filter((it, idx) => idx !== index);
   }
   setSelect(s: boolean) {
     this.isSelect = s;

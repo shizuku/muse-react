@@ -240,14 +240,14 @@ export class Note implements Codec, SelectionNote {
       this.p = 0;
     }
   }
-  addSubNote(n: string) {
+  addSubNote() {
     this.subNotes.push(
-      new SubNote("", n, 0, this, this.subNotes.length, this.config)
+      new SubNote("", "0", 0, this, this.subNotes.length, this.config)
     );
     Selector.instance.selectSubNote(this.subNotes[this.subNotes.length - 1]);
   }
   removeSubNote(index: number) {
-    this.subNotes = this.subNotes.filter((it) => it.index !== index);
+    this.subNotes = this.subNotes.filter((it, idx) => idx !== index);
   }
   getThis() {
     return this;

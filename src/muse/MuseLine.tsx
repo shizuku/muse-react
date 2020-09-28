@@ -6,7 +6,7 @@ import Codec from "./Codec";
 import { computed, observable } from "mobx";
 import { observer } from "mobx-react";
 import { Page } from "./MusePage";
-import { SelectionLine } from "./Selector";
+import Selector, { SelectionLine } from "./Selector";
 
 export interface ILine {
   tracks: ITrack[];
@@ -48,6 +48,20 @@ export class Line implements Codec, SelectionLine {
     this.index = index;
     this.config = config;
     this.decode(o);
+  }
+  addTrack() {
+    this.tracks.push(
+      new Track(
+        { bars: [{ notes: [{ n: "0" }] }] },
+        this.tracks.length,
+        this,
+        this.config
+      )
+    );
+    Selector.instance.selectTrack(this.tracks[this.tracks.length - 1]);
+  }
+  removeTrack(index: number) {
+    this.tracks = this.tracks.filter((it, idx) => idx !== index);
   }
   setSelect(s: boolean) {
     this.isSelect = s;

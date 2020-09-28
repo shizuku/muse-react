@@ -7,7 +7,7 @@ import { computed, observable } from "mobx";
 import { Line } from "./MuseLine";
 import Fraction from "./Fraction";
 import { observer } from "mobx-react";
-import { SelectionTrack } from "./Selector";
+import Selector, { SelectionTrack } from "./Selector";
 
 export interface ITrack {
   bars: IBar[];
@@ -71,6 +71,13 @@ export class Track implements Codec, SelectionTrack {
     this.line = line;
     this.config = config;
     this.decode(o);
+  }
+  addBar() {
+    this.bars.push(new Bar({ notes: [{n:"0"}] }, this.bars.length, this, this.config));
+    Selector.instance.selectBar(this.bars[this.bars.length - 1]);
+  }
+  removeBar(index: number) {
+    this.bars = this.bars.filter((it, idx) => idx !== index);
   }
   setSelect(s: boolean) {
     this.isSelect = s;

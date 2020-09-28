@@ -1,5 +1,6 @@
 import { Bar } from "./MuseBar";
 import { Line } from "./MuseLine";
+import { Notation } from "./MuseNotation";
 import { Note, SubNote } from "./MuseNote";
 import { Page } from "./MusePage";
 import { Track } from "./MuseTrack";
@@ -18,28 +19,43 @@ export interface SelectionNote {
   getThis: () => Note;
   reduceLine: (l: number) => void;
   reduceTailPoint: (p: number) => void;
-  addSubNote: (n: string) => void;
+  addSubNote: () => void;
   removeSubNote: (index: number) => void;
 }
 
 export interface SelectionBar {
   setSelect: (i: boolean) => void;
   getThis: () => Bar;
+  addNote: () => void;
+  removeNote: (index: number) => void;
 }
 
 export interface SelectionTrack {
   setSelect: (s: boolean) => void;
   getThis: () => Track;
+  addBar: () => void;
+  removeBar: (index: number) => void;
 }
 
 export interface SelectionLine {
   setSelect: (s: boolean) => void;
   getThis: () => Line;
+  addTrack: () => void;
+  removeTrack: (index: number) => void;
 }
 
 export interface SelectionPage {
   setSelect: (s: boolean) => void;
   getThis: () => Page;
+  addLine: () => void;
+  removeLine: (index: number) => void;
+}
+
+export interface SelectionNotation {
+  setSelect: (s: boolean) => void;
+  getThis: () => Notation;
+  addPage: () => void;
+  reomvePage: (index: number) => void;
 }
 
 class Selector {
@@ -49,6 +65,7 @@ class Selector {
   track: SelectionTrack | null = null;
   line: SelectionLine | null = null;
   page: SelectionPage | null = null;
+  notation: SelectionNotation | null = null;
   static instance = new Selector();
   private constructor() {
     document.addEventListener("keydown", (ev) => {
@@ -106,9 +123,13 @@ class Selector {
           this.note = null;
           this.bar?.setSelect(true);
         } else if (ev.key === " ") {
-          this.note.addSubNote("0");
+          this.note.addSubNote();
           ev.returnValue = false;
         } else if (ev.key === "Backspace") {
+          this.bar?.removeNote(this.note.getThis().index);
+          this.bar?.setSelect(true);
+          this.note.setSelect(false);
+          this.note = null;
         } else if (ev.key === "ArrowUp") {
           this.subnote = this.note.getThis().subNotes[0];
           this.subnote.setSelect(true);
@@ -135,8 +156,13 @@ class Selector {
           this.bar = null;
           this.track?.setSelect(true);
         } else if (ev.key === " ") {
+          this.bar.addNote();
           ev.returnValue = false;
         } else if (ev.key === "Backspace") {
+          this.track?.removeBar(this.bar.getThis().index);
+          this.track?.setSelect(true);
+          this.bar.setSelect(false);
+          this.bar = null;
           ev.returnValue = false;
         }
       } else if (this.track !== null) {
@@ -145,8 +171,13 @@ class Selector {
           this.track = null;
           this.line?.setSelect(true);
         } else if (ev.key === " ") {
+          this.track.addBar();
           ev.returnValue = false;
         } else if (ev.key === "Backspace") {
+          this.line?.removeTrack(this.track.getThis().index);
+          this.line?.setSelect(true);
+          this.track.setSelect(false);
+          this.track = null;
           ev.returnValue = false;
         }
       } else if (this.line !== null) {
@@ -155,12 +186,33 @@ class Selector {
           this.line = null;
           this.page?.setSelect(true);
         } else if (ev.key === " ") {
+          this.line.addTrack();
           ev.returnValue = false;
         } else if (ev.key === "Backspace") {
+          this.page?.removeLine(this.line.getThis().index);
+          this.page?.setSelect(true);
+          this.line.setSelect(false);
+          this.line = null;
           ev.returnValue = false;
         }
       } else if (this.page !== null) {
+        if (ev.key === "Enter") {
+          this.page.setSelect(false);
+          this.page = null;
+          this.notation?.setSelect(true);
+        } else if (ev.key === " ") {
+          this.page.addLine();
+          ev.returnValue = false;
+        } else if (ev.key === "Backspace") {
+          this.notation?.reomvePage(this.page.getThis().index);
+          this.notation?.setSelect(true);
+          this.page.setSelect(false);
+          this.page = null;
+          ev.returnValue = false;
+        }
+      } else if (this.notation !== null) {
         if (ev.key === " ") {
+          this.notation.addPage();
           ev.returnValue = false;
         }
       }
@@ -200,6 +252,12 @@ class Selector {
     this.page?.setSelect(false);
     this.page = s;
     if (this.line === null) this.page.setSelect(true);
+    this.selectNotation(s.getThis().notation);
+  }
+  selectNotation(s: SelectionNotation) {
+    this.notation?.setSelect(false);
+    this.notation = s;
+    if (this.page === null) this.notation.setSelect(true);
   }
 }
 
