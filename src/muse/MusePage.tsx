@@ -24,14 +24,17 @@ export class Page implements Codec, SelectionPage {
   @computed get height() {
     return (
       this.config.pageWidth * this.config.pageE -
-      this.config.pageMarginVertical * 2
+      this.config.pageMarginVertical -
+      this.marginTop
     );
   }
   @computed get x() {
     return this.config.pageMarginHorizontal;
   }
   @computed get y() {
-    return this.marginTop + this.index * this.height;
+    return (
+      this.marginTop + this.index * (this.config.pageWidth * this.config.pageE)
+    );
   }
   @computed get marginTop() {
     let mt = 0;
@@ -171,7 +174,7 @@ class MusePage extends React.Component<{ page: Page }> {
           w={this.props.page.width}
           h={this.props.page.height}
           x={this.props.page.x}
-          y={this.props.page.y}
+          y={this.props.page.marginTop}
           clazz={clazz}
           show={this.props.page.isSelect}
         />
