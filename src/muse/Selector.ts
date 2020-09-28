@@ -69,6 +69,7 @@ class Selector {
   static instance = new Selector();
   private constructor() {
     document.addEventListener("keydown", (ev) => {
+      console.log(ev);
       if (!this.keySubNote(ev)) {
         if (!this.keyNote(ev)) {
           if (!this.keyBar(ev)) {
@@ -128,7 +129,7 @@ class Selector {
   keySubNote(ev: KeyboardEvent): boolean {
     if (this.subnote !== null) {
       switch (ev.key) {
-        case "Enter":
+        case "Escape":
           this.subnote.setSelect(false);
           this.subnote = null;
           this.note?.setSelect(true);
@@ -138,6 +139,8 @@ class Selector {
           this.note?.setSelect(true);
           this.subnote.setSelect(false);
           this.subnote = null;
+          return true;
+        case " ":
           return true;
         case "ArrowUp":
           if (this.note) {
@@ -150,7 +153,6 @@ class Selector {
               this.subnote.setSelect(true);
             }
           }
-          ev.returnValue = false;
           return true;
         case "ArrowDown":
           if (this.note) {
@@ -162,10 +164,22 @@ class Selector {
               this.subnote.setSelect(true);
             }
           }
-          ev.returnValue = false;
+          return true;
+        case "ArrowLeft":
+          return true;
+        case "ArrowRight":
           return true;
         case "0":
         case "1":
+        case "2":
+        case "3":
+        case "4":
+        case "5":
+        case "6":
+        case "7":
+        case "8":
+        case "9":
+        case "-":
           this.subnote.setNum(ev.key);
           return true;
         case "r":
@@ -195,6 +209,11 @@ class Selector {
     if (this.note) {
       switch (ev.key) {
         case "Enter":
+          this.subnote = this.note.getThis().subNotes[0];
+          this.subnote.setSelect(true);
+          this.note.setSelect(false);
+          return true;
+        case "Escape":
           this.note.setSelect(false);
           this.note = null;
           this.bar?.setSelect(true);
@@ -208,17 +227,56 @@ class Selector {
           this.note.setSelect(false);
           this.note = null;
           return true;
-        case "ArrowUp":
-          this.subnote = this.note.getThis().subNotes[0];
-          this.subnote.setSelect(true);
-          this.note.setSelect(false);
-          return true;
-        case "ArrowDown":
-          let l = this.note.getThis().subNotes.length;
-          this.subnote = this.note.getThis().subNotes[l - 1];
-          this.subnote.setSelect(true);
-          this.note.setSelect(false);
-          return true;
+        case "ArrowLeft":
+          if (this.bar) {
+            if (this.note.getThis().index > 0) {
+              this.note.setSelect(false);
+              this.note = this.bar.getThis().notes[
+                this.note.getThis().index - 1
+              ];
+              this.note.setSelect(true);
+              return true;
+            } else if (this.track) {
+              if (this.bar.getThis().index > 0) {
+                this.bar.setSelect(false);
+                this.bar = this.track.getThis().bars[
+                  this.bar.getThis().index - 1
+                ];
+                this.note.setSelect(false);
+                this.note = this.bar.getThis().notes[
+                  this.bar.getThis().notes.length - 1
+                ];
+                this.note.setSelect(true);
+                return true;
+              } else return false;
+            } else return false;
+          } else return false;
+        case "ArrowRight":
+          if (this.bar !== null) {
+            let l = this.bar.getThis().notes.length;
+            if (this.note.getThis().index < l - 1) {
+              this.note.setSelect(false);
+              this.note = this.bar.getThis().notes[
+                this.note.getThis().index + 1
+              ];
+              this.note.setSelect(true);
+              return true;
+            } else if (this.track) {
+              if (
+                this.bar.getThis().index <
+                this.track?.getThis().bars.length - 1
+              ) {
+                this.bar.setSelect(false);
+                this.bar = this.track.getThis().bars[
+                  this.bar.getThis().index + 1
+                ];
+                this.note.setSelect(false);
+                this.note = this.bar.getThis().notes[0];
+                this.note.setSelect(true);
+                return true;
+              } else return false;
+            } else return false;
+          } else return false;
         case "q":
           this.note.reduceLine(-1);
           return true;
@@ -240,6 +298,11 @@ class Selector {
     if (this.bar !== null) {
       switch (ev.key) {
         case "Enter":
+          this.note = this.bar.getThis().notes[0];
+          this.note.setSelect(true);
+          this.bar.setSelect(false);
+          return true;
+        case "Escape":
           this.bar.setSelect(false);
           this.bar = null;
           this.track?.setSelect(true);
@@ -253,6 +316,47 @@ class Selector {
           this.bar.setSelect(false);
           this.bar = null;
           return true;
+        case "ArrowLeft":
+          if (this.track) {
+            if (this.bar.getThis().index > 0) {
+              this.bar.setSelect(false);
+              this.bar = this.track.getThis().bars[
+                this.bar.getThis().index - 1
+              ];
+              this.bar.setSelect(true);
+              return true;
+            } else return true;
+          } else return false;
+        case "ArrowRight":
+          if (this.track !== null) {
+            let l = this.track.getThis().bars.length;
+            if (this.bar.getThis().index < l - 1) {
+              this.bar.setSelect(false);
+              this.bar = this.track.getThis().bars[
+                this.bar.getThis().index + 1
+              ];
+              this.bar.setSelect(true);
+              return true;
+            } else if (this.line) {
+              if (
+                this.track.getThis().index <
+                this.line?.getThis().tracks.length - 1
+              ) {
+                this.track.setSelect(false);
+                this.track = this.line.getThis().tracks[
+                  this.track.getThis().index + 1
+                ];
+                this.bar.setSelect(false);
+                this.bar = this.track.getThis().bars[0];
+                this.bar.setSelect(true);
+                return true;
+              } else return false;
+            } else return false;
+          } else return false;
+        case "ArrowUp":
+          return true;
+        case "ArrowDown":
+          return true;
         default:
           return false;
       }
@@ -262,6 +366,11 @@ class Selector {
     if (this.track !== null) {
       switch (ev.key) {
         case "Enter":
+          this.bar = this.track.getThis().bars[0];
+          this.bar.setSelect(true);
+          this.track.setSelect(false);
+          return true;
+        case "Escape":
           this.track.setSelect(false);
           this.track = null;
           this.line?.setSelect(true);
@@ -277,6 +386,29 @@ class Selector {
           this.track = null;
           ev.returnValue = false;
           return true;
+        case "ArrowUp":
+          if (this.line) {
+            if (this.track.getThis().index > 0) {
+              this.track.setSelect(false);
+              this.track = this.line.getThis().tracks[
+                this.track.getThis().index - 1
+              ];
+              this.track.setSelect(true);
+              return true;
+            } else return true;
+          } else return false;
+        case "ArrowDown":
+          if (this.line !== null) {
+            let l = this.line.getThis().tracks.length;
+            if (this.track.getThis().index < l - 1) {
+              this.track.setSelect(false);
+              this.track = this.line.getThis().tracks[
+                this.track.getThis().index + 1
+              ];
+              this.track.setSelect(true);
+              return true;
+            } else return true;
+          } else return false;
         default:
           return false;
       }
@@ -286,6 +418,11 @@ class Selector {
     if (this.line !== null) {
       switch (ev.key) {
         case "Enter":
+          this.track = this.line.getThis().tracks[0];
+          this.track.setSelect(true);
+          this.line.setSelect(false);
+          return true;
+        case "Escape":
           this.line.setSelect(false);
           this.line = null;
           this.page?.setSelect(true);
@@ -301,6 +438,29 @@ class Selector {
           this.line = null;
           ev.returnValue = false;
           return true;
+        case "ArrowUp":
+          if (this.page) {
+            if (this.line.getThis().index > 0) {
+              this.line.setSelect(false);
+              this.line = this.page.getThis().lines[
+                this.line.getThis().index - 1
+              ];
+              this.line.setSelect(true);
+              return true;
+            } else return true;
+          } else return false;
+        case "ArrowDown":
+          if (this.page !== null) {
+            let l = this.page.getThis().lines.length;
+            if (this.line.getThis().index < l - 1) {
+              this.line.setSelect(false);
+              this.line = this.page.getThis().lines[
+                this.line.getThis().index + 1
+              ];
+              this.line.setSelect(true);
+              return true;
+            } else return true;
+          } else return false;
         default:
           return false;
       }
@@ -310,6 +470,11 @@ class Selector {
     if (this.page !== null) {
       switch (ev.key) {
         case "Enter":
+          this.line = this.page.getThis().lines[0];
+          this.line.setSelect(true);
+          this.page.setSelect(false);
+          return true;
+        case "Escape":
           this.page.setSelect(false);
           this.page = null;
           this.notation?.setSelect(true);
@@ -325,6 +490,29 @@ class Selector {
           this.page = null;
           ev.returnValue = false;
           return true;
+        case "ArrowUp":
+          if (this.notation) {
+            if (this.page.getThis().index > 0) {
+              this.page.setSelect(false);
+              this.page = this.notation.getThis().pages[
+                this.page.getThis().index - 1
+              ];
+              this.page.setSelect(true);
+              return true;
+            } else return true;
+          } else return false;
+        case "ArrowDown":
+          if (this.notation !== null) {
+            let l = this.notation.getThis().pages.length;
+            if (this.page.getThis().index < l - 1) {
+              this.page.setSelect(false);
+              this.page = this.notation.getThis().pages[
+                this.page.getThis().index + 1
+              ];
+              this.page.setSelect(true);
+              return true;
+            } else return true;
+          } else return false;
         default:
           return false;
       }
@@ -333,6 +521,11 @@ class Selector {
   keyNotation(ev: KeyboardEvent): boolean {
     if (this.notation !== null) {
       switch (ev.key) {
+        case "Enter":
+          this.page = this.notation.getThis().pages[0];
+          this.page.setSelect(true);
+          this.notation.setSelect(false);
+          return true;
         case " ":
           this.notation.addPage();
           ev.returnValue = false;
