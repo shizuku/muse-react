@@ -19,7 +19,7 @@ export interface IBar {
   notes: INote[];
 }
 
-export class Bar implements Codec {
+export class Bar implements Codec, SelectionBar {
   readonly config: MuseConfig;
   readonly index: number;
   @observable track: Track;
@@ -113,12 +113,12 @@ export class Bar implements Codec {
     this.config = config;
     this.decode(o);
   }
-  selection: SelectionBar = {
-    setSelect: (s: boolean) => {
-      this.isSelect = s;
-    },
-    getThis: () => this,
-  };
+  setSelect(i: boolean) {
+    this.isSelect = i;
+  }
+  getThis() {
+    return this;
+  }
   decode(o: IBar): void {
     if (o.notes !== undefined) {
       o.notes.forEach((it: INote, idx) => {

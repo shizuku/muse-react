@@ -12,7 +12,7 @@ export interface ILine {
   tracks: ITrack[];
 }
 
-export class Line implements Codec {
+export class Line implements Codec, SelectionLine {
   readonly page: Page;
   readonly index: number;
   readonly config: MuseConfig;
@@ -49,12 +49,12 @@ export class Line implements Codec {
     this.config = config;
     this.decode(o);
   }
-  selection: SelectionLine = {
-    setSelect: (s: boolean) => {
-      this.isSelect = s;
-    },
-    getThis: () => this,
-  };
+  setSelect(s: boolean) {
+    this.isSelect = s;
+  }
+  getThis() {
+    return this;
+  }
   decode(o: ILine): void {
     if (o.tracks !== undefined) {
       o.tracks.forEach((it: ITrack, idx) => {

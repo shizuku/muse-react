@@ -13,7 +13,7 @@ export interface ITrack {
   bars: IBar[];
 }
 
-export class Track implements Codec {
+export class Track implements Codec, SelectionTrack {
   readonly config: MuseConfig;
   readonly index: number;
   readonly line: Line;
@@ -72,12 +72,12 @@ export class Track implements Codec {
     this.config = config;
     this.decode(o);
   }
-  selection: SelectionTrack = {
-    setSelect: (s: boolean) => {
-      this.isSelect = s;
-    },
-    getThis: () => this,
-  };
+  setSelect(s: boolean) {
+    this.isSelect = s;
+  }
+  getThis() {
+    return this;
+  }
   decode(o: ITrack): void {
     if (o.bars !== undefined) {
       o.bars.forEach((it: any, idx) => {

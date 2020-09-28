@@ -61,7 +61,7 @@ export class SubNote implements SelectionSubNote {
   }
 }
 
-export class Note implements Codec {
+export class Note implements Codec, SelectionNote {
   readonly config: MuseConfig;
   @observable index: number;
   @observable bar: Bar;
@@ -225,35 +225,34 @@ export class Note implements Codec {
     this.index = idx;
     this.decode(o);
   }
-  selection: SelectionNote = {
-    setSelect: (s: boolean) => {
-      this.isSelect = s;
-    },
-    reduceLine: (l: number) => {
-      this.l += l;
-      if (this.l < 0) {
-        this.l = 0;
-      }
-    },
-    reduceTailPoint: (p: number) => {
-      this.p += p;
-      if (this.p < 0) {
-        this.p = 0;
-      }
-    },
-    addSubNote: (n: string) => {
-      this.subNotes.push(
-        new SubNote("", n, 0, this, this.subNotes.length, this.config)
-      );
-      Selector.instance.selectSubNote(
-        this.subNotes[this.subNotes.length - 1]
-      );
-    },
-    removeSubNote: (index: number) => {
-      this.subNotes = this.subNotes.filter((it) => it.index !== index);
-    },
-    getThis: () => this,
-  };
+  setSelect(s: boolean) {
+    this.isSelect = s;
+  }
+  reduceLine(l: number) {
+    this.l += l;
+    if (this.l < 0) {
+      this.l = 0;
+    }
+  }
+  reduceTailPoint(p: number) {
+    this.p += p;
+    if (this.p < 0) {
+      this.p = 0;
+    }
+  }
+  addSubNote(n: string) {
+    this.subNotes.push(
+      new SubNote("", n, 0, this, this.subNotes.length, this.config)
+    );
+    Selector.instance.selectSubNote(this.subNotes[this.subNotes.length - 1]);
+  }
+  removeSubNote(index: number) {
+    this.subNotes = this.subNotes.filter((it) => it.index !== index);
+  }
+  getThis() {
+    return this;
+  }
+
   decode(o: INote): void {
     if (o.n !== undefined) {
       let n: string = o.n;
@@ -448,7 +447,7 @@ class MuseNote extends React.Component<{ note: Note }, {}> {
         width={this.props.note.width}
         height={this.props.note.height}
         onClick={() => {
-          Selector.instance.selectNote(this.props.note.selection);
+          Selector.instance.selectNote(this.props.note);
         }}
       >
         <OuterBorder

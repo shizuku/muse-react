@@ -12,7 +12,7 @@ export interface IPage {
   lines: ILine[];
 }
 
-export class Page implements Codec {
+export class Page implements Codec, SelectionPage {
   readonly notation: Notation;
   readonly config: MuseConfig;
   readonly index: number;
@@ -78,12 +78,12 @@ export class Page implements Codec {
     this.config = config;
     this.decode(o);
   }
-  selection: SelectionPage = {
-    setSelect: (s: boolean) => {
-      this.isSelect = s;
-    },
-    getThis: () => this,
-  };
+  setSelect(s: boolean) {
+    this.isSelect = s;
+  }
+  getThis() {
+    return this;
+  }
   decode(o: IPage): void {
     if (o.lines !== undefined) {
       o.lines.forEach((it: ILine, idx) => {

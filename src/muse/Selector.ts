@@ -46,6 +46,9 @@ class Selector {
   subnote: SelectionSubNote | null = null;
   note: SelectionNote | null = null;
   bar: SelectionBar | null = null;
+  track: SelectionTrack | null = null;
+  line: SelectionLine | null = null;
+  page: SelectionPage | null = null;
   static instance = new Selector();
   private constructor() {
     document.addEventListener("keydown", (ev) => {
@@ -126,25 +129,62 @@ class Selector {
           this.note.addSubNote("0");
           ev.returnValue = false;
         }
+      } else if (this.bar !== null) {
+        if (ev.key === "Enter") {
+          this.bar.setSelect(false);
+          this.bar = null;
+          this.track?.setSelect(true);
+        }
+      } else if (this.track !== null) {
+        if (ev.key === "Enter") {
+          this.track.setSelect(false);
+          this.track = null;
+          this.line?.setSelect(true);
+        }
+      } else if (this.line !== null) {
+        if (ev.key === "Enter") {
+          this.line.setSelect(false);
+          this.line = null;
+          this.page?.setSelect(true);
+        }
+      } else if (this.page !== null) {
       }
     });
-  }
-  selectNote(s: SelectionNote) {
-    this.note?.setSelect(false);
-    this.note = s;
-    if (this.subnote === null) this.note.setSelect(true);
-    this.selectBar(s.getThis().bar.selection);
   }
   selectSubNote(s: SelectionSubNote) {
     this.subnote?.setSelect(false);
     this.subnote = s;
     this.subnote.setSelect(true);
-    this.selectNote(s.getThis().note.selection);
+    this.selectNote(s.getThis().note);
+  }
+  selectNote(s: SelectionNote) {
+    this.note?.setSelect(false);
+    this.note = s;
+    if (this.subnote === null) this.note.setSelect(true);
+    this.selectBar(s.getThis().bar);
   }
   selectBar(s: SelectionBar) {
     this.bar?.setSelect(false);
     this.bar = s;
     if (this.note === null) this.bar.setSelect(true);
+    this.selectTrack(s.getThis().track);
+  }
+  selectTrack(s: SelectionTrack) {
+    this.track?.setSelect(false);
+    this.track = s;
+    if (this.bar === null) this.track.setSelect(true);
+    this.selectLine(s.getThis().line);
+  }
+  selectLine(s: SelectionLine) {
+    this.line?.setSelect(false);
+    this.line = s;
+    if (this.track === null) this.line.setSelect(true);
+    this.selectPage(s.getThis().page);
+  }
+  selectPage(s: SelectionPage) {
+    this.page?.setSelect(false);
+    this.page = s;
+    if (this.line === null) this.page.setSelect(true);
   }
 }
 
