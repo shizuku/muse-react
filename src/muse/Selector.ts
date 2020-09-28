@@ -69,153 +69,19 @@ class Selector {
   static instance = new Selector();
   private constructor() {
     document.addEventListener("keydown", (ev) => {
-      if (this.subnote !== null) {
-        if (ev.key === "Enter") {
-          this.subnote.setSelect(false);
-          this.subnote = null;
-          this.note?.setSelect(true);
-        } else if (ev.key === "Backspace") {
-          this.note?.removeSubNote(this.subnote.getThis().index);
-          this.note?.setSelect(true);
-          this.subnote.setSelect(false);
-          this.subnote = null;
-        } else if (ev.key === "ArrowUp") {
-          if (this.note) {
-            let l = this.note.getThis().subNotes.length;
-            if (l > this.subnote.getThis().index + 1) {
-              this.subnote.setSelect(false);
-              this.subnote = this.note.getThis().subNotes[
-                this.subnote.getThis().index + 1
-              ];
-              this.subnote.setSelect(true);
-            }
-          }
-          ev.returnValue = false;
-        } else if (ev.key === "ArrowDown") {
-          if (this.note) {
-            if (this.subnote.getThis().index > 0) {
-              this.subnote.setSelect(false);
-              this.subnote = this.note.getThis().subNotes[
-                this.subnote.getThis().index - 1
-              ];
-              this.subnote.setSelect(true);
-            }
-          }
-          ev.returnValue = false;
-        } else if ((ev.key >= "0" && ev.key <= "9") || ev.key === "-") {
-          this.subnote.setNum(ev.key);
-        } else if (ev.key === "r") {
-          this.subnote.reducePoint(1);
-        } else if (ev.key === "f") {
-          this.subnote.reducePoint(-1);
-        } else if (ev.key === "q") {
-          this.subnote.reduceLine(-1);
-        } else if (ev.key === "a") {
-          this.subnote.reduceLine(1);
-        } else if (ev.key === "s") {
-          this.subnote.reduceTailPoint(-1);
-        } else if (ev.key === "d") {
-          this.subnote.reduceTailPoint(1);
-        }
-      } else if (this.note !== null) {
-        if (ev.key === "Enter") {
-          this.note.setSelect(false);
-          this.note = null;
-          this.bar?.setSelect(true);
-        } else if (ev.key === " ") {
-          this.note.addSubNote();
-          ev.returnValue = false;
-        } else if (ev.key === "Backspace") {
-          this.bar?.removeNote(this.note.getThis().index);
-          this.bar?.setSelect(true);
-          this.note.setSelect(false);
-          this.note = null;
-        } else if (ev.key === "ArrowUp") {
-          this.subnote = this.note.getThis().subNotes[0];
-          this.subnote.setSelect(true);
-          this.note.setSelect(false);
-          ev.returnValue = false;
-        } else if (ev.key === "ArrowDown") {
-          let l = this.note.getThis().subNotes.length;
-          this.subnote = this.note.getThis().subNotes[l - 1];
-          this.subnote.setSelect(true);
-          this.note.setSelect(false);
-          ev.returnValue = false;
-        } else if (ev.key === "q") {
-          this.note.reduceLine(-1);
-        } else if (ev.key === "a") {
-          this.note.reduceLine(1);
-        } else if (ev.key === "s") {
-          this.note.reduceTailPoint(-1);
-        } else if (ev.key === "d") {
-          this.note.reduceTailPoint(1);
-        }
-      } else if (this.bar !== null) {
-        if (ev.key === "Enter") {
-          this.bar.setSelect(false);
-          this.bar = null;
-          this.track?.setSelect(true);
-        } else if (ev.key === " ") {
-          this.bar.addNote();
-          ev.returnValue = false;
-        } else if (ev.key === "Backspace") {
-          this.track?.removeBar(this.bar.getThis().index);
-          this.track?.setSelect(true);
-          this.bar.setSelect(false);
-          this.bar = null;
-          ev.returnValue = false;
-        }
-      } else if (this.track !== null) {
-        if (ev.key === "Enter") {
-          this.track.setSelect(false);
-          this.track = null;
-          this.line?.setSelect(true);
-        } else if (ev.key === " ") {
-          this.track.addBar();
-          ev.returnValue = false;
-        } else if (ev.key === "Backspace") {
-          this.line?.removeTrack(this.track.getThis().index);
-          this.line?.setSelect(true);
-          this.track.setSelect(false);
-          this.track = null;
-          ev.returnValue = false;
-        }
-      } else if (this.line !== null) {
-        if (ev.key === "Enter") {
-          this.line.setSelect(false);
-          this.line = null;
-          this.page?.setSelect(true);
-        } else if (ev.key === " ") {
-          this.line.addTrack();
-          ev.returnValue = false;
-        } else if (ev.key === "Backspace") {
-          this.page?.removeLine(this.line.getThis().index);
-          this.page?.setSelect(true);
-          this.line.setSelect(false);
-          this.line = null;
-          ev.returnValue = false;
-        }
-      } else if (this.page !== null) {
-        if (ev.key === "Enter") {
-          this.page.setSelect(false);
-          this.page = null;
-          this.notation?.setSelect(true);
-        } else if (ev.key === " ") {
-          this.page.addLine();
-          ev.returnValue = false;
-        } else if (ev.key === "Backspace") {
-          this.notation?.reomvePage(this.page.getThis().index);
-          this.notation?.setSelect(true);
-          this.page.setSelect(false);
-          this.page = null;
-          ev.returnValue = false;
-        }
-      } else if (this.notation !== null) {
-        if (ev.key === " ") {
-          this.notation.addPage();
-          ev.returnValue = false;
-        }
-      }
+      if (!this.keySubNote(ev)) {
+        if (!this.keyNote(ev)) {
+          if (!this.keyBar(ev)) {
+            if (!this.keyTrack(ev)) {
+              if (!this.keyLine(ev)) {
+                if (!this.keyPage(ev)) {
+                  if (this.keyNotation(ev)) ev.returnValue = false;
+                } else ev.returnValue = false;
+              } else ev.returnValue = false;
+            } else ev.returnValue = false;
+          } else ev.returnValue = false;
+        } else ev.returnValue = false;
+      } else ev.returnValue = false;
     });
   }
   selectSubNote(s: SelectionSubNote) {
@@ -258,6 +124,223 @@ class Selector {
     this.notation?.setSelect(false);
     this.notation = s;
     if (this.page === null) this.notation.setSelect(true);
+  }
+  keySubNote(ev: KeyboardEvent): boolean {
+    if (this.subnote !== null) {
+      switch (ev.key) {
+        case "Enter":
+          this.subnote.setSelect(false);
+          this.subnote = null;
+          this.note?.setSelect(true);
+          return true;
+        case "Backspace":
+          this.note?.removeSubNote(this.subnote.getThis().index);
+          this.note?.setSelect(true);
+          this.subnote.setSelect(false);
+          this.subnote = null;
+          return true;
+        case "ArrowUp":
+          if (this.note) {
+            let l = this.note.getThis().subNotes.length;
+            if (l > this.subnote.getThis().index + 1) {
+              this.subnote.setSelect(false);
+              this.subnote = this.note.getThis().subNotes[
+                this.subnote.getThis().index + 1
+              ];
+              this.subnote.setSelect(true);
+            }
+          }
+          ev.returnValue = false;
+          return true;
+        case "ArrowDown":
+          if (this.note) {
+            if (this.subnote.getThis().index > 0) {
+              this.subnote.setSelect(false);
+              this.subnote = this.note.getThis().subNotes[
+                this.subnote.getThis().index - 1
+              ];
+              this.subnote.setSelect(true);
+            }
+          }
+          ev.returnValue = false;
+          return true;
+        case "0":
+        case "1":
+          this.subnote.setNum(ev.key);
+          return true;
+        case "r":
+          this.subnote.reducePoint(1);
+          return true;
+        case "f":
+          this.subnote.reducePoint(-1);
+          return true;
+        case "q":
+          this.subnote.reduceLine(-1);
+          return true;
+        case "a":
+          this.subnote.reduceLine(1);
+          return true;
+        case "s":
+          this.subnote.reduceTailPoint(-1);
+          return true;
+        case "d":
+          this.subnote.reduceTailPoint(1);
+          return true;
+        default:
+          return false;
+      }
+    } else return false;
+  }
+  keyNote(ev: KeyboardEvent): boolean {
+    if (this.note) {
+      switch (ev.key) {
+        case "Enter":
+          this.note.setSelect(false);
+          this.note = null;
+          this.bar?.setSelect(true);
+          return true;
+        case " ":
+          this.note.addSubNote();
+          return true;
+        case "Backspace":
+          this.bar?.removeNote(this.note.getThis().index);
+          this.bar?.setSelect(true);
+          this.note.setSelect(false);
+          this.note = null;
+          return true;
+        case "ArrowUp":
+          this.subnote = this.note.getThis().subNotes[0];
+          this.subnote.setSelect(true);
+          this.note.setSelect(false);
+          return true;
+        case "ArrowDown":
+          let l = this.note.getThis().subNotes.length;
+          this.subnote = this.note.getThis().subNotes[l - 1];
+          this.subnote.setSelect(true);
+          this.note.setSelect(false);
+          return true;
+        case "q":
+          this.note.reduceLine(-1);
+          return true;
+        case "a":
+          this.note.reduceLine(1);
+          return true;
+        case "s":
+          this.note.reduceTailPoint(-1);
+          return true;
+        case "d":
+          this.note.reduceTailPoint(1);
+          return true;
+        default:
+          return false;
+      }
+    } else return false;
+  }
+  keyBar(ev: KeyboardEvent): boolean {
+    if (this.bar !== null) {
+      switch (ev.key) {
+        case "Enter":
+          this.bar.setSelect(false);
+          this.bar = null;
+          this.track?.setSelect(true);
+          return true;
+        case " ":
+          this.bar.addNote();
+          return true;
+        case "Backspace":
+          this.track?.removeBar(this.bar.getThis().index);
+          this.track?.setSelect(true);
+          this.bar.setSelect(false);
+          this.bar = null;
+          return true;
+        default:
+          return false;
+      }
+    } else return false;
+  }
+  keyTrack(ev: KeyboardEvent): boolean {
+    if (this.track !== null) {
+      switch (ev.key) {
+        case "Enter":
+          this.track.setSelect(false);
+          this.track = null;
+          this.line?.setSelect(true);
+          return true;
+        case " ":
+          this.track.addBar();
+          ev.returnValue = false;
+          return true;
+        case "Backspace":
+          this.line?.removeTrack(this.track.getThis().index);
+          this.line?.setSelect(true);
+          this.track.setSelect(false);
+          this.track = null;
+          ev.returnValue = false;
+          return true;
+        default:
+          return false;
+      }
+    } else return false;
+  }
+  keyLine(ev: KeyboardEvent): boolean {
+    if (this.line !== null) {
+      switch (ev.key) {
+        case "Enter":
+          this.line.setSelect(false);
+          this.line = null;
+          this.page?.setSelect(true);
+          return true;
+        case " ":
+          this.line.addTrack();
+          ev.returnValue = false;
+          return true;
+        case "Backspace":
+          this.page?.removeLine(this.line.getThis().index);
+          this.page?.setSelect(true);
+          this.line.setSelect(false);
+          this.line = null;
+          ev.returnValue = false;
+          return true;
+        default:
+          return false;
+      }
+    } else return false;
+  }
+  keyPage(ev: KeyboardEvent): boolean {
+    if (this.page !== null) {
+      switch (ev.key) {
+        case "Enter":
+          this.page.setSelect(false);
+          this.page = null;
+          this.notation?.setSelect(true);
+          return true;
+        case " ":
+          this.page.addLine();
+          ev.returnValue = false;
+          return true;
+        case "Backspace":
+          this.notation?.reomvePage(this.page.getThis().index);
+          this.notation?.setSelect(true);
+          this.page.setSelect(false);
+          this.page = null;
+          ev.returnValue = false;
+          return true;
+        default:
+          return false;
+      }
+    } else return false;
+  }
+  keyNotation(ev: KeyboardEvent): boolean {
+    if (this.notation !== null) {
+      switch (ev.key) {
+        case " ":
+          this.notation.addPage();
+          ev.returnValue = false;
+          return true;
+        default:
+          return false;
+      }
+    } else return false;
   }
 }
 
