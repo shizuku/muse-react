@@ -10,7 +10,6 @@
 
 ## Key map
 
-
 |             |       subnote       |        note         |         bar         |        track        |        line         |        page         |     notation      |
 | :---------: | :-----------------: | :-----------------: | :-----------------: | :-----------------: | :-----------------: | :-----------------: | :---------------: |
 |   `Space`   |          /          |  new child at tail  |  new child at tail  |  new child at tail  |  new child at tail  |  new child at tail  | new child at tail |
