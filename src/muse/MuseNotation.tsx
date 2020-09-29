@@ -46,7 +46,7 @@ export class Notation implements Codec, SelectionNotation {
     this.decode(o);
   }
   addPage(index: number) {
-    this.pages = this.pages.splice(
+    this.pages.splice(
       index,
       0,
       new Page(

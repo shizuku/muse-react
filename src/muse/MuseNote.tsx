@@ -241,7 +241,7 @@ export class Note implements Codec, SelectionNote {
     }
   }
   addSubNote(index: number) {
-    this.subNotes = this.subNotes.splice(
+    this.subNotes.splice(
       index,
       0,
       new SubNote("", "0", 0, this, this.subNotes.length, this.config)

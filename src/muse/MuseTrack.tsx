@@ -73,7 +73,7 @@ export class Track implements Codec, SelectionTrack {
     this.decode(o);
   }
   addBar(index: number) {
-    this.bars = this.bars.splice(
+    this.bars.splice(
       index,
       0,
       new Bar({ notes: [{ n: "0" }] }, this.bars.length, this, this.config)

@@ -283,7 +283,7 @@ class Selector {
         case "Backspace":
           if (this.bar) {
             let idx = this.note.getThis().index;
-            this.bar.removeNote(this.note.getThis().index);
+            this.bar.removeNote(idx);
             if (this.bar.getThis().notes.length === 0) {
               this.bar.setSelect(true);
               this.note.setSelect(false);
@@ -413,7 +413,7 @@ class Selector {
         case "Backspace":
           if (this.track) {
             let idx = this.bar.getThis().index;
-            this.track.removeBar(this.bar.getThis().index);
+            this.track.removeBar(idx);
             if (this.track.getThis().bars.length === 0) {
               this.track.setSelect(true);
               this.bar.setSelect(false);

@@ -50,7 +50,7 @@ export class Line implements Codec, SelectionLine {
     this.decode(o);
   }
   addTrack(index: number) {
-    this.tracks = this.tracks.splice(
+    this.tracks.splice(
       index,
       0,
       new Track(

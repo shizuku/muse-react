@@ -82,7 +82,7 @@ export class Page implements Codec, SelectionPage {
     this.decode(o);
   }
   addLine(index: number) {
-    this.lines = this.lines.splice(
+    this.lines.splice(
       index,
       0,
       new Line(
