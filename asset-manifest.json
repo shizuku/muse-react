@@ -1,14 +1,14 @@
 {
   "files": {
     "main.css": "/muse-react/static/css/main.06c0bf08.chunk.css",
-    "main.js": "/muse-react/static/js/main.bb498444.chunk.js",
-    "main.js.map": "/muse-react/static/js/main.bb498444.chunk.js.map",
+    "main.js": "/muse-react/static/js/main.084553d7.chunk.js",
+    "main.js.map": "/muse-react/static/js/main.084553d7.chunk.js.map",
     "runtime-main.js": "/muse-react/static/js/runtime-main.ce441ca2.js",
     "runtime-main.js.map": "/muse-react/static/js/runtime-main.ce441ca2.js.map",
     "static/js/2.3fc57aec.chunk.js": "/muse-react/static/js/2.3fc57aec.chunk.js",
     "static/js/2.3fc57aec.chunk.js.map": "/muse-react/static/js/2.3fc57aec.chunk.js.map",
     "index.html": "/muse-react/index.html",
-    "precache-manifest.11ceefc1a19725d4561656f3109d019f.js": "/muse-react/precache-manifest.11ceefc1a19725d4561656f3109d019f.js",
+    "precache-manifest.e0a810f7620bed23371714eefac34a85.js": "/muse-react/precache-manifest.e0a810f7620bed23371714eefac34a85.js",
     "service-worker.js": "/muse-react/service-worker.js",
     "static/css/main.06c0bf08.chunk.css.map": "/muse-react/static/css/main.06c0bf08.chunk.css.map",
     "static/js/2.3fc57aec.chunk.js.LICENSE.txt": "/muse-react/static/js/2.3fc57aec.chunk.js.LICENSE.txt"
@@ -17,6 +17,6 @@
     "static/js/runtime-main.ce441ca2.js",
     "static/js/2.3fc57aec.chunk.js",
     "static/css/main.06c0bf08.chunk.css",
-    "static/js/main.bb498444.chunk.js"
+    "static/js/main.084553d7.chunk.js"
   ]
 }
