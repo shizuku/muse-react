@@ -163,11 +163,18 @@ class Selector {
         case "x":
           if (this.note) {
             let idx = this.subnote.getThis().index;
+            this.note?.addSubNote(idx);
+            this.selectSubNote(this.note?.getThis().subNotes[idx]);
+          }
+          return true;
+        case "c":
+          if (this.note) {
+            let idx = this.subnote.getThis().index;
             this.note?.addSubNote(idx + 1);
             this.selectSubNote(this.note?.getThis().subNotes[idx + 1]);
           }
           return true;
-        case "c":
+        case "v":
           if (this.note) {
             this.note?.addSubNote(this.note.getThis().subNotes.length);
             this.selectSubNote(
@@ -268,11 +275,18 @@ class Selector {
         case "x":
           if (this.bar) {
             let idx = this.note.getThis().index;
+            this.bar?.addNote(idx);
+            this.selectNote(this.bar?.getThis().notes[idx]);
+          }
+          return true;
+        case "c":
+          if (this.bar) {
+            let idx = this.note.getThis().index;
             this.bar?.addNote(idx + 1);
             this.selectNote(this.bar?.getThis().notes[idx + 1]);
           }
           return true;
-        case "c":
+        case "v":
           if (this.bar) {
             this.bar?.addNote(this.bar.getThis().notes.length);
             this.selectNote(
@@ -398,11 +412,18 @@ class Selector {
         case "x":
           if (this.track) {
             let idx = this.bar.getThis().index;
+            this.track.addBar(idx);
+            this.selectBar(this.track.getThis().bars[idx]);
+          }
+          return true;
+        case "c":
+          if (this.track) {
+            let idx = this.bar.getThis().index;
             this.track.addBar(idx + 1);
             this.selectBar(this.track.getThis().bars[idx + 1]);
           }
           return true;
-        case "c":
+        case "v":
           if (this.track) {
             this.track.addBar(this.track.getThis().bars.length);
             this.selectBar(
@@ -609,11 +630,18 @@ class Selector {
         case "x":
           if (this.line) {
             let idx = this.track.getThis().index;
+            this.line.addTrack(idx);
+            this.selectTrack(this.line.getThis().tracks[idx]);
+          }
+          return true;
+        case "c":
+          if (this.line) {
+            let idx = this.track.getThis().index;
             this.line.addTrack(idx + 1);
             this.selectTrack(this.line.getThis().tracks[idx + 1]);
           }
           return true;
-        case "c":
+        case "v":
           if (this.line) {
             this.line.addTrack(this.line.getThis().tracks.length);
             this.selectTrack(
@@ -752,11 +780,18 @@ class Selector {
         case "x":
           if (this.page) {
             let idx = this.line.getThis().index;
+            this.page.addLine(idx);
+            this.selectLine(this.page.getThis().lines[idx]);
+          }
+          return true;
+        case "c":
+          if (this.page) {
+            let idx = this.line.getThis().index;
             this.page.addLine(idx + 1);
             this.selectLine(this.page.getThis().lines[idx + 1]);
           }
           return true;
-        case "c":
+        case "v":
           if (this.page) {
             this.page.addLine(this.page.getThis().lines.length);
             this.selectLine(
@@ -864,11 +899,18 @@ class Selector {
         case "x":
           if (this.notation) {
             let idx = this.page.getThis().index;
+            this.notation.addPage(idx);
+            this.selectPage(this.notation.getThis().pages[idx]);
+          }
+          return true;
+        case "c":
+          if (this.notation) {
+            let idx = this.page.getThis().index;
             this.notation.addPage(idx + 1);
             this.selectPage(this.notation.getThis().pages[idx + 1]);
           }
           return true;
-        case "c":
+        case "v":
           if (this.notation) {
             this.notation.addPage(this.notation.getThis().pages.length);
             this.selectPage(
