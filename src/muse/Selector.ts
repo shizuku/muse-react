@@ -462,7 +462,56 @@ class Selector {
               this.bar = this.track.getThis().bars[this.bar.getThis().index];
               this.bar.setSelect(true);
               return true;
-            } else return true;
+            } else if (this.page) {
+              if (this.line.getThis().index > 0) {
+                this.line = this.page.getThis().lines[
+                  this.line.getThis().index - 1
+                ];
+                this.track = this.line.getThis().tracks[
+                  this.line.getThis().tracks.length - 1
+                ];
+                this.bar.setSelect(false);
+                if (
+                  this.track.getThis().bars.length > this.bar.getThis().index
+                ) {
+                  this.bar = this.track.getThis().bars[
+                    this.bar.getThis().index
+                  ];
+                } else {
+                  this.bar = this.track.getThis().bars[
+                    this.track.getThis().bars.length - 1
+                  ];
+                }
+                this.bar.setSelect(true);
+                return true;
+              } else if (this.notation) {
+                if (this.page.getThis().index > 0) {
+                  this.page = this.notation.getThis().pages[
+                    this.page.getThis().index - 1
+                  ];
+                  this.line = this.page.getThis().lines[
+                    this.page.getThis().lines.length - 1
+                  ];
+                  this.track = this.line.getThis().tracks[
+                    this.line.getThis().tracks.length - 1
+                  ];
+                  this.bar.setSelect(false);
+                  if (
+                    this.track.getThis().bars.length > this.bar.getThis().index
+                  ) {
+                    this.bar = this.track.getThis().bars[
+                      this.bar.getThis().index
+                    ];
+                  } else {
+                    this.bar = this.track.getThis().bars[
+                      this.track.getThis().bars.length - 1
+                    ];
+                  }
+                  this.bar.setSelect(true);
+                  return true;
+                } else return false;
+              } else return false;
+            } else return false;
           } else return false;
         case "ArrowDown":
           if (this.track && this.line) {
@@ -475,7 +524,56 @@ class Selector {
               this.bar = this.track.getThis().bars[this.bar.getThis().index];
               this.bar.setSelect(true);
               return true;
-            } else return true;
+            } else if (this.page) {
+              if (
+                this.line.getThis().index <
+                this.page?.getThis().lines.length - 1
+              ) {
+                this.line = this.page.getThis().lines[
+                  this.line.getThis().index + 1
+                ];
+                this.track = this.line.getThis().tracks[0];
+                this.bar.setSelect(false);
+                if (
+                  this.track.getThis().bars.length > this.bar.getThis().index
+                ) {
+                  this.bar = this.track.getThis().bars[
+                    this.bar.getThis().index
+                  ];
+                } else {
+                  this.bar = this.track.getThis().bars[
+                    this.track.getThis().bars.length - 1
+                  ];
+                }
+                this.bar.setSelect(true);
+                return true;
+              } else if (this.notation) {
+                if (
+                  this.page.getThis().index <
+                  this.notation.getThis().pages.length - 1
+                ) {
+                  this.page = this.notation.getThis().pages[
+                    this.page.getThis().index + 1
+                  ];
+                  this.line = this.page.getThis().lines[0];
+                  this.track = this.line.getThis().tracks[0];
+                  this.bar.setSelect(false);
+                  if (
+                    this.track.getThis().bars.length > this.bar.getThis().index
+                  ) {
+                    this.bar = this.track.getThis().bars[
+                      this.bar.getThis().index
+                    ];
+                  } else {
+                    this.bar = this.track.getThis().bars[
+                      this.track.getThis().bars.length - 1
+                    ];
+                  }
+                  this.bar.setSelect(true);
+                  return true;
+                } else return false;
+              } else return false;
+            } else return false;
           } else return false;
         default:
           return false;
