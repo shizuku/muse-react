@@ -1,13 +1,13 @@
 import React from "react";
 import "./App.css";
-import Muse from "./muse/Muse";
-
+import MuseConfig from "./muse/MuseConfig";
+import MuseNotation, { Notation } from "./muse/MuseNotation";
 class App extends React.Component<
   {},
   {
     error: any | null;
     isLoaded: boolean;
-    data: string;
+    notation: Notation | null;
   }
 > {
   constructor(props: {}) {
@@ -15,7 +15,7 @@ class App extends React.Component<
     this.state = {
       error: null,
       isLoaded: false,
-      data: "",
+      notation: null,
     };
   }
 
@@ -28,7 +28,7 @@ class App extends React.Component<
         (result) => {
           this.setState({
             isLoaded: true,
-            data: result,
+            notation: new Notation(JSON.parse(result), new MuseConfig()),
           });
         },
         (error) => {
@@ -39,22 +39,30 @@ class App extends React.Component<
         }
       );
   }
-
   render() {
-    return (
-      <div className="app">
-        <h1>Example</h1>
-        {this.state.isLoaded ? (
-          this.state.error ? (
-            "error"
+    if (this.state.notation) {
+      return (
+        <div className="app">
+          <h1>Example</h1>
+          {this.state.isLoaded ? (
+            this.state.error ? (
+              "error"
+            ) : (
+              <MuseNotation notation={this.state.notation} />
+            )
           ) : (
-            <Muse data={this.state.data} />
-          )
-        ) : (
-          "loading..."
-        )}
-      </div>
-    );
+            "loading..."
+          )}
+          <button
+            onClick={() => {
+              console.log(JSON.stringify(this.state.notation?.code()));
+            }}
+          >
+            log
+          </button>
+        </div>
+      );
+    } else return <></>;
   }
 }
 

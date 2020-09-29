@@ -14,8 +14,8 @@ export interface INote {
 
 export class SubNote implements SelectionSubNote {
   @observable isSelect = false;
-  readonly note: Note;
-  readonly index: number;
+  @observable note: Note;
+  @observable index: number;
   config: MuseConfig;
   @observable x: string = "";
   @observable n: string = "";
@@ -240,14 +240,17 @@ export class Note implements Codec, SelectionNote {
       this.p = 0;
     }
   }
-  addSubNote() {
-    this.subNotes.push(
+  addSubNote(index: number) {
+    this.subNotes = this.subNotes.splice(
+      index,
+      0,
       new SubNote("", "0", 0, this, this.subNotes.length, this.config)
     );
-    Selector.instance.selectSubNote(this.subNotes[this.subNotes.length - 1]);
+    this.subNotes.forEach((it, idx) => (it.index = idx));
   }
   removeSubNote(index: number) {
     this.subNotes = this.subNotes.filter((it, idx) => idx !== index);
+    this.subNotes.forEach((it, idx) => (it.index = idx));
   }
   getThis() {
     return this;

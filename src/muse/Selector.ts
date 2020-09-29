@@ -19,14 +19,14 @@ export interface SelectionNote {
   getThis: () => Note;
   reduceLine: (l: number) => void;
   reduceTailPoint: (p: number) => void;
-  addSubNote: () => void;
+  addSubNote: (index: number) => void;
   removeSubNote: (index: number) => void;
 }
 
 export interface SelectionBar {
   setSelect: (i: boolean) => void;
   getThis: () => Bar;
-  addNote: () => void;
+  addNote: (index: number) => void;
   removeNote: (index: number) => void;
 }
 
@@ -69,7 +69,6 @@ class Selector {
   static instance = new Selector();
   private constructor() {
     document.addEventListener("keydown", (ev) => {
-      console.log(ev);
       if (!this.keySubNote(ev)) {
         if (!this.keyNote(ev)) {
           if (!this.keyBar(ev)) {
@@ -135,12 +134,48 @@ class Selector {
           this.note?.setSelect(true);
           return true;
         case "Backspace":
-          this.note?.removeSubNote(this.subnote.getThis().index);
-          this.note?.setSelect(true);
-          this.subnote.setSelect(false);
-          this.subnote = null;
+          if (this.note) {
+            let idx = this.subnote.getThis().index;
+            this.note.removeSubNote(this.subnote.getThis().index);
+            if (this.note.getThis().subNotes.length === 0) {
+              this.note.setSelect(true);
+              this.subnote.setSelect(false);
+              this.subnote = null;
+            } else {
+              if (idx === 0) {
+                this.subnote = this.note.getThis().subNotes[0];
+                this.subnote.setSelect(true);
+              } else {
+                this.subnote = this.note.getThis().subNotes[idx - 1];
+                this.subnote.setSelect(true);
+              }
+            }
+          }
           return true;
         case " ":
+          return true;
+        case "z":
+          if (this.note) {
+            this.note?.addSubNote(0);
+            this.selectSubNote(this.note?.getThis().subNotes[0]);
+          }
+          return true;
+        case "x":
+          if (this.note) {
+            let idx = this.subnote.getThis().index;
+            this.note?.addSubNote(idx + 1);
+            this.selectSubNote(this.note?.getThis().subNotes[idx + 1]);
+          }
+          return true;
+        case "c":
+          if (this.note) {
+            this.note?.addSubNote(this.note.getThis().subNotes.length);
+            this.selectSubNote(
+              this.note?.getThis().subNotes[
+                this.note.getThis().subNotes.length - 1
+              ]
+            );
+          }
           return true;
         case "ArrowUp":
           if (this.note) {
@@ -210,7 +245,7 @@ class Selector {
       switch (ev.key) {
         case "Enter":
           if (this.note.getThis().subNotes.length <= 0) {
-            this.note.addSubNote();
+            this.note.addSubNote(this.note.getThis().subNotes.length);
           }
           this.subnote = this.note.getThis().subNotes[0];
           this.subnote.setSelect(true);
@@ -222,13 +257,47 @@ class Selector {
           this.bar?.setSelect(true);
           return true;
         case " ":
-          this.note.addSubNote();
+          this.note.addSubNote(this.note.getThis().subNotes.length);
+          return true;
+        case "z":
+          if (this.bar) {
+            this.bar?.addNote(0);
+            this.selectNote(this.bar?.getThis().notes[0]);
+          }
+          return true;
+        case "x":
+          if (this.bar) {
+            let idx = this.note.getThis().index;
+            this.bar?.addNote(idx + 1);
+            this.selectNote(this.bar?.getThis().notes[idx + 1]);
+          }
+          return true;
+        case "c":
+          if (this.bar) {
+            this.bar?.addNote(this.bar.getThis().notes.length);
+            this.selectNote(
+              this.bar?.getThis().notes[this.bar.getThis().notes.length - 1]
+            );
+          }
           return true;
         case "Backspace":
-          this.bar?.removeNote(this.note.getThis().index);
-          this.bar?.setSelect(true);
-          this.note.setSelect(false);
-          this.note = null;
+          if (this.bar) {
+            let idx = this.note.getThis().index;
+            this.bar.removeNote(this.note.getThis().index);
+            if (this.bar.getThis().notes.length === 0) {
+              this.bar.setSelect(true);
+              this.note.setSelect(false);
+              this.note = null;
+            } else {
+              if (idx === 0) {
+                this.note = this.bar.getThis().notes[0];
+                this.note.setSelect(true);
+              } else {
+                this.note = this.bar.getThis().notes[idx - 1];
+                this.note.setSelect(true);
+              }
+            }
+          }
           return true;
         case "ArrowLeft":
           if (this.bar) {
@@ -306,7 +375,7 @@ class Selector {
       switch (ev.key) {
         case "Enter":
           if (this.bar.getThis().notes.length <= 0) {
-            this.bar.addNote();
+            this.bar.addNote(this.bar.getThis().notes.length);
           }
           this.note = this.bar.getThis().notes[0];
           this.note.setSelect(true);
@@ -318,13 +387,26 @@ class Selector {
           this.track?.setSelect(true);
           return true;
         case " ":
-          this.bar.addNote();
+          this.bar.addNote(this.bar.getThis().notes.length);
           return true;
         case "Backspace":
-          this.track?.removeBar(this.bar.getThis().index);
-          this.track?.setSelect(true);
-          this.bar.setSelect(false);
-          this.bar = null;
+          if (this.track) {
+            let idx = this.bar.getThis().index;
+            this.track.removeBar(this.bar.getThis().index);
+            if (this.track.getThis().bars.length === 0) {
+              this.track.setSelect(true);
+              this.bar.setSelect(false);
+              this.bar = null;
+            } else {
+              if (idx === 0) {
+                this.bar = this.track.getThis().bars[0];
+                this.bar.setSelect(true);
+              } else {
+                this.bar = this.track.getThis().bars[idx - 1];
+                this.bar.setSelect(true);
+              }
+            }
+          }
           return true;
         case "ArrowLeft":
           if (this.track) {
@@ -400,11 +482,23 @@ class Selector {
           ev.returnValue = false;
           return true;
         case "Backspace":
-          this.line?.removeTrack(this.track.getThis().index);
-          this.line?.setSelect(true);
-          this.track.setSelect(false);
-          this.track = null;
-          ev.returnValue = false;
+          if (this.line) {
+            let idx = this.track.getThis().index;
+            this.line.removeTrack(this.track.getThis().index);
+            if (this.line.getThis().tracks.length === 0) {
+              this.line.setSelect(true);
+              this.track.setSelect(false);
+              this.track = null;
+            } else {
+              if (idx === 0) {
+                this.track = this.line.getThis().tracks[0];
+                this.track.setSelect(true);
+              } else {
+                this.track = this.line.getThis().tracks[idx - 1];
+                this.track.setSelect(true);
+              }
+            }
+          }
           return true;
         case "ArrowUp":
           if (this.line) {
@@ -508,14 +602,25 @@ class Selector {
           return true;
         case " ":
           this.line.addTrack();
-          ev.returnValue = false;
           return true;
         case "Backspace":
-          this.page?.removeLine(this.line.getThis().index);
-          this.page?.setSelect(true);
-          this.line.setSelect(false);
-          this.line = null;
-          ev.returnValue = false;
+          if (this.page) {
+            let idx = this.line.getThis().index;
+            this.page.removeLine(this.line.getThis().index);
+            if (this.page.getThis().lines.length === 0) {
+              this.page.setSelect(true);
+              this.line.setSelect(false);
+              this.line = null;
+            } else {
+              if (idx === 0) {
+                this.line = this.page.getThis().lines[0];
+                this.line.setSelect(true);
+              } else {
+                this.line = this.page.getThis().lines[idx - 1];
+                this.line.setSelect(true);
+              }
+            }
+          }
           return true;
         case "ArrowUp":
           if (this.page) {
@@ -588,14 +693,25 @@ class Selector {
           return true;
         case " ":
           this.page.addLine();
-          ev.returnValue = false;
           return true;
         case "Backspace":
-          this.notation?.reomvePage(this.page.getThis().index);
-          this.notation?.setSelect(true);
-          this.page.setSelect(false);
-          this.page = null;
-          ev.returnValue = false;
+          if (this.notation) {
+            let idx = this.page.getThis().index;
+            this.notation?.reomvePage(this.page.getThis().index);
+            if (this.notation.getThis().pages.length === 0) {
+              this.notation.setSelect(true);
+              this.page.setSelect(false);
+              this.page = null;
+            } else {
+              if (idx === 0) {
+                this.page = this.notation.getThis().pages[0];
+                this.page.setSelect(true);
+              } else {
+                this.page = this.notation.getThis().pages[idx - 1];
+                this.page.setSelect(true);
+              }
+            }
+          }
           return true;
         case "ArrowUp":
           if (this.notation) {

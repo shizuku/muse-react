@@ -7,7 +7,7 @@ import { computed, observable } from "mobx";
 import { observer, useObserver } from "mobx-react";
 import Fraction from "./Fraction";
 import { Track } from "./MuseTrack";
-import Selector, { SelectionBar } from "./Selector";
+import { SelectionBar } from "./Selector";
 
 interface Baseline {
   y: number;
@@ -113,12 +113,13 @@ export class Bar implements Codec, SelectionBar {
     this.config = config;
     this.decode(o);
   }
-  addNote() {
-    this.notes.push(new Note({ n: "0" }, this, this.notes.length));
-    Selector.instance.selectNote(this.notes[this.notes.length - 1]);
+  addNote(index: number) {
+    this.notes = this.notes.splice(index, 0, new Note({ n: "0" }, this, this.notes.length));
+    this.notes.forEach((it, idx) => (it.index = idx));
   }
   removeNote(index: number) {
     this.notes = this.notes.filter((it, idx) => idx !== index);
+    this.notes.forEach((it, idx) => (it.index = idx));
   }
   setSelect(i: boolean) {
     this.isSelect = i;
