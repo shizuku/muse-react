@@ -13,10 +13,10 @@ export interface INote {
 }
 
 export class SubNote implements SelectionSubNote {
+  readonly config: MuseConfig;
   @observable isSelect = false;
   @observable note: Note;
   @observable index: number;
-  config: MuseConfig;
   @observable x: string = "";
   @observable n: string = "";
   @observable t: number = 0;

@@ -5,7 +5,7 @@ import { Border, OuterBorder } from "./Border";
 import Codec from "./Codec";
 import { computed, observable } from "mobx";
 import { observer } from "mobx-react";
-import Selector, { SelectionNotation } from "./Selector";
+import { SelectionNotation } from "./Selector";
 
 export class NotationInfo {
   @observable title: string = "";
@@ -45,8 +45,10 @@ export class Notation implements Codec, SelectionNotation {
     this.config = config;
     this.decode(o);
   }
-  addPage() {
-    this.pages.push(
+  addPage(index: number) {
+    this.pages = this.pages.splice(
+      index,
+      0,
       new Page(
         { lines: [{ tracks: [{ bars: [{ notes: [{ n: "0" }] }] }] }] },
         this.pages.length,
@@ -54,10 +56,11 @@ export class Notation implements Codec, SelectionNotation {
         this.config
       )
     );
-    Selector.instance.selectPage(this.pages[this.pages.length - 1]);
+    this.pages.forEach((it, idx) => (it.index = idx));
   }
   reomvePage(index: number) {
     this.pages = this.pages.filter((it, idx) => idx !== index);
+    this.pages.forEach((it, idx) => (it.index = idx));
   }
   setSelect(s: boolean) {
     this.isSelect = s;

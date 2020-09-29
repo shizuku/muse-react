@@ -40,21 +40,21 @@ export interface SelectionTrack {
 export interface SelectionLine {
   setSelect: (s: boolean) => void;
   getThis: () => Line;
-  addTrack: () => void;
+  addTrack: (index: number) => void;
   removeTrack: (index: number) => void;
 }
 
 export interface SelectionPage {
   setSelect: (s: boolean) => void;
   getThis: () => Page;
-  addLine: () => void;
+  addLine: (index: number) => void;
   removeLine: (index: number) => void;
 }
 
 export interface SelectionNotation {
   setSelect: (s: boolean) => void;
   getThis: () => Notation;
-  addPage: () => void;
+  addPage: (index: number) => void;
   reomvePage: (index: number) => void;
 }
 
@@ -502,6 +502,27 @@ class Selector {
           this.track.addBar(this.track.getThis().bars.length);
           ev.returnValue = false;
           return true;
+        case "z":
+          if (this.line) {
+            this.line.addTrack(0);
+            this.selectTrack(this.line.getThis().tracks[0]);
+          }
+          return true;
+        case "x":
+          if (this.line) {
+            let idx = this.track.getThis().index;
+            this.line.addTrack(idx + 1);
+            this.selectTrack(this.line.getThis().tracks[idx + 1]);
+          }
+          return true;
+        case "c":
+          if (this.line) {
+            this.line.addTrack(this.line.getThis().tracks.length);
+            this.selectTrack(
+              this.line.getThis().tracks[this.line.getThis().tracks.length - 1]
+            );
+          }
+          return true;
         case "Backspace":
           if (this.line) {
             let idx = this.track.getThis().index;
@@ -610,7 +631,7 @@ class Selector {
       switch (ev.key) {
         case "Enter":
           if (this.line.getThis().tracks.length <= 0) {
-            this.line.getThis().addTrack();
+            this.line.getThis().addTrack(this.line.getThis().tracks.length);
           }
           this.track = this.line.getThis().tracks[0];
           this.track.setSelect(true);
@@ -622,7 +643,28 @@ class Selector {
           this.page?.setSelect(true);
           return true;
         case " ":
-          this.line.addTrack();
+          this.line.addTrack(this.line.getThis().tracks.length);
+          return true;
+        case "z":
+          if (this.page) {
+            this.page.addLine(0);
+            this.selectLine(this.page.getThis().lines[0]);
+          }
+          return true;
+        case "x":
+          if (this.page) {
+            let idx = this.line.getThis().index;
+            this.page.addLine(idx + 1);
+            this.selectLine(this.page.getThis().lines[idx + 1]);
+          }
+          return true;
+        case "c":
+          if (this.page) {
+            this.page.addLine(this.page.getThis().lines.length);
+            this.selectLine(
+              this.page.getThis().lines[this.page.getThis().lines.length - 1]
+            );
+          }
           return true;
         case "Backspace":
           if (this.page) {
@@ -701,7 +743,7 @@ class Selector {
       switch (ev.key) {
         case "Enter":
           if (this.page.getThis().lines.length <= 0) {
-            this.page.getThis().addLine();
+            this.page.getThis().addLine(this.page.getThis().lines.length);
           }
           this.line = this.page.getThis().lines[0];
           this.line.setSelect(true);
@@ -713,7 +755,30 @@ class Selector {
           this.notation?.setSelect(true);
           return true;
         case " ":
-          this.page.addLine();
+          this.page.addLine(this.page.getThis().lines.length);
+          return true;
+        case "z":
+          if (this.notation) {
+            this.notation.addPage(0);
+            this.selectPage(this.notation.getThis().pages[0]);
+          }
+          return true;
+        case "x":
+          if (this.notation) {
+            let idx = this.page.getThis().index;
+            this.notation.addPage(idx + 1);
+            this.selectPage(this.notation.getThis().pages[idx + 1]);
+          }
+          return true;
+        case "c":
+          if (this.notation) {
+            this.notation.addPage(this.notation.getThis().pages.length);
+            this.selectPage(
+              this.notation.getThis().pages[
+                this.notation.getThis().pages.length - 1
+              ]
+            );
+          }
           return true;
         case "Backspace":
           if (this.notation) {
@@ -767,14 +832,16 @@ class Selector {
       switch (ev.key) {
         case "Enter":
           if (this.notation.getThis().pages.length <= 0) {
-            this.notation.getThis().addPage();
+            this.notation
+              .getThis()
+              .addPage(this.notation.getThis().pages.length);
           }
           this.page = this.notation.getThis().pages[0];
           this.page.setSelect(true);
           this.notation.setSelect(false);
           return true;
         case " ":
-          this.notation.addPage();
+          this.notation.addPage(this.notation.getThis().pages.length);
           ev.returnValue = false;
           return true;
         default:

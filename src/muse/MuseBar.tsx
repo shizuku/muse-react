@@ -21,7 +21,7 @@ export interface IBar {
 
 export class Bar implements Codec, SelectionBar {
   readonly config: MuseConfig;
-  readonly index: number;
+  @observable index: number;
   @observable track: Track;
   @observable notes: Note[] = [];
   @observable isSelect: boolean = false;
@@ -114,7 +114,11 @@ export class Bar implements Codec, SelectionBar {
     this.decode(o);
   }
   addNote(index: number) {
-    this.notes = this.notes.splice(index, 0, new Note({ n: "0" }, this, this.notes.length));
+    this.notes = this.notes.splice(
+      index,
+      0,
+      new Note({ n: "0" }, this, this.notes.length)
+    );
     this.notes.forEach((it, idx) => (it.index = idx));
   }
   removeNote(index: number) {

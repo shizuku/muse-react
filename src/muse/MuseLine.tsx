@@ -6,16 +6,16 @@ import Codec from "./Codec";
 import { computed, observable } from "mobx";
 import { observer } from "mobx-react";
 import { Page } from "./MusePage";
-import Selector, { SelectionLine } from "./Selector";
+import { SelectionLine } from "./Selector";
 
 export interface ILine {
   tracks: ITrack[];
 }
 
 export class Line implements Codec, SelectionLine {
-  readonly page: Page;
-  readonly index: number;
   readonly config: MuseConfig;
+  @observable page: Page;
+  @observable index: number;
   @observable tracks: Track[] = [];
   @observable isSelect: boolean = false;
   @computed get width() {
@@ -49,8 +49,10 @@ export class Line implements Codec, SelectionLine {
     this.config = config;
     this.decode(o);
   }
-  addTrack() {
-    this.tracks.push(
+  addTrack(index: number) {
+    this.tracks = this.tracks.splice(
+      index,
+      0,
       new Track(
         { bars: [{ notes: [{ n: "0" }] }] },
         this.tracks.length,
@@ -58,10 +60,11 @@ export class Line implements Codec, SelectionLine {
         this.config
       )
     );
-    Selector.instance.selectTrack(this.tracks[this.tracks.length - 1]);
+    this.tracks.forEach((it, idx) => (it.index = idx));
   }
   removeTrack(index: number) {
     this.tracks = this.tracks.filter((it, idx) => idx !== index);
+    this.tracks.forEach((it, idx) => (it.index = idx));
   }
   setSelect(s: boolean) {
     this.isSelect = s;
