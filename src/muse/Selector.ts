@@ -33,7 +33,7 @@ export interface SelectionBar {
 export interface SelectionTrack {
   setSelect: (s: boolean) => void;
   getThis: () => Track;
-  addBar: () => void;
+  addBar: (index: number) => void;
   removeBar: (index: number) => void;
 }
 
@@ -389,6 +389,27 @@ class Selector {
         case " ":
           this.bar.addNote(this.bar.getThis().notes.length);
           return true;
+        case "z":
+          if (this.track) {
+            this.track.addBar(0);
+            this.selectBar(this.track.getThis().bars[0]);
+          }
+          return true;
+        case "x":
+          if (this.track) {
+            let idx = this.bar.getThis().index;
+            this.track.addBar(idx + 1);
+            this.selectBar(this.track.getThis().bars[idx + 1]);
+          }
+          return true;
+        case "c":
+          if (this.track) {
+            this.track.addBar(this.track.getThis().bars.length);
+            this.selectBar(
+              this.track.getThis().bars[this.track.getThis().bars.length - 1]
+            );
+          }
+          return true;
         case "Backspace":
           if (this.track) {
             let idx = this.bar.getThis().index;
@@ -466,7 +487,7 @@ class Selector {
       switch (ev.key) {
         case "Enter":
           if (this.track.getThis().bars.length <= 0) {
-            this.track.addBar();
+            this.track.addBar(this.track.getThis().bars.length);
           }
           this.bar = this.track.getThis().bars[0];
           this.bar.setSelect(true);
@@ -478,7 +499,7 @@ class Selector {
           this.line?.setSelect(true);
           return true;
         case " ":
-          this.track.addBar();
+          this.track.addBar(this.track.getThis().bars.length);
           ev.returnValue = false;
           return true;
         case "Backspace":
