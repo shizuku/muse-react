@@ -427,6 +427,21 @@ class Selector {
                 ];
                 this.track.setSelect(true);
                 return true;
+              } else if (this.notation) {
+                if (this.page.getThis().index > 0) {
+                  this.page = this.notation.getThis().pages[
+                    this.page.getThis().index - 1
+                  ];
+                  this.line = this.page.getThis().lines[
+                    this.page.getThis().lines.length - 1
+                  ];
+                  this.track.setSelect(false);
+                  this.track = this.line.getThis().tracks[
+                    this.line.getThis().tracks.length - 1
+                  ];
+                  this.track.setSelect(true);
+                  return true;
+                } else return false;
               } else return false;
             } else return false;
           } else return false;
@@ -453,6 +468,20 @@ class Selector {
                 this.track = this.line.getThis().tracks[0];
                 this.track.setSelect(true);
                 return true;
+              } else if (this.notation) {
+                if (
+                  this.page.getThis().index <
+                  this.notation.getThis().pages.length - 1
+                ) {
+                  this.page = this.notation.getThis().pages[
+                    this.page.getThis().index + 1
+                  ];
+                  this.line = this.page.getThis().lines[0];
+                  this.track.setSelect(false);
+                  this.track = this.line.getThis().tracks[0];
+                  this.track.setSelect(true);
+                  return true;
+                } else return false;
               } else return false;
             } else return false;
           } else return false;
@@ -497,7 +526,19 @@ class Selector {
               ];
               this.line.setSelect(true);
               return true;
-            } else return true;
+            } else if (this.notation) {
+              if (this.page.getThis().index > 0) {
+                this.page = this.notation.getThis().pages[
+                  this.page.getThis().index - 1
+                ];
+                this.line.setSelect(false);
+                this.line = this.page.getThis().lines[
+                  this.page.getThis().lines.length - 1
+                ];
+                this.line.setSelect(true);
+                return true;
+              } else return false;
+            } else return false;
           } else return false;
         case "ArrowDown":
           if (this.page !== null) {
@@ -509,7 +550,20 @@ class Selector {
               ];
               this.line.setSelect(true);
               return true;
-            } else return true;
+            } else if (this.notation) {
+              if (
+                this.page.getThis().index <
+                this.notation.getThis().pages.length - 1
+              ) {
+                this.page = this.notation.getThis().pages[
+                  this.page.getThis().index + 1
+                ];
+                this.line.setSelect(false);
+                this.line = this.page.getThis().lines[0];
+                this.line.setSelect(true);
+                return true;
+              } else return false;
+            } else return false;
           } else return false;
         default:
           return false;
