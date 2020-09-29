@@ -209,6 +209,9 @@ class Selector {
     if (this.note) {
       switch (ev.key) {
         case "Enter":
+          if (this.note.getThis().subNotes.length <= 0) {
+            this.note.addSubNote();
+          }
           this.subnote = this.note.getThis().subNotes[0];
           this.subnote.setSelect(true);
           this.note.setSelect(false);
@@ -277,6 +280,10 @@ class Selector {
               } else return false;
             } else return false;
           } else return false;
+        case "ArrowUp":
+          return true;
+        case "ArrowDown":
+          return true;
         case "q":
           this.note.reduceLine(-1);
           return true;
@@ -298,6 +305,9 @@ class Selector {
     if (this.bar !== null) {
       switch (ev.key) {
         case "Enter":
+          if (this.bar.getThis().notes.length <= 0) {
+            this.bar.addNote();
+          }
           this.note = this.bar.getThis().notes[0];
           this.note.setSelect(true);
           this.bar.setSelect(false);
@@ -337,26 +347,33 @@ class Selector {
               ];
               this.bar.setSelect(true);
               return true;
-            } else if (this.line) {
-              if (
-                this.track.getThis().index <
-                this.line?.getThis().tracks.length - 1
-              ) {
-                this.track.setSelect(false);
-                this.track = this.line.getThis().tracks[
-                  this.track.getThis().index + 1
-                ];
-                this.bar.setSelect(false);
-                this.bar = this.track.getThis().bars[0];
-                this.bar.setSelect(true);
-                return true;
-              } else return false;
-            } else return false;
+            } else return true;
           } else return false;
         case "ArrowUp":
-          return true;
+          if (this.track && this.line) {
+            if (this.track.getThis().index > 0) {
+              this.track = this.line.getThis().tracks[
+                this.track.getThis().index - 1
+              ];
+              this.bar.setSelect(false);
+              this.bar = this.track.getThis().bars[this.bar.getThis().index];
+              this.bar.setSelect(true);
+              return true;
+            } else return true;
+          } else return false;
         case "ArrowDown":
-          return true;
+          if (this.track && this.line) {
+            let l = this.line.getThis().tracks.length;
+            if (this.track.getThis().index < l - 1) {
+              this.track = this.line.getThis().tracks[
+                this.track.getThis().index + 1
+              ];
+              this.bar.setSelect(false);
+              this.bar = this.track.getThis().bars[this.bar.getThis().index];
+              this.bar.setSelect(true);
+              return true;
+            } else return true;
+          } else return false;
         default:
           return false;
       }
@@ -366,6 +383,9 @@ class Selector {
     if (this.track !== null) {
       switch (ev.key) {
         case "Enter":
+          if (this.track.getThis().bars.length <= 0) {
+            this.track.addBar();
+          }
           this.bar = this.track.getThis().bars[0];
           this.bar.setSelect(true);
           this.track.setSelect(false);
@@ -395,7 +415,20 @@ class Selector {
               ];
               this.track.setSelect(true);
               return true;
-            } else return true;
+            } else if (this.page) {
+              if (this.line.getThis().index > 0) {
+                this.line.setSelect(false);
+                this.line = this.page.getThis().lines[
+                  this.line.getThis().index - 1
+                ];
+                this.track.setSelect(false);
+                this.track = this.line.getThis().tracks[
+                  this.line.getThis().tracks.length - 1
+                ];
+                this.track.setSelect(true);
+                return true;
+              } else return false;
+            } else return false;
           } else return false;
         case "ArrowDown":
           if (this.line !== null) {
@@ -407,7 +440,21 @@ class Selector {
               ];
               this.track.setSelect(true);
               return true;
-            } else return true;
+            } else if (this.page) {
+              if (
+                this.line.getThis().index <
+                this.page.getThis().lines.length - 1
+              ) {
+                this.line.setSelect(false);
+                this.line = this.page.getThis().lines[
+                  this.line.getThis().index + 1
+                ];
+                this.track.setSelect(false);
+                this.track = this.line.getThis().tracks[0];
+                this.track.setSelect(true);
+                return true;
+              } else return false;
+            } else return false;
           } else return false;
         default:
           return false;
@@ -418,6 +465,9 @@ class Selector {
     if (this.line !== null) {
       switch (ev.key) {
         case "Enter":
+          if (this.line.getThis().tracks.length <= 0) {
+            this.line.getThis().addTrack();
+          }
           this.track = this.line.getThis().tracks[0];
           this.track.setSelect(true);
           this.line.setSelect(false);
@@ -470,6 +520,9 @@ class Selector {
     if (this.page !== null) {
       switch (ev.key) {
         case "Enter":
+          if (this.page.getThis().lines.length <= 0) {
+            this.page.getThis().addLine();
+          }
           this.line = this.page.getThis().lines[0];
           this.line.setSelect(true);
           this.page.setSelect(false);
@@ -522,6 +575,9 @@ class Selector {
     if (this.notation !== null) {
       switch (ev.key) {
         case "Enter":
+          if (this.notation.getThis().pages.length <= 0) {
+            this.notation.getThis().addPage();
+          }
           this.page = this.notation.getThis().pages[0];
           this.page.setSelect(true);
           this.notation.setSelect(false);
